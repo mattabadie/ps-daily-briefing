@@ -39,6 +39,7 @@ GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 BASE_URL = "https://services.api.exterro.com/api/1.0"
 RL_APP_BASE = "https://services.exterro.com/projects"
 
+DASH = "\u2014"  # em-dash constant for use in f-string expressions (Python 3.11 compat)
 DIRECTORS = {393610: "eDiscovery", 393604: "Data PSG", 393607: "Post Implementation"}
 DIRECTOR_NAMES = {"eDiscovery": "Vanessa Graham", "Data PSG": "Maggie Ledbetter", "Post Implementation": "Oronde Ward"}
 ACTIVE_STATUS_VALUES = {2, 4, 5, 6, 9, 12, 14, 15}
@@ -979,7 +980,7 @@ def build_email_html(data):
                 if r["go_live_slip_days"] and r["go_live_slip_days"] > 180:
                     slip_str = f'<strong style="color:#fca5a5;">{r["go_live_slip_days"]}d</strong>'
                 html += f'<tr><td class="num {sc}">{r["score"]}</td><td>{link}</td><td>{p["customer"]}</td>'
-                html += f'<td>{p["owner"]}</td><td>{p["status"]}</td><td>{dot}{p["health"] or "\u2014"}</td>'
+                html += f'<td>{p["owner"]}</td><td>{p["status"]}</td><td>{dot}{p["health"] or DASH}</td>'
                 html += f'<td>{te}</td><td class="num">{task_str}</td><td class="num">{overdue_str}</td>'
                 html += f'<td class="num">{notes_str}</td><td class="num">{slip_str}</td></tr>'
             html += '</table>'
