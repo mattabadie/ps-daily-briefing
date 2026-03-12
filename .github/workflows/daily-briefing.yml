@@ -1,19 +1,27 @@
 name: PS Daily Briefing
 
 on:
-  # Weekdays at 8:00 AM EST (13:00 UTC)
-  # Note: GitHub Actions cron uses UTC. EST = UTC-5.
   schedule:
+    # Email report: 6 AM EST = 11:00 UTC
+    - cron: '0 11 * * 1-5'
+    # Chat card: 8 AM EST = 13:00 UTC
     - cron: '0 13 * * 1-5'
-
-  # Allow manual trigger from Actions tab
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Output mode'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - chat
+          - email
 
 jobs:
   post-briefing:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,8 +31,23 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 11 * * 1-5" ]; then
+            echo "mode=email" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 13 * * 1-5" ]; then
+            echo "mode=chat" >> $GITHUB_OUTPUT
+          else
+            echo "mode=both" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run daily briefing
         env:
           ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
           GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
-        run: python daily_briefing_chat.py
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python daily_briefing.py --mode ${{ steps.mode.outputs.mode }}
