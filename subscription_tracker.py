@@ -568,6 +568,227 @@ def send_renewal_email(sub_data, html_body, dry_run=False):
     print(f"  Email sent to: {to_list}")
 
 
+def build_summary_email(triggered_results, threshold):
+    """Build a single summary HTML email listing all subscriptions that would trigger renewal alerts."""
+    rows_html = ""
+    detail_sections = ""
+
+    for i, (sub_d, consumption, siblings) in enumerate(triggered_results, 1):
+        pct = consumption["pct_consumed"]
+        used = consumption["total_hours_used"]
+        budget = consumption["total_budgeted_hours"]
+        remaining = consumption["remaining_hours"]
+        burn = consumption["avg_monthly_burn"]
+        months_left = consumption["months_remaining"]
+
+        # Urgency color
+        if pct >= 90:
+            color = "#ef4444"
+            label = "CRITICAL"
+        elif pct >= 75:
+            color = "#f59e0b"
+            label = "ACTION NEEDED"
+        else:
+            color = "#3b82f6"
+            label = "MONITORING"
+
+        bar_pct = min(pct, 100)
+
+        # AE / CSM / recipients info
+        ae = sub_d.get("opp_owner", "") or "N/A"
+        ae_email = sub_d.get("opp_owner_email", "") or ""
+        account_owner = sub_d.get("account_owner", "") or "N/A"
+        primary_contact = sub_d.get("primary_contact_name", "") or "N/A"
+        primary_contact_email = sub_d.get("primary_contact_email", "") or ""
+        pm = sub_d.get("pm_name", "") or "N/A"
+
+        # Build intended recipients list
+        intended_recipients = []
+        if ae_email and "@" in ae_email:
+            intended_recipients.append(f"{ae} ({ae_email})")
+        if GMAIL_ADDRESS:
+            intended_recipients.append(GMAIL_ADDRESS)
+        intended_str = ", ".join(intended_recipients) if intended_recipients else "N/A"
+
+        project_url = f"{RL_APP_BASE}/{sub_d['project_id']}"
+
+        # Summary table row
+        rows_html += f'''
+    <tr>
+      <td style="font-weight:500;"><a href="{project_url}" style="color:#3b82f6;">{sub_d["customer"]}</a></td>
+      <td>{sub_d["project_name"][:45]}</td>
+      <td style="text-align:center;"><span style="background:{color}; color:white; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">{pct}%</span></td>
+      <td style="text-align:right;">{used}h / {budget}h</td>
+      <td style="text-align:right;">{remaining}h</td>
+      <td>{ae}</td>
+    </tr>'''
+
+        # Detailed section per project
+        runway_str = f"{months_left} months" if months_left is not None else "N/A"
+        if months_left is not None and months_left < 1:
+            runway_str = '<span style="color:#ef4444;">Less than 1 month</span>'
+
+        # Monthly trend mini-table
+        monthly = consumption.get("monthly_hours", {})
+        monthly_rows = ""
+        if monthly:
+            max_m = max(monthly.values()) if monthly.values() else 1
+            for mk, mh in list(monthly.items())[-6:]:
+                bw = (mh / max_m * 100) if max_m > 0 else 0
+                monthly_rows += f'<tr><td>{mk}</td><td>{round(mh, 1)}h</td><td><div style="background:#3b82f6; height:12px; width:{bw}%; border-radius:2px; min-width:2px;"></div></td></tr>'
+
+        monthly_html = ""
+        if monthly_rows:
+            monthly_html = f'''
+      <div style="margin-top:10px;">
+        <strong style="font-size:12px; color:#475569;">Monthly Usage (last 6 months)</strong>
+        <table style="margin-top:4px;"><tr><th>Month</th><th>Hours</th><th style="width:50%;">Usage</th></tr>{monthly_rows}</table>
+      </div>'''
+
+        # Recent entries
+        recent = consumption.get("recent_entries", [])
+        recent_html = ""
+        if recent:
+            recent_rows = ""
+            for e in recent[:10]:
+                task_short = (e["task"][:40] + "...") if len(e["task"]) > 40 else e["task"]
+                recent_rows += f'<tr><td>{e["date"]}</td><td>{e["user"]}</td><td>{e["hours"]}h</td><td>{task_short}</td></tr>'
+            recent_html = f'''
+      <div style="margin-top:10px;">
+        <strong style="font-size:12px; color:#475569;">Recent Activity (Last 30 Days)</strong>
+        <table style="margin-top:4px;"><tr><th>Date</th><th>Consultant</th><th>Hours</th><th>Task</th></tr>{recent_rows}</table>
+      </div>'''
+
+        # Siblings
+        siblings_html = ""
+        if siblings:
+            sib_rows = ""
+            for s in siblings:
+                sib_url = f"{RL_APP_BASE}/{s['id']}"
+                sib_rows += f'<tr><td><a href="{sib_url}" style="color:#3b82f6;">{s["name"]}</a></td><td>{s["type"]}</td><td>{s["status"]}</td><td>{s["owner"]}</td></tr>'
+            siblings_html = f'''
+      <div style="margin-top:10px;">
+        <strong style="font-size:12px; color:#475569;">Other Active Projects for {sub_d["customer"]}</strong>
+        <table style="margin-top:4px;"><tr><th>Project</th><th>Type</th><th>Status</th><th>Owner</th></tr>{sib_rows}</table>
+      </div>'''
+
+        # Health notes
+        notes_html = ""
+        if sub_d.get("health_notes") or sub_d.get("weekly_status"):
+            notes_parts = []
+            if sub_d["health_notes"]:
+                notes_parts.append(f'<strong>Health Notes:</strong> {sub_d["health_notes"][:300]}')
+            if sub_d["weekly_status"]:
+                notes_parts.append(f'<strong>Weekly Status:</strong> {sub_d["weekly_status"][:300]}')
+            notes_html = '<div style="margin-top:10px; font-size:12px; color:#64748b;">' + "<br>".join(notes_parts) + '</div>'
+
+        opp_link = ""
+        if sub_d.get("opp_url"):
+            opp_link = f' | <a href="{sub_d["opp_url"]}" style="color:#3b82f6; font-size:12px;">View Opportunity</a>'
+
+        detail_sections += f'''
+<div style="background:white; border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin:16px 0;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <div>
+      <strong style="font-size:15px;">{i}. {sub_d["customer"]}</strong>
+      <span style="color:#64748b; font-size:13px;"> {DASH} {sub_d["project_name"]}</span>
+    </div>
+    <span style="background:{color}; color:white; padding:3px 10px; border-radius:4px; font-size:12px; font-weight:700;">{label} {DASH} {pct}%</span>
+  </div>
+
+  <!-- Progress bar -->
+  <div style="background:#e2e8f0; border-radius:6px; height:20px; overflow:hidden; position:relative; margin-bottom:12px;">
+    <div style="height:100%; width:{bar_pct}%; background:{color}; border-radius:6px;"></div>
+    <span style="position:absolute; right:8px; top:2px; font-size:11px; font-weight:600;">{used}h / {budget}h</span>
+  </div>
+
+  <!-- Metrics row -->
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:10px; font-size:13px;">
+    <div><span style="color:#64748b;">Remaining:</span> <strong>{remaining}h</strong></div>
+    <div><span style="color:#64748b;">Avg Burn:</span> <strong>{burn}h/mo</strong></div>
+    <div><span style="color:#64748b;">Runway:</span> <strong>{runway_str}</strong></div>
+    <div><span style="color:#64748b;">PM:</span> {pm}</div>
+  </div>
+
+  <!-- Intended recipients -->
+  <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 12px; font-size:12px; margin-bottom:8px;">
+    <strong style="color:#1e40af;">Intended Recipients:</strong> {intended_str}
+  </div>
+
+  <!-- Contacts -->
+  <div style="font-size:12px; color:#475569; margin-bottom:4px;">
+    <strong>AE:</strong> {ae}{f" ({ae_email})" if ae_email else ""} |
+    <strong>Account Owner:</strong> {account_owner} |
+    <strong>Customer Contact:</strong> {primary_contact}{f" ({primary_contact_email})" if primary_contact_email else ""}
+    {opp_link}
+  </div>
+
+  {monthly_html}
+  {recent_html}
+  {siblings_html}
+  {notes_html}
+</div>'''
+
+    # Assemble the full email
+    html = f'''<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#1e293b; max-width:800px; margin:0 auto; padding:20px; background:#f8fafc; }}
+table {{ width:100%; border-collapse:collapse; font-size:12px; }}
+th {{ text-align:left; padding:6px 8px; background:#f1f5f9; color:#475569; font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.3px; }}
+td {{ padding:6px 8px; border-bottom:1px solid #f1f5f9; }}
+a {{ color:#3b82f6; text-decoration:none; }}
+</style></head><body>
+
+<div style="background:linear-gradient(135deg, #1e293b 0%, #334155 100%); color:white; padding:24px 28px; border-radius:12px;">
+  <h1 style="margin:0 0 4px 0; font-size:22px; font-weight:600;">Subscription Renewal Summary</h1>
+  <div style="color:#94a3b8; font-size:13px;">
+    {len(triggered_results)} subscriptions at or above {threshold}% consumption {DASH} {NOW.strftime("%b %d, %Y")}
+  </div>
+</div>
+
+<!-- OVERVIEW TABLE -->
+<div style="background:white; border:1px solid #e2e8f0; border-radius:8px; padding:16px 20px; margin:16px 0;">
+  <h2 style="font-size:15px; font-weight:600; color:#475569; margin:0 0 10px 0; border-bottom:2px solid #e2e8f0; padding-bottom:6px;">At-a-Glance</h2>
+  <table>
+    <tr><th>Customer</th><th>Project</th><th style="text-align:center;">Consumed</th><th style="text-align:right;">Used / Budget</th><th style="text-align:right;">Remaining</th><th>AE</th></tr>
+    {rows_html}
+  </table>
+</div>
+
+<!-- DETAILED SECTIONS -->
+{detail_sections}
+
+<div style="text-align:center; padding:16px; font-size:11px; color:#94a3b8;">
+  Auto-generated Subscription Summary {DASH} {NOW.strftime("%b %d, %Y %H:%M")} {DASH} Rocketlane API<br>
+  This is a preview of emails that would be sent to each AE/CSM listed above.
+</div>
+
+</body></html>'''
+
+    return html
+
+
+def send_summary_email(html_body, recipient, threshold, count, dry_run=False):
+    """Send the consolidated summary email to a single recipient."""
+    subject = f"Subscription Renewal Summary: {count} projects at {threshold}%+ consumption {DASH} {NOW.strftime('%b %d, %Y')}"
+
+    if dry_run:
+        print(f"  [DRY RUN] Would send summary to: {recipient}")
+        print(f"  [DRY RUN] Subject: {subject}")
+        return
+
+    msg = MIMEMultipart("alternative")
+    msg["From"] = GMAIL_ADDRESS
+    msg["To"] = recipient
+    msg["Subject"] = subject
+    msg.attach(MIMEText(html_body, "html"))
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+        server.send_message(msg)
+    print(f"  Summary email sent to: {recipient}")
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -579,13 +800,14 @@ def main():
                         help="Preview which projects would trigger, without sending emails")
     parser.add_argument("--force-all", action="store_true",
                         help="Process ALL subscription projects regardless of threshold (testing)")
+    parser.add_argument("--summary-to", type=str, default="",
+                        help="Send a single summary email to this address instead of individual AE/CSM emails")
     args = parser.parse_args()
 
     if not API_KEY:
         print("ERROR: ROCKETLANE_API_KEY not set"); sys.exit(1)
-    # Gmail credentials only needed if actually sending (not in no-send mode)
-    # if not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
-    #     print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required"); sys.exit(1)
+    if not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
+        print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required"); sys.exit(1)
 
     print("=" * 60)
     print(f"Subscription Consumption Tracker")
@@ -667,10 +889,18 @@ def main():
 
     # 6. Send emails
     if triggered:
-        print(f"\nSending {len(triggered)} renewal package emails...")
-        for sub_d, consumption, siblings in triggered:
-            html = build_renewal_email(sub_d, consumption, siblings)
-            send_renewal_email(sub_d, html, dry_run=True)  # Emails disabled
+        if args.summary_to:
+            # Send a single consolidated summary email
+            print(f"\nBuilding summary email for {len(triggered)} projects...")
+            summary_html = build_summary_email(triggered, args.threshold)
+            send_summary_email(summary_html, args.summary_to, args.threshold,
+                               len(triggered), dry_run=args.dry_run)
+        else:
+            # Send individual renewal emails to AE/CSM
+            print(f"\nSending {len(triggered)} renewal package emails...")
+            for sub_d, consumption, siblings in triggered:
+                html = build_renewal_email(sub_d, consumption, siblings)
+                send_renewal_email(sub_d, html, dry_run=args.dry_run)
     else:
         print("\nNo projects above threshold. No emails to send.")
 
