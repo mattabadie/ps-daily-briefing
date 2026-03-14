@@ -583,8 +583,9 @@ def main():
 
     if not API_KEY:
         print("ERROR: ROCKETLANE_API_KEY not set"); sys.exit(1)
-    if not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
-        print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required"); sys.exit(1)
+    # Gmail credentials only needed if actually sending (not in no-send mode)
+    # if not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
+    #     print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required"); sys.exit(1)
 
     print("=" * 60)
     print(f"Subscription Consumption Tracker")
@@ -669,7 +670,7 @@ def main():
         print(f"\nSending {len(triggered)} renewal package emails...")
         for sub_d, consumption, siblings in triggered:
             html = build_renewal_email(sub_d, consumption, siblings)
-            send_renewal_email(sub_d, html, dry_run=args.dry_run)
+            send_renewal_email(sub_d, html, dry_run=True)  # Emails disabled
     else:
         print("\nNo projects above threshold. No emails to send.")
 
