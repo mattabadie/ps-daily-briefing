@@ -1,0 +1,51 @@
+name: Subscription Consumption Tracker
+
+on:
+  schedule:
+    # Run weekly on Monday at 7 AM EST = 12:00 UTC
+    - cron: '0 12 * * 1'
+  workflow_dispatch:
+    inputs:
+      threshold:
+        description: 'Consumption threshold %'
+        required: false
+        default: '75'
+        type: string
+      dry_run:
+        description: 'Dry run (preview only, no emails)'
+        required: false
+        default: false
+        type: boolean
+      force_all:
+        description: 'Process all projects regardless of threshold'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  check-subscriptions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run subscription tracker
+        env:
+          ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          ARGS="--threshold ${{ inputs.threshold || '75' }}"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ "${{ inputs.force_all }}" = "true" ]; then
+            ARGS="$ARGS --force-all"
+          fi
+          python subscription_tracker.py $ARGS
