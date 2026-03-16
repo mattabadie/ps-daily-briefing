@@ -580,86 +580,66 @@ def post_chat_card(card):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# OUTPUT 2: FULL HTML EMAIL REPORT
+# OUTPUT 2: FULL HTML EMAIL REPORT (ALL INLINE STYLES — Gmail-forward safe)
 # ═══════════════════════════════════════════════════════════════════════════════
-EMAIL_CSS = """
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-       max-width: 780px; margin: 0 auto; color: #1a1a1a; font-size: 13px; line-height: 1.5; }
-h2 { border-bottom: 2px solid #2563eb; padding-bottom: 8px; font-size: 18px; }
-h3 { margin-top: 28px; font-size: 15px; border-left: 4px solid #2563eb; padding-left: 10px; }
-h4 { margin: 16px 0 6px 0; font-size: 13px; }
-table { border-collapse: collapse; width: 100%; margin: 6px 0 14px 0; font-size: 11px; }
-th, td { padding: 4px 8px; border: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
-th { background: #f1f5f9; font-weight: 600; }
-td.num { text-align: right; }
-a { color: #2563eb; text-decoration: none; }
-.health-red { background: #fef2f2; border-left: 4px solid #dc2626; padding: 8px 10px; margin: 6px 0; border-radius: 4px; }
-.health-yellow { background: #fefce8; border-left: 4px solid #ca8a04; padding: 8px 10px; margin: 6px 0; border-radius: 4px; }
-.health-green { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 8px 10px; margin: 6px 0; border-radius: 4px; }
-.stale-badge { display: inline-block; background: #fbbf24; color: #78350f; font-size: 10px;
-               padding: 1px 6px; border-radius: 10px; font-weight: 600; margin-left: 4px; }
-.stale-badge.critical { background: #ef4444; color: #fff; }
-.flag { font-weight: 700; color: #dc2626; }
-.muted { color: #64748b; font-size: 11px; }
-.section-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin: 8px 0; }
-ul { margin: 4px 0; padding-left: 20px; }
-li { margin-bottom: 4px; }
-.kpi-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; }
-.kpi { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 14px; min-width: 90px; text-align: center; }
-.kpi .num { font-size: 22px; font-weight: 700; }
-.kpi .label { font-size: 10px; color: #64748b; text-transform: uppercase; }
-.stoplight { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 6px; }
-.stoplight.red { background: #dc2626; }
-.stoplight.yellow { background: #eab308; }
-.stoplight.green { background: #16a34a; }
-.z2e-tag { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 10px;
-           padding: 0 5px; border-radius: 3px; font-weight: 600; margin-left: 4px; }
-.z2e-tag.ns { background: #fee2e2; color: #991b1b; }
-.z2e-tag.p1 { background: #e0e7ff; color: #3730a3; }
-.z2e-tag.p2 { background: #dbeafe; color: #1e40af; }
-.seg-banner { padding: 5px 12px; border-radius: 4px; font-weight: 700; font-size: 13px; margin: 10px 0 4px 0; }
-.seg-banner.z2e { background: #1e3a5f; color: #93c5fd; border-left: 4px solid #3b82f6; }
-.seg-banner.non-z2e { background: #3f3f46; color: #d4d4d8; border-left: 4px solid #a1a1aa; }
-.seg-banner .seg-count { font-size: 11px; font-weight: 400; opacity: 0.8; margin-left: 6px; }
-.phase-group { margin: 8px 0 4px 8px; font-weight: 800; font-size: 14px; letter-spacing: 0.3px; }
-.phase-group.p1 { color: #7e22ce; }
-.phase-group.p2 { color: #0f766e; }
-.phase-group.ns { color: #b91c1c; }
-.pm-group { margin: 4px 0 2px 16px; font-weight: 700; font-size: 12px; color: #334155; text-transform: uppercase;
-            letter-spacing: 0.5px; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; }
-.health-red .pm-group { color: #991b1b; border-bottom-color: #fca5a5; }
-.health-yellow .pm-group { color: #854d0e; border-bottom-color: #fde047; }
-.pm-projects { padding-left: 8px; }
-.no-health-warning { background: #fff7ed; border: 2px dashed #f97316; border-radius: 6px; padding: 8px 12px;
-                     margin: 8px 0; color: #9a3412; font-weight: 700; font-size: 13px; }
-.no-health-warning .count { font-size: 20px; font-weight: 800; color: #c2410c; }
-.zombie-section { background: #1e1b2e; color: #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 14px 0; }
-.zombie-section h3 { color: #a78bfa; border-left-color: #a78bfa; margin-top: 0; }
-.zombie-section a { color: #93c5fd; }
-.zombie-section table { color: #e2e8f0; }
-.zombie-section th { background: #312e48; color: #c4b5fd; border-color: #4c4675; }
-.zombie-section td { border-color: #4c4675; }
-.score-critical { background: #7f1d1d; font-weight: 700; color: #fca5a5; }
-.score-high { background: #78350f; font-weight: 700; color: #fed7aa; }
-.score-medium { background: #422006; color: #fde68a; }
-.zombie-section .muted { color: #94a3b8; }
-</style>
-"""
+S_BODY = "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:780px;margin:0 auto;color:#1a1a1a;font-size:13px;line-height:1.5;"
+S_H2 = "border-bottom:2px solid #2563eb;padding-bottom:8px;font-size:18px;"
+S_H3 = "margin-top:28px;font-size:15px;border-left:4px solid #2563eb;padding-left:10px;"
+S_H4 = "margin:16px 0 6px 0;font-size:13px;"
+S_TABLE = "border-collapse:collapse;width:100%;margin:6px 0 14px 0;font-size:11px;"
+S_TH = "padding:4px 8px;border:1px solid #e2e8f0;text-align:left;vertical-align:top;background:#f1f5f9;font-weight:600;"
+S_TD = "padding:4px 8px;border:1px solid #e2e8f0;text-align:left;vertical-align:top;"
+S_TD_NUM = "padding:4px 8px;border:1px solid #e2e8f0;text-align:right;vertical-align:top;"
+S_LINK = "color:#2563eb;text-decoration:none;"
+S_MUTED = "color:#64748b;font-size:11px;"
+S_KPI_ROW = "margin:8px 0;"
+S_KPI = "display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 14px;min-width:90px;text-align:center;margin:4px 6px 4px 0;vertical-align:top;"
+S_KPI_NUM = "font-size:22px;font-weight:700;"
+S_KPI_LABEL = "font-size:10px;color:#64748b;text-transform:uppercase;"
+S_SECTION_BOX = "background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 14px;margin:8px 0;"
+S_UL = "margin:4px 0;padding-left:20px;"
+S_LI = "margin-bottom:4px;"
+S_FLAG = "font-weight:700;color:#dc2626;"
+HEALTH_STYLES = {
+    "red": "background:#fef2f2;border-left:4px solid #dc2626;padding:8px 10px;margin:6px 0;border-radius:4px;",
+    "yellow": "background:#fefce8;border-left:4px solid #ca8a04;padding:8px 10px;margin:6px 0;border-radius:4px;",
+    "green": "background:#f0fdf4;border-left:4px solid #16a34a;padding:8px 10px;margin:6px 0;border-radius:4px;",
+}
+STOPLIGHT_COLORS = {"red": "#dc2626", "yellow": "#eab308", "green": "#16a34a"}
+S_STOPLIGHT_BASE = "display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:6px;"
+Z2E_TAG_STYLES = {
+    "p1": "display:inline-block;background:#e0e7ff;color:#3730a3;font-size:10px;padding:0 5px;border-radius:3px;font-weight:600;margin-left:4px;",
+    "p2": "display:inline-block;background:#dbeafe;color:#1e40af;font-size:10px;padding:0 5px;border-radius:3px;font-weight:600;margin-left:4px;",
+    "ns": "display:inline-block;background:#fee2e2;color:#991b1b;font-size:10px;padding:0 5px;border-radius:3px;font-weight:600;margin-left:4px;",
+}
+PHASE_COLORS = {"p1": "#7e22ce", "p2": "#0f766e", "ns": "#b91c1c"}
+S_PM_GROUP = "margin:4px 0 2px 16px;font-weight:700;font-size:12px;color:#334155;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #cbd5e1;padding-bottom:2px;"
+S_NO_HEALTH = "background:#fff7ed;border:2px dashed #f97316;border-radius:6px;padding:8px 12px;margin:8px 0;color:#9a3412;font-weight:700;font-size:13px;"
+S_ZOMBIE_SECTION = "background:#1e1b2e;color:#e2e8f0;border-radius:8px;padding:14px 18px;margin:14px 0;"
+S_ZOMBIE_H3 = "margin-top:0;font-size:15px;border-left:4px solid #a78bfa;padding-left:10px;color:#a78bfa;"
+S_ZOMBIE_TH = "padding:4px 8px;border:1px solid #4c4675;text-align:left;vertical-align:top;background:#312e48;font-weight:600;color:#c4b5fd;"
+S_ZOMBIE_TD = "padding:4px 8px;border:1px solid #4c4675;text-align:left;vertical-align:top;color:#e2e8f0;"
+S_ZOMBIE_TD_NUM = "padding:4px 8px;border:1px solid #4c4675;text-align:right;vertical-align:top;color:#e2e8f0;"
+S_ZOMBIE_LINK = "color:#93c5fd;text-decoration:none;"
+SCORE_STYLES = {
+    "score-critical": "background:#7f1d1d;font-weight:700;color:#fca5a5;",
+    "score-high": "background:#78350f;font-weight:700;color:#fed7aa;",
+    "score-medium": "background:#422006;color:#fde68a;",
+}
 
 
 def staleness_badge(days):
     if days is None:
         return ""
     if days > 60:
-        return f'<span class="stale-badge critical">{days}d stale</span>'
+        return f'<span style="display:inline-block;background:#ef4444;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;margin-left:4px;">{days}d stale</span>'
     elif days > 14:
-        return f'<span class="stale-badge">{days}d stale</span>'
+        return f'<span style="display:inline-block;background:#fbbf24;color:#78350f;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;margin-left:4px;">{days}d stale</span>'
     return ""
 
 
 def email_project_link(name, pid):
-    return f'<a href="{RL_APP_BASE}/{pid}" target="_blank">{name}</a>'
+    return f'<a href="{RL_APP_BASE}/{pid}" target="_blank" style="{S_LINK}">{name}</a>'
 
 
 def z2e_tag_html(classification):
@@ -667,7 +647,7 @@ def z2e_tag_html(classification):
     if classification not in labels:
         return ""
     text, cls = labels[classification]
-    return f'<span class="z2e-tag {cls}">{text}</span>'
+    return f'<span style="{Z2E_TAG_STYLES[cls]}">{text}</span>'
 
 
 def render_project_li(p, show_z2e=False):
@@ -676,7 +656,7 @@ def render_project_li(p, show_z2e=False):
     notes = highlight_concerns(p["health_notes"][:200])
     note_str = f' \u2014 <em>{notes}</em>' if notes else ""
     z2e = z2e_tag_html(classify_edisc(p["sub_type"])) if show_z2e else ""
-    return f'<li><strong>{link}</strong>{z2e} \u2014 {p["customer"]} (PM: {p["owner"]}){stale}{note_str}</li>'
+    return f'<li style="{S_LI}"><strong>{link}</strong>{z2e} \u2014 {p["customer"]} (PM: {p["owner"]}){stale}{note_str}</li>'
 
 
 def render_projects_by_pm(projects, show_z2e=False):
@@ -686,8 +666,8 @@ def render_projects_by_pm(projects, show_z2e=False):
     html = ""
     for pm in sorted(by_pm.keys()):
         pm_projs = sorted(by_pm[pm], key=lambda x: x["name"])
-        html += f'<div class="pm-group">{pm} ({len(pm_projs)})</div>'
-        html += '<ul class="pm-projects">'
+        html += f'<div style="{S_PM_GROUP}">{pm} ({len(pm_projs)})</div>'
+        html += f'<ul style="{S_UL}padding-left:8px;">'
         for p in pm_projs:
             html += render_project_li(p, show_z2e=show_z2e)
         html += '</ul>'
@@ -702,7 +682,8 @@ def render_z2e_by_phase_and_pm(z2e_projects):
         if not phase_projs:
             continue
         tag_cls = {"z2e-phase1": "p1", "z2e-phase2": "p2", "z2e-not-started": "ns"}[phase_key]
-        html += f'<div class="phase-group {tag_cls}">{phase_label} ({len(phase_projs)})</div>'
+        color = PHASE_COLORS[tag_cls]
+        html += f'<div style="margin:8px 0 4px 8px;font-weight:800;font-size:14px;letter-spacing:0.3px;color:{color};">{phase_label} ({len(phase_projs)})</div>'
         html += render_projects_by_pm(phase_projs, show_z2e=False)
     return html
 
@@ -715,7 +696,19 @@ def score_class(score):
 
 
 def health_dot(h):
-    return f'<span class="stoplight {h}"></span>' if h in ("red", "yellow", "green") else ""
+    if h in STOPLIGHT_COLORS:
+        return f'<span style="{S_STOPLIGHT_BASE}background:{STOPLIGHT_COLORS[h]};"></span>'
+    return ""
+
+
+def _kpi(value, label, color=None):
+    num_style = S_KPI_NUM + (f"color:{color};" if color else "")
+    return f'<div style="{S_KPI}"><div style="{num_style}">{value}</div><div style="{S_KPI_LABEL}">{label}</div></div>'
+
+
+def _zombie_kpi(value, label, num_color="#fca5a5"):
+    s = "display:inline-block;background:#312e48;border:1px solid #4c4675;border-radius:6px;padding:8px 14px;min-width:90px;text-align:center;margin:4px 6px 4px 0;vertical-align:top;"
+    return f'<div style="{s}"><div style="font-size:22px;font-weight:700;color:{num_color};">{value}</div><div style="font-size:10px;color:#94a3b8;text-transform:uppercase;">{label}</div></div>'
 
 
 def build_email_edisc_health(enriched_projects):
@@ -725,30 +718,30 @@ def build_email_edisc_health(enriched_projects):
     green = [p for p in active if p["health"] == "green"]
     no_health = [p for p in active if not p["health"]]
     html = ""
-    for color, projects, css_class, icon_class, label_color in [
-        ("red", red, "health-red", "red", "#dc2626"),
-        ("yellow", yellow, "health-yellow", "yellow", "#ca8a04"),
+    for color, projects, label_color in [
+        ("red", red, "#dc2626"),
+        ("yellow", yellow, "#ca8a04"),
     ]:
         if not projects:
             continue
         z2e = [p for p in projects if classify_edisc(p["sub_type"]) != "non-z2e"]
         non_z2e = [p for p in projects if classify_edisc(p["sub_type"]) == "non-z2e"]
-        html += f'<div class="{css_class}"><span class="stoplight {icon_class}"></span>'
+        html += f'<div style="{HEALTH_STYLES[color]}">{health_dot(color)}'
         html += f'<strong style="color:{label_color};">{color.upper()} ({len(projects)})</strong>'
         if z2e:
-            html += f'<div class="seg-banner z2e">Z2E MIGRATIONS<span class="seg-count">({len(z2e)} projects)</span></div>'
+            html += f'<div style="padding:5px 12px;border-radius:4px;font-weight:700;font-size:13px;margin:10px 0 4px 0;background:#1e3a5f;color:#93c5fd;border-left:4px solid #3b82f6;">Z2E MIGRATIONS<span style="font-size:11px;font-weight:400;opacity:0.8;margin-left:6px;">({len(z2e)} projects)</span></div>'
             html += render_z2e_by_phase_and_pm(z2e)
         if non_z2e:
-            html += f'<div class="seg-banner non-z2e">NON-Z2E<span class="seg-count">({len(non_z2e)} projects)</span></div>'
+            html += f'<div style="padding:5px 12px;border-radius:4px;font-weight:700;font-size:13px;margin:10px 0 4px 0;background:#3f3f46;color:#d4d4d8;border-left:4px solid #a1a1aa;">NON-Z2E<span style="font-size:11px;font-weight:400;opacity:0.8;margin-left:6px;">({len(non_z2e)} projects)</span></div>'
             html += render_projects_by_pm(non_z2e)
         html += '</div>'
     if green:
         stale_greens = [p for p in green if p["health_stale_days"] and p["health_stale_days"] > 30]
         stale_note = f' ({len(stale_greens)} with stale notes &gt;30d)' if stale_greens else ""
-        html += f'<div class="health-green"><span class="stoplight green"></span>'
+        html += f'<div style="{HEALTH_STYLES["green"]}">{health_dot("green")}'
         html += f'<strong style="color:#16a34a;">GREEN ({len(green)})</strong>{stale_note}</div>'
     if no_health:
-        html += f'<div class="no-health-warning">\u26a0\ufe0f <span class="count">{len(no_health)}</span> active projects with NO HEALTH SET</div>'
+        html += f'<div style="{S_NO_HEALTH}">\u26a0\ufe0f <span style="font-size:20px;font-weight:800;color:#c2410c;">{len(no_health)}</span> active projects with NO HEALTH SET</div>'
     return html
 
 
@@ -759,23 +752,23 @@ def build_email_health_section(enriched_projects):
     green = [p for p in active if p["health"] == "green"]
     no_health = [p for p in active if not p["health"]]
     html = ""
-    for color, projects, css_class, icon_class, label_color in [
-        ("red", red, "health-red", "red", "#dc2626"),
-        ("yellow", yellow, "health-yellow", "yellow", "#ca8a04"),
+    for color, projects, label_color in [
+        ("red", red, "#dc2626"),
+        ("yellow", yellow, "#ca8a04"),
     ]:
         if not projects:
             continue
-        html += f'<div class="{css_class}"><span class="stoplight {icon_class}"></span>'
+        html += f'<div style="{HEALTH_STYLES[color]}">{health_dot(color)}'
         html += f'<strong style="color:{label_color};">{color.upper()} ({len(projects)})</strong>'
         html += render_projects_by_pm(projects)
         html += '</div>'
     if green:
         stale_greens = [p for p in green if p["health_stale_days"] and p["health_stale_days"] > 30]
         stale_note = f' ({len(stale_greens)} with stale notes &gt;30d)' if stale_greens else ""
-        html += f'<div class="health-green"><span class="stoplight green"></span>'
+        html += f'<div style="{HEALTH_STYLES["green"]}">{health_dot("green")}'
         html += f'<strong style="color:#16a34a;">GREEN ({len(green)})</strong> \u2014 {len(green)} projects healthy{stale_note}</div>'
     if no_health:
-        html += f'<div class="no-health-warning">\u26a0\ufe0f <span class="count">{len(no_health)}</span> active projects with NO HEALTH SET</div>'
+        html += f'<div style="{S_NO_HEALTH}">\u26a0\ufe0f <span style="font-size:20px;font-weight:800;color:#c2410c;">{len(no_health)}</span> active projects with NO HEALTH SET</div>'
     return html
 
 
@@ -793,13 +786,13 @@ def build_email_staleness(active_projects):
     if not stale:
         return ""
     stale.sort(key=lambda x: -x[1])
-    html = f'<h4>Stale Updates ({len(stale)} projects &gt;14 days)</h4><ul style="font-size:12px;">'
+    html = f'<h4 style="{S_H4}">Stale Updates ({len(stale)} projects &gt;14 days)</h4><ul style="{S_UL}font-size:12px;">'
     for p, d in stale[:10]:
         badge = staleness_badge(d)
         link = email_project_link(p["name"], p["id"])
-        html += f'<li>{link} \u2014 {p["customer"]} (PM: {p["owner"]}){badge}</li>'
+        html += f'<li style="{S_LI}">{link} \u2014 {p["customer"]} (PM: {p["owner"]}){badge}</li>'
     if len(stale) > 10:
-        html += f'<li class="muted">...and {len(stale)-10} more</li>'
+        html += f'<li style="{S_LI}{S_MUTED}">...and {len(stale)-10} more</li>'
     html += '</ul>'
     return html
 
@@ -809,16 +802,16 @@ def build_email_recent(enriched_projects):
     recently_completed = [p for p in enriched_projects if p["status_val"] == 3 and p["updated_at"] >= CUTOFF_MS]
     html = ""
     if recently_completed:
-        html += f'<h4 style="color:#16a34a;">Completed (24h): {len(recently_completed)}</h4><ul style="font-size:12px;">'
+        html += f'<h4 style="{S_H4}color:#16a34a;">Completed (24h): {len(recently_completed)}</h4><ul style="{S_UL}font-size:12px;">'
         for p in sorted(recently_completed, key=lambda x: x["name"]):
-            html += f'<li>{email_project_link(p["name"], p["id"])} \u2014 {p["customer"]}</li>'
+            html += f'<li style="{S_LI}">{email_project_link(p["name"], p["id"])} \u2014 {p["customer"]}</li>'
         html += '</ul>'
     if recently_updated:
-        html += f'<h4>Updated (24h): {len(recently_updated)}</h4><ul style="font-size:12px;">'
+        html += f'<h4 style="{S_H4}">Updated (24h): {len(recently_updated)}</h4><ul style="{S_UL}font-size:12px;">'
         for p in sorted(recently_updated, key=lambda x: x["updated_at"], reverse=True)[:8]:
-            html += f'<li>{email_project_link(p["name"], p["id"])} \u2014 {p["status"]} (PM: {p["owner"]})</li>'
+            html += f'<li style="{S_LI}">{email_project_link(p["name"], p["id"])} \u2014 {p["status"]} (PM: {p["owner"]})</li>'
         if len(recently_updated) > 8:
-            html += f'<li class="muted">...and {len(recently_updated)-8} more</li>'
+            html += f'<li style="{S_LI}{S_MUTED}">...and {len(recently_updated)-8} more</li>'
         html += '</ul>'
     return html
 
@@ -836,17 +829,17 @@ def build_email_html(data):
     red_health = sum(1 for p in all_enriched if p["health"] == "red" and p["status_val"] in ACTIVE_STATUS_VALUES)
     yellow_health = sum(1 for p in all_enriched if p["health"] == "yellow" and p["status_val"] in ACTIVE_STATUS_VALUES)
 
-    html = f'''<html><head>{EMAIL_CSS}</head>
-<body>
-<h2>PS Daily Briefing \u2014 {today_str}</h2>
-<p class="muted">eDiscovery | Data PSG | Post Implementation</p>
-<div class="kpi-row">
-<div class="kpi"><div class="num">{total}</div><div class="label">Total Projects</div></div>
-<div class="kpi"><div class="num">{active}</div><div class="label">Active</div></div>
-<div class="kpi"><div class="num" style="color:#dc2626;">{blocked}</div><div class="label">Blocked</div></div>
-<div class="kpi"><div class="num" style="color:#dc2626;">{delayed}</div><div class="label">Delayed</div></div>
-<div class="kpi"><div class="num" style="color:#dc2626;">{red_health}</div><div class="label">Red Health</div></div>
-<div class="kpi"><div class="num" style="color:#ca8a04;">{yellow_health}</div><div class="label">Yellow Health</div></div>
+    html = f'''<html><head></head>
+<body style="{S_BODY}">
+<h2 style="{S_H2}">PS Daily Briefing \u2014 {today_str}</h2>
+<p style="{S_MUTED}">eDiscovery | Data PSG | Post Implementation</p>
+<div style="{S_KPI_ROW}">
+{_kpi(total, "Total Projects")}
+{_kpi(active, "Active")}
+{_kpi(blocked, "Blocked", "#dc2626")}
+{_kpi(delayed, "Delayed", "#dc2626")}
+{_kpi(red_health, "Red Health", "#dc2626")}
+{_kpi(yellow_health, "Yellow Health", "#ca8a04")}
 </div>
 '''
 
@@ -861,15 +854,15 @@ def build_email_html(data):
     z2e_ns = sum(1 for p in edisc_active if classify_edisc(p["sub_type"]) == "z2e-not-started")
     non_z2e = [p for p in edisc_active if classify_edisc(p["sub_type"]) == "non-z2e"]
 
-    html += f'<h3>eDiscovery \u2014 {DIRECTOR_NAMES["eDiscovery"]}</h3>'
-    html += '<div class="kpi-row">'
-    html += f'<div class="kpi"><div class="num">{len(edisc_active)}</div><div class="label">Active</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#dc2626;">{len(edisc_blocked)}</div><div class="label">Blocked</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#dc2626;">{len(edisc_delayed)}</div><div class="label">Delayed</div></div>'
-    html += f'<div class="kpi"><div class="num">{len(z2e_all)}</div><div class="label">Z2E Total</div></div>'
-    html += f'<div class="kpi"><div class="num">{len(non_z2e)}</div><div class="label">Non-Z2E</div></div>'
+    html += f'<h3 style="{S_H3}">eDiscovery \u2014 {DIRECTOR_NAMES["eDiscovery"]}</h3>'
+    html += f'<div style="{S_KPI_ROW}">'
+    html += _kpi(len(edisc_active), "Active")
+    html += _kpi(len(edisc_blocked), "Blocked", "#dc2626")
+    html += _kpi(len(edisc_delayed), "Delayed", "#dc2626")
+    html += _kpi(len(z2e_all), "Z2E Total")
+    html += _kpi(len(non_z2e), "Non-Z2E")
     html += '</div>'
-    html += f'<div class="section-box"><strong>Z2E:</strong> <span class="z2e-tag p1">P1</span> {z2e_p1} | <span class="z2e-tag p2">P2</span> {z2e_p2} | <span class="z2e-tag ns">NS</span> {z2e_ns}</div>'
+    html += f'<div style="{S_SECTION_BOX}"><strong>Z2E:</strong> {z2e_tag_html("z2e-phase1")} {z2e_p1} | {z2e_tag_html("z2e-phase2")} {z2e_p2} | {z2e_tag_html("z2e-not-started")} {z2e_ns}</div>'
     html += build_email_edisc_health(edisc)
     html += build_email_staleness(edisc_active)
     html += build_email_recent(edisc)
@@ -880,18 +873,18 @@ def build_email_html(data):
     dpsg_blocked = [p for p in dpsg_active if p["status_val"] == 4]
     dpsg_delayed = [p for p in dpsg_active if p["status_val"] == 12]
 
-    html += f'<h3>Data PSG \u2014 {DIRECTOR_NAMES["Data PSG"]}</h3>'
-    html += '<div class="kpi-row">'
-    html += f'<div class="kpi"><div class="num">{len(dpsg_active)}</div><div class="label">Active</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#dc2626;">{len(dpsg_blocked)}</div><div class="label">Blocked</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#dc2626;">{len(dpsg_delayed)}</div><div class="label">Delayed</div></div>'
+    html += f'<h3 style="{S_H3}">Data PSG \u2014 {DIRECTOR_NAMES["Data PSG"]}</h3>'
+    html += f'<div style="{S_KPI_ROW}">'
+    html += _kpi(len(dpsg_active), "Active")
+    html += _kpi(len(dpsg_blocked), "Blocked", "#dc2626")
+    html += _kpi(len(dpsg_delayed), "Delayed", "#dc2626")
     html += '</div>'
     html += build_email_health_section(dpsg)
     dpsg_attention = [p for p in dpsg_active if p["status_val"] in (4, 12)]
     if dpsg_attention:
-        html += f'<h4>Blocked / Delayed ({len(dpsg_attention)})</h4><ul>'
+        html += f'<h4 style="{S_H4}">Blocked / Delayed ({len(dpsg_attention)})</h4><ul style="{S_UL}">'
         for p in sorted(dpsg_attention, key=lambda x: x["name"]):
-            html += f'<li><strong>{email_project_link(p["name"], p["id"])}</strong> \u2014 {p["status"]} \u2014 {p["customer"]} (PM: {p["owner"]})</li>'
+            html += f'<li style="{S_LI}"><strong>{email_project_link(p["name"], p["id"])}</strong> \u2014 {p["status"]} \u2014 {p["customer"]} (PM: {p["owner"]})</li>'
         html += '</ul>'
     html += build_email_staleness(dpsg_active)
     html += build_email_recent(dpsg)
@@ -909,27 +902,27 @@ def build_email_html(data):
         customer_zero_counts[p["customer"]] += 1
     repeat_zero = {c: n for c, n in customer_zero_counts.items() if n >= 2}
 
-    html += f'<h3>Post Implementation \u2014 {DIRECTOR_NAMES["Post Implementation"]}</h3>'
-    html += '<div class="kpi-row">'
-    html += f'<div class="kpi"><div class="num">{len(pimpl_active)}</div><div class="label">Active</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#dc2626;">{len(pimpl_blocked)}</div><div class="label">Blocked</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#dc2626;">{len(pimpl_delayed)}</div><div class="label">Delayed</div></div>'
-    html += f'<div class="kpi"><div class="num">{len(subs_active)}</div><div class="label">Subscriptions</div></div>'
-    html += f'<div class="kpi"><div class="num" style="color:#b45309;">{len(zero_subs)}</div><div class="label">$0 Subs</div></div>'
+    html += f'<h3 style="{S_H3}">Post Implementation \u2014 {DIRECTOR_NAMES["Post Implementation"]}</h3>'
+    html += f'<div style="{S_KPI_ROW}">'
+    html += _kpi(len(pimpl_active), "Active")
+    html += _kpi(len(pimpl_blocked), "Blocked", "#dc2626")
+    html += _kpi(len(pimpl_delayed), "Delayed", "#dc2626")
+    html += _kpi(len(subs_active), "Subscriptions")
+    html += _kpi(len(zero_subs), "$0 Subs", "#b45309")
     html += '</div>'
     html += build_email_health_section(pimpl)
     pimpl_attention = [p for p in pimpl_active if p["status_val"] in (4, 12)]
     if pimpl_attention:
-        html += f'<h4>Blocked / Delayed ({len(pimpl_attention)})</h4><ul>'
+        html += f'<h4 style="{S_H4}">Blocked / Delayed ({len(pimpl_attention)})</h4><ul style="{S_UL}">'
         for p in sorted(pimpl_attention, key=lambda x: x["name"]):
-            html += f'<li><strong>{email_project_link(p["name"], p["id"])}</strong> \u2014 {p["status"]} \u2014 {p["customer"]} (PM: {p["owner"]})</li>'
+            html += f'<li style="{S_LI}"><strong>{email_project_link(p["name"], p["id"])}</strong> \u2014 {p["status"]} \u2014 {p["customer"]} (PM: {p["owner"]})</li>'
         html += '</ul>'
     if repeat_zero:
-        html += '<h4 style="color:#b45309;">Repeat $0 Subscription Customers</h4>'
-        html += '<div class="section-box" style="border-color:#fbbf24;">'
-        html += '<p class="muted">Customers with multiple subscription projects at $0:</p><ul>'
+        html += f'<h4 style="{S_H4}color:#b45309;">Repeat $0 Subscription Customers</h4>'
+        html += f'<div style="{S_SECTION_BOX}border-color:#fbbf24;">'
+        html += f'<p style="{S_MUTED}">Customers with multiple subscription projects at $0:</p><ul style="{S_UL}">'
         for cust, count in sorted(repeat_zero.items(), key=lambda x: -x[1]):
-            html += f'<li><strong>{cust}</strong> \u2014 {count} subscription projects with $0/blank subtotal</li>'
+            html += f'<li style="{S_LI}"><strong>{cust}</strong> \u2014 {count} subscription projects with $0/blank subtotal</li>'
         html += '</ul></div>'
     html += build_email_staleness(pimpl_active)
     html += build_email_recent(pimpl)
@@ -940,54 +933,57 @@ def build_email_html(data):
         high = sum(1 for r in zombies if 45 <= r["score"] < 60)
         medium = sum(1 for r in zombies if 30 <= r["score"] < 45)
 
-        html += '<div class="zombie-section"><h3>Zombie Watch</h3>'
-        html += '<p class="muted">Projects with corroborating staleness signals.</p>'
-        html += '<div class="kpi-row">'
-        html += f'<div class="kpi" style="background:#312e48;border-color:#4c4675;"><div class="num" style="color:#fca5a5;">{len(zombies)}</div><div class="label" style="color:#94a3b8;">Flagged</div></div>'
+        html += f'<div style="{S_ZOMBIE_SECTION}"><h3 style="{S_ZOMBIE_H3}">Zombie Watch</h3>'
+        html += f'<p style="color:#94a3b8;font-size:11px;">Projects with corroborating staleness signals.</p>'
+        html += f'<div style="{S_KPI_ROW}">'
+        html += _zombie_kpi(len(zombies), "Flagged", "#fca5a5")
         if critical:
-            html += f'<div class="kpi" style="background:#312e48;border-color:#4c4675;"><div class="num" style="color:#fca5a5;">{critical}</div><div class="label" style="color:#94a3b8;">Critical 60+</div></div>'
+            html += _zombie_kpi(critical, "Critical 60+", "#fca5a5")
         if high:
-            html += f'<div class="kpi" style="background:#312e48;border-color:#4c4675;"><div class="num" style="color:#fed7aa;">{high}</div><div class="label" style="color:#94a3b8;">High 45-59</div></div>'
+            html += _zombie_kpi(high, "High 45-59", "#fed7aa")
         if medium:
-            html += f'<div class="kpi" style="background:#312e48;border-color:#4c4675;"><div class="num" style="color:#fde68a;">{medium}</div><div class="label" style="color:#94a3b8;">Medium 30-44</div></div>'
+            html += _zombie_kpi(medium, "Medium 30-44", "#fde68a")
         html += '</div>'
 
         for team_name in ["eDiscovery", "Data PSG", "Post Implementation"]:
             team_flagged = [r for r in zombies if r["team"] == team_name]
             if not team_flagged:
                 continue
-            html += f'<h4 style="color:#c4b5fd;margin-top:12px;">{team_name} ({len(team_flagged)})</h4>'
-            html += '<table><tr><th>Score</th><th>Project</th><th>Customer</th><th>PM</th><th>Status</th><th>Health</th>'
-            html += '<th>Last Time</th><th>Tasks</th><th>Overdue</th><th>Notes</th><th>Go-Live Slip</th></tr>'
+            html += f'<h4 style="color:#c4b5fd;margin-top:12px;font-size:13px;">{team_name} ({len(team_flagged)})</h4>'
+            html += f'<table style="{S_TABLE}color:#e2e8f0;"><tr>'
+            for hdr in ["Score", "Project", "Customer", "PM", "Status", "Health", "Last Time", "Tasks", "Overdue", "Notes", "Go-Live Slip"]:
+                html += f'<th style="{S_ZOMBIE_TH}">{hdr}</th>'
+            html += '</tr>'
             for r in team_flagged:
                 p = r["enriched"]
                 sc = score_class(r["score"])
-                link = email_project_link(p["name"], p["id"])
+                sc_style = SCORE_STYLES.get(sc, "")
+                link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_ZOMBIE_LINK}">{p["name"]}</a>'
                 dot = health_dot(p["health"])
                 te = r["last_time_entry"]
                 if r["time_entry_stale_days"] and r["time_entry_stale_days"] < 9999:
                     te += f' ({r["time_entry_stale_days"]}d)'
                 elif r["last_time_entry"] == "Never":
                     te = '<strong style="color:#fca5a5;">Never</strong>'
-                task_str = f'{r["completed_tasks"]}/{r["total_tasks"]}' if r["total_tasks"] else "\u2014"
+                task_str = f'{r["completed_tasks"]}/{r["total_tasks"]}' if r["total_tasks"] else DASH
                 if r["task_pct"] is not None:
                     task_str += f' ({int(r["task_pct"])}%)'
-                overdue_str = str(r["overdue_tasks"]) if r["overdue_tasks"] else "\u2014"
+                overdue_str = str(r["overdue_tasks"]) if r["overdue_tasks"] else DASH
                 if r["overdue_tasks"] and r["total_tasks"] and r["overdue_tasks"] / r["total_tasks"] > 0.5:
                     overdue_str = f'<strong style="color:#fca5a5;">{r["overdue_tasks"]}</strong>'
                 notes_str = f'{r["notes_stale_days"]}d' if r["notes_stale_days"] else "N/A"
-                slip_str = f'{r["go_live_slip_days"]}d' if r["go_live_slip_days"] else "\u2014"
+                slip_str = f'{r["go_live_slip_days"]}d' if r["go_live_slip_days"] else DASH
                 if r["go_live_slip_days"] and r["go_live_slip_days"] > 180:
                     slip_str = f'<strong style="color:#fca5a5;">{r["go_live_slip_days"]}d</strong>'
-                html += f'<tr><td class="num {sc}">{r["score"]}</td><td>{link}</td><td>{p["customer"]}</td>'
-                html += f'<td>{p["owner"]}</td><td>{p["status"]}</td><td>{dot}{p["health"] or DASH}</td>'
-                html += f'<td>{te}</td><td class="num">{task_str}</td><td class="num">{overdue_str}</td>'
-                html += f'<td class="num">{notes_str}</td><td class="num">{slip_str}</td></tr>'
+                html += f'<tr><td style="{S_ZOMBIE_TD_NUM}{sc_style}">{r["score"]}</td><td style="{S_ZOMBIE_TD}">{link}</td><td style="{S_ZOMBIE_TD}">{p["customer"]}</td>'
+                html += f'<td style="{S_ZOMBIE_TD}">{p["owner"]}</td><td style="{S_ZOMBIE_TD}">{p["status"]}</td><td style="{S_ZOMBIE_TD}">{dot}{p["health"] or DASH}</td>'
+                html += f'<td style="{S_ZOMBIE_TD}">{te}</td><td style="{S_ZOMBIE_TD_NUM}">{task_str}</td><td style="{S_ZOMBIE_TD_NUM}">{overdue_str}</td>'
+                html += f'<td style="{S_ZOMBIE_TD_NUM}">{notes_str}</td><td style="{S_ZOMBIE_TD_NUM}">{slip_str}</td></tr>'
             html += '</table>'
         html += '</div>'
 
     html += f'''<hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
-<p class="muted">Auto-generated from Rocketlane API \u00b7 {NOW.strftime("%H:%M")} \u00b7 services.api.exterro.com</p>
+<p style="{S_MUTED}">Auto-generated from Rocketlane API \u00b7 {NOW.strftime("%H:%M")} \u00b7 services.api.exterro.com</p>
 </body></html>'''
 
     return html
