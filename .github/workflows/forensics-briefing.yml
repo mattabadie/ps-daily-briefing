@@ -1,0 +1,48 @@
+name: Forensics Daily Briefing
+
+on:
+  schedule:
+    # Email report weekdays at 11:00 UTC (6:00 AM EST)
+    - cron: '0 11 * * 1-5'
+    # Chat card weekdays at 13:00 UTC (8:00 AM EST)
+    - cron: '0 13 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Output mode'
+        required: true
+        default: 'email'
+        type: choice
+        options:
+          - chat
+          - email
+          - both
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 11 * * 1-5" ]; then
+            echo "mode=email" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=chat" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Forensics Briefing
+        env:
+          ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
+          GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python forensics_briefing.py --mode ${{ steps.mode.outputs.mode }}
