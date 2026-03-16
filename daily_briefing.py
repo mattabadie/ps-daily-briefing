@@ -993,10 +993,14 @@ def build_email_html(data):
     return html
 
 
+EXTRA_RECIPIENTS = ["matt.abadie@exterro.com"]
+
+
 def send_email(subject, html_body):
+    all_recipients = [GMAIL_ADDRESS] + EXTRA_RECIPIENTS
     msg = MIMEMultipart("alternative")
     msg["From"] = GMAIL_ADDRESS
-    msg["To"] = GMAIL_ADDRESS
+    msg["To"] = ", ".join(all_recipients)
     msg["Subject"] = subject
     msg.attach(MIMEText(html_body, "html"))
     print("Connecting to Gmail SMTP...")
