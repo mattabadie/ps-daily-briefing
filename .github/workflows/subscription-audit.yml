@@ -1,0 +1,42 @@
+name: Monthly Subscription Audit
+
+on:
+  schedule:
+    # First Monday of each month at 8 AM EST = 13:00 UTC
+    - cron: '0 13 1-7 * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (preview only, no sends)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  run-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openpyxl
+
+      - name: Run subscription audit
+        env:
+          ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GCHAT_SUB_WEBHOOK_URL: ${{ secrets.GCHAT_SUB_WEBHOOK_URL }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="--dry-run"
+          fi
+          python subscription_audit.py $ARGS
