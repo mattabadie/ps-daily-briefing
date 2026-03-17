@@ -23,6 +23,7 @@ import os
 import re
 import smtplib
 import sys
+import time
 import urllib.error
 import urllib.request
 from collections import defaultdict
@@ -69,6 +70,11 @@ def fetch_all_projects():
         else:
             break
     return all_projects
+
+
+def fetch_project_detail(pid):
+    """Fetch individual project detail (includes financials not in list endpoint)."""
+    return api_get(f"projects/{pid}")
 
 
 def fetch_time_entries_for_project(pid):
@@ -137,10 +143,23 @@ def is_active_subscription(p):
 
 
 def extract_subscription_data(p):
-    """Pull subscription contract financials and opp fields from a raw project."""
+    """Pull subscription contract financials and opp fields from a project.
+    Fetches individual project detail to get financials (not in list endpoint)."""
     pid = p.get("projectId", "")
-    financials = p.get("financials", {}) or {}
+
+    # Fetch detail for financials (list endpoint doesn't include them)
+    try:
+        detail = fetch_project_detail(pid)
+    except Exception as e:
+        print(f"    WARNING: Could not fetch detail for {pid}: {e}")
+        detail = p
+
+    # Merge: use detail for financials, but keep list-level fields as fallback
+    financials = detail.get("financials", {}) or {}
+    contract_type = financials.get("contractType", "UNKNOWN") or "UNKNOWN"
     sub_contract = financials.get("subscriptionContract", {}) or {}
+    tm_contract = financials.get("timeAndMaterialContract", {}) or {}
+    tm_budget_dollars = tm_contract.get("projectBudget", 0) or 0
 
     period_minutes = sub_contract.get("periodMinutes", 0) or 0
     no_of_periods = sub_contract.get("noOfPeriods", 0) or 0
@@ -187,15 +206,19 @@ def extract_subscription_data(p):
         "health_notes": strip_html(get_field(p, "Internal Project Health Notes") or ""),
         "weekly_status": strip_html(get_field(p, "Internal Weekly Status") or ""),
         "project_type": get_field(p, "Project Type") or "",
+        "contract_type": contract_type,
+        "needs_correction": contract_type not in ("SUBSCRIPTION", "UNKNOWN"),
         # Subscription contract
         "period_minutes": period_minutes,
         "no_of_periods": no_of_periods,
         "period_budget_dollars": period_budget,
+        "tm_budget_dollars": tm_budget_dollars,
         "frequency": frequency,
         "start_date": start_date,
         "end_date": end_date,
         "total_budgeted_hours": total_budgeted_hours,
-        # Opp fields
+        # Domain & Opp fields
+        "service_hours_domains": get_field(p, "Opp: Service Hours Domain(s)") or "",
         "service_subtotal": get_field(p, "Opp: Service Subtotal") or "",
         "account_owner": get_field(p, "Opp: Account Owner") or "",
         "opp_owner": get_field(p, "Opp: Opportunity Owner") or "",
@@ -600,19 +623,36 @@ def main():
     subs = [p for p in all_projects if is_post_impl_project(p) and is_active_subscription(p)]
     print(f"  {len(subs)} active subscription projects under Post Implementation")
 
-    # 3. Extract subscription data
-    print("Extracting subscription data...")
-    sub_data_list = [extract_subscription_data(p) for p in subs]
+    # 3. Extract subscription data (fetches per-project detail for financials)
+    print(f"Extracting subscription data ({len(subs)} projects, fetching details)...")
+    sub_data_list = []
+    for i, p in enumerate(subs):
+        if i > 0:
+            time.sleep(3)  # Rate limit protection for detail fetches
+        if (i + 1) % 10 == 0:
+            print(f"  {i + 1}/{len(subs)}...")
+        sub_data_list.append(extract_subscription_data(p))
+
+    # Flag projects with wrong contract type (T&M, FIXED_FEE, NON_BILLABLE, etc.)
+    needs_fix = [s for s in sub_data_list if s["needs_correction"]]
+    if needs_fix:
+        print(f"\n  WARNING: {len(needs_fix)} projects have incorrect contract type (should be SUBSCRIPTION):")
+        for s in needs_fix:
+            extra = ""
+            if s["tm_budget_dollars"]:
+                extra = f" (T&M budget: ${s['tm_budget_dollars']:,.0f})"
+            print(f"    - [{s['contract_type']}] {s['customer']}: {s['project_name']}{extra}")
+        print("    These need to be corrected in Rocketlane to SUBSCRIPTION with hours budget.\n")
 
     # Filter to those with budget data
     with_budget = [s for s in sub_data_list if s["total_budgeted_hours"] > 0]
-    no_budget = [s for s in sub_data_list if s["total_budgeted_hours"] == 0]
-    print(f"  {len(with_budget)} have budget data, {len(no_budget)} missing budget")
+    no_budget = [s for s in sub_data_list if s["total_budgeted_hours"] == 0 and not s["needs_correction"]]
+    print(f"  {len(with_budget)} have subscription budget, {len(needs_fix)} need contract type fix, {len(no_budget)} missing budget")
 
     if no_budget:
         print("  Projects missing budget data:")
         for s in no_budget[:10]:
-            print(f"    - {s['customer']}: {s['project_name']}")
+            print(f"    - [{s['contract_type']}] {s['customer']}: {s['project_name']}")
         if len(no_budget) > 10:
             print(f"    ... and {len(no_budget) - 10} more")
 
@@ -627,7 +667,7 @@ def main():
         siblings = find_sibling_projects(sub_d, all_projects)
         return sub_d, consumption, siblings
 
-    with ThreadPoolExecutor(max_workers=10) as pool:
+    with ThreadPoolExecutor(max_workers=3) as pool:
         futures = {pool.submit(_process, s): s for s in with_budget}
         done = 0
         for f in as_completed(futures):
@@ -681,6 +721,20 @@ def main():
         pct = consumption["pct_consumed"]
         flag = " *** ALERT ***" if pct >= args.threshold else ""
         print(f"  {pct:6.1f}%  {sub_d['customer'][:30]:30s}  {sub_d['project_name'][:40]}{flag}")
+
+    # Report projects needing contract type correction
+    if needs_fix:
+        print(f"\n{'=' * 60}")
+        print(f"ACTION REQUIRED: {len(needs_fix)} projects need contract type correction")
+        print(f"{'=' * 60}")
+        print("These projects have Project Type = 'Subscription' but their")
+        print("Rocketlane financials contract type is NOT set to SUBSCRIPTION.")
+        print("They need to be updated in Rocketlane so hours budget can be tracked.\n")
+        for s in needs_fix:
+            extra = ""
+            if s["tm_budget_dollars"]:
+                extra = f"  |  T&M Budget: ${s['tm_budget_dollars']:,.0f}"
+            print(f"  [{s['contract_type']:20s}] {s['customer'][:25]:25s}  {s['project_name'][:50]}{extra}")
 
     print(f"\nDone. Processed {len(results)} subscription projects.")
 
