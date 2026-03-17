@@ -660,7 +660,7 @@ def build_chat_summary(triggered, needs_fix, total_with_budget, threshold):
     # T&M projects needing correction
     if needs_fix:
         fix_lines = []
-        for s in needs_fix[:8]:
+        for s in needs_fix:
             extra = ""
             if s["tm_budget_dollars"]:
                 extra = f" (${s['tm_budget_dollars']:,.0f})"
@@ -669,8 +669,6 @@ def build_chat_summary(triggered, needs_fix, total_with_budget, threshold):
                 f'<a href="{RL_APP_BASE}/{s["project_id"]}">{s["customer"]}</a>'
                 f" {DASH} {s['project_name'][:50]}{extra}"
             )
-        if len(needs_fix) > 8:
-            fix_lines.append(f"<i>...and {len(needs_fix) - 8} more</i>")
         sections.append({
             "header": f"\ud83d\udee0\ufe0f Contract Type Correction Needed ({len(needs_fix)})",
             "widgets": [{"textParagraph": {"text": "<br>".join(fix_lines)}}],
