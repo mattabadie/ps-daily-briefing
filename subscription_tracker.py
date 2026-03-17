@@ -710,6 +710,8 @@ def post_chat_summary(card, dry_run=False):
 # ═══════════════════════════════════════════════════════════════════════════════
 def main():
     parser = argparse.ArgumentParser(description="Subscription Consumption Tracker")
+    parser.add_argument("--mode", choices=["email", "chat", "both"], default="both",
+                        help="Output mode: email (renewal packages), chat (summary card), or both")
     parser.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD,
                         help=f"Consumption threshold %% to trigger alert (default: {DEFAULT_THRESHOLD})")
     parser.add_argument("--dry-run", action="store_true",
@@ -720,8 +722,8 @@ def main():
 
     if not API_KEY:
         print("ERROR: ROCKETLANE_API_KEY not set"); sys.exit(1)
-    if not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
-        print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required"); sys.exit(1)
+    if args.mode in ("email", "both") and not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
+        print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required for email mode"); sys.exit(1)
 
     print("=" * 60)
     print(f"Subscription Consumption Tracker")
@@ -818,14 +820,17 @@ def main():
         print(f"    AE: {sub_d['opp_owner']} ({sub_d['opp_owner_email']})")
         print(f"    Siblings: {len(siblings)} other active projects")
 
-    # 6. Send emails
-    if triggered:
-        print(f"\nSending {len(triggered)} renewal package emails...")
-        for sub_d, consumption, siblings in triggered:
-            html = build_renewal_email(sub_d, consumption, siblings)
-            send_renewal_email(sub_d, html, dry_run=args.dry_run)
+    # 6. Send emails (skip if chat-only mode)
+    if args.mode in ("email", "both"):
+        if triggered:
+            print(f"\nSending {len(triggered)} renewal package emails...")
+            for sub_d, consumption, siblings in triggered:
+                html = build_renewal_email(sub_d, consumption, siblings)
+                send_renewal_email(sub_d, html, dry_run=args.dry_run)
+        else:
+            print("\nNo projects above threshold. No emails to send.")
     else:
-        print("\nNo projects above threshold. No emails to send.")
+        print("\nSkipping emails (chat-only mode).")
 
     # Summary
     print(f"\n{'=' * 60}")
@@ -850,8 +855,8 @@ def main():
                 extra = f"  |  T&M Budget: ${s['tm_budget_dollars']:,.0f}"
             print(f"  [{s['contract_type']:20s}] {s['customer'][:25]:25s}  {s['project_name'][:50]}{extra}")
 
-    # 7. Post summary to Google Chat (sorted by most recent activity first)
-    if triggered or needs_fix:
+    # 7. Post summary to Google Chat (skip if email-only mode)
+    if args.mode in ("chat", "both") and (triggered or needs_fix):
         # Re-sort triggered by most recent time entry date (most recently crossed threshold first)
         triggered_for_chat = sorted(
             triggered,

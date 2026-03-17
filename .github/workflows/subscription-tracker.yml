@@ -2,17 +2,26 @@ name: Subscription Consumption Tracker
 
 on:
   schedule:
-    # Run daily weekdays at 7 AM EST = 12:00 UTC
+    # Daily weekday chat summary at 7 AM EST = 12:00 UTC
     - cron: '0 12 * * 1-5'
   workflow_dispatch:
     inputs:
+      mode:
+        description: 'Output mode'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - email
+          - chat
       threshold:
         description: 'Consumption threshold %'
         required: false
         default: '75'
         type: string
       dry_run:
-        description: 'Dry run (preview only, no emails)'
+        description: 'Dry run (preview only, no sends)'
         required: false
         default: false
         type: boolean
@@ -23,7 +32,29 @@ on:
         type: boolean
 
 jobs:
-  check-subscriptions:
+  # Scheduled run: chat-only summary each morning
+  chat-summary:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Post chat summary
+        env:
+          ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
+          GCHAT_SUB_WEBHOOK_URL: ${{ secrets.GCHAT_SUB_WEBHOOK_URL }}
+        run: python subscription_tracker.py --mode chat
+
+  # Manual run: configurable mode
+  manual-run:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,7 +73,7 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GCHAT_SUB_WEBHOOK_URL: ${{ secrets.GCHAT_SUB_WEBHOOK_URL }}
         run: |
-          ARGS="--threshold ${{ inputs.threshold || '75' }}"
+          ARGS="--mode ${{ inputs.mode || 'both' }} --threshold ${{ inputs.threshold || '75' }}"
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
