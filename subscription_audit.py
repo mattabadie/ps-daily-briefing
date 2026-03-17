@@ -153,6 +153,8 @@ def extract_project_row(p, detail):
         "domain": get_field(p, "Opp: Service Hours Domain(s)") or "",
         "opp_owner": get_field(p, "Opp: Opportunity Owner") or "",
         "client_segment": get_field(p, "Opp: Client Segmentation") or "",
+        "opp_url": get_field(p, "Opp: Opportunity URL") or "",
+        "psr_key": get_field(p, "PSR: Key") or "",
         "needs_fix": contract_type not in ("SUBSCRIPTION", "UNKNOWN"),
     }
 
@@ -170,7 +172,7 @@ def build_workbook(rows):
         "Contract Type", "Frequency", "Periods", "Period Hrs",
         "Total Budget Hrs", "Period Budget ($)", "T&M Budget ($)",
         "Hrs in Name", "Start Date", "Health", "Domain",
-        "Opp Owner", "Client Segment", "Needs Fix"
+        "Opp Owner", "Client Segment", "SF Opportunity", "PSR Key", "Needs Fix"
     ]
 
     hdr_font = Font(name="Arial", bold=True, color="FFFFFF", size=10)
@@ -204,8 +206,12 @@ def build_workbook(rows):
             r["contract_type"], r["frequency"], r["periods"], r["period_hrs"],
             r["total_budget_hrs"], r["period_budget_usd"], r["tm_budget_usd"],
             r["hrs_in_name"], r["start_date"], r["health"], r["domain"],
-            r["opp_owner"], r["client_segment"], "YES" if r["needs_fix"] else ""
+            r["opp_owner"], r["client_segment"],
+            r["opp_url"],  # SF Opportunity — will be hyperlinked below
+            r["psr_key"],  # PSR Key
+            "YES" if r["needs_fix"] else ""
         ]
+        link_font = Font(name="Arial", size=10, color="3B82F6", underline="single")
         for col, v in enumerate(vals, 1):
             c = ws.cell(row=i, column=col, value=v)
             c.font = data_font
@@ -214,6 +220,11 @@ def build_workbook(rows):
                 c.number_format = money_fmt
             if r["needs_fix"]:
                 c.fill = red_fill
+            # SF Opportunity hyperlink (col 19)
+            if col == 19 and v:
+                c.value = "View Opp"
+                c.hyperlink = v
+                c.font = link_font if not r["needs_fix"] else Font(name="Arial", size=10, color="3B82F6", underline="single")
             if col == 15:
                 h_lower = (v or "").lower()
                 if "red" in h_lower:
@@ -223,7 +234,7 @@ def build_workbook(rows):
                 elif "green" in h_lower:
                     c.fill = green_fill
 
-    widths = [28, 50, 12, 14, 20, 18, 12, 8, 10, 14, 14, 14, 10, 12, 10, 24, 22, 18, 10]
+    widths = [28, 50, 12, 14, 20, 18, 12, 8, 10, 14, 14, 14, 10, 12, 10, 24, 22, 18, 14, 10, 10]
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
 
