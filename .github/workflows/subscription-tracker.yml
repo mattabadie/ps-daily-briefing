@@ -21,6 +21,11 @@ on:
         required: false
         default: false
         type: boolean
+      summary_to:
+        description: 'Send single summary email to this address (leave blank for individual emails)'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   check-subscriptions:
@@ -47,5 +52,8 @@ jobs:
           fi
           if [ "${{ inputs.force_all }}" = "true" ]; then
             ARGS="$ARGS --force-all"
+          fi
+          if [ -n "${{ inputs.summary_to }}" ]; then
+            ARGS="$ARGS --summary-to ${{ inputs.summary_to }}"
           fi
           python subscription_tracker.py $ARGS
