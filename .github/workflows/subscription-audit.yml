@@ -40,3 +40,12 @@ jobs:
             ARGS="--dry-run"
           fi
           python subscription_audit.py $ARGS
+
+      - name: Upload audit spreadsheet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: subscription-audit-${{ github.run_id }}
+          path: Subscription_Audit_*.xlsx
+          retention-days: 90
+          if-no-files-found: ignore

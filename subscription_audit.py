@@ -454,6 +454,11 @@ def main():
     print("\nBuilding spreadsheet...")
     wb = build_workbook(rows)
 
+    # Save to disk (for GitHub Actions artifact upload)
+    filename = f"Subscription_Audit_{NOW.strftime('%Y%m%d')}.xlsx"
+    wb.save(filename)
+    print(f"  Saved {filename}")
+
     # Email with attachment
     print("Sending audit email...")
     send_audit_email(wb, rows, dry_run=args.dry_run)
