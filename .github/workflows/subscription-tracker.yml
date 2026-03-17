@@ -2,8 +2,8 @@ name: Subscription Consumption Tracker
 
 on:
   schedule:
-    # Run weekly on Monday at 7 AM EST = 12:00 UTC
-    - cron: '0 12 * * 1'
+    # Run daily weekdays at 7 AM EST = 12:00 UTC
+    - cron: '0 12 * * 1-5'
   workflow_dispatch:
     inputs:
       threshold:
@@ -40,6 +40,7 @@ jobs:
           ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GCHAT_SUB_WEBHOOK_URL: ${{ secrets.GCHAT_SUB_WEBHOOK_URL }}
         run: |
           ARGS="--threshold ${{ inputs.threshold || '75' }}"
           if [ "${{ inputs.dry_run }}" = "true" ]; then

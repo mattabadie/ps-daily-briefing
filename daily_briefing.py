@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PS Daily Briefing — Unified Script
+eDiscovery and Data PSG Daily Update — Unified Script
 Shared data layer with two output modes: Google Chat card + HTML email report.
 
 Usage:
@@ -561,7 +561,7 @@ def build_chat_card(data):
             "cardId": "ps-daily-briefing-v2",
             "card": {
                 "header": {
-                    "title": "PS Daily Briefing",
+                    "title": "eDiscovery and Data PSG Daily Update",
                     "subtitle": today_str,
                     "imageUrl": "https://fonts.gstatic.com/s/i/short-term/release/googlesymbols/monitoring/default/48px.svg",
                     "imageType": "CIRCLE"
@@ -831,7 +831,7 @@ def build_email_html(data):
 
     html = f'''<html><head></head>
 <body style="{S_BODY}">
-<h2 style="{S_H2}">PS Daily Briefing \u2014 {today_str}</h2>
+<h2 style="{S_H2}">eDiscovery and Data PSG Daily Update \u2014 {today_str}</h2>
 <p style="{S_MUTED}">eDiscovery | Data PSG | Post Implementation</p>
 <div style="{S_KPI_ROW}">
 {_kpi(total, "Total Projects")}
@@ -1010,7 +1010,7 @@ def send_email(subject, html_body):
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
 def main():
-    parser = argparse.ArgumentParser(description="PS Daily Briefing")
+    parser = argparse.ArgumentParser(description="eDiscovery and Data PSG Daily Update")
     parser.add_argument("--mode", choices=["chat", "email", "both"], default="both",
                         help="Output mode: chat (Google Chat card), email (HTML report), or both")
     args = parser.parse_args()
@@ -1026,7 +1026,7 @@ def main():
         print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required for email mode"); sys.exit(1)
 
     print("=" * 60)
-    print(f"PS Daily Briefing — mode: {args.mode}")
+    print(f"eDiscovery and Data PSG Daily Update — mode: {args.mode}")
     print("=" * 60)
 
     print("Fetching all Rocketlane projects...")
@@ -1061,7 +1061,7 @@ def main():
         print("\n--- Building HTML email report ---")
         html = build_email_html(data)
         print(f"HTML built ({len(html)} bytes)")
-        subject = f"PS Daily Briefing \u2014 {NOW.strftime('%b %d, %Y')}"
+        subject = f"eDiscovery and Data PSG Daily Update \u2014 {NOW.strftime('%b %d, %Y')}"
         send_email(subject, html)
         print("SUCCESS \u2014 email sent.")
 

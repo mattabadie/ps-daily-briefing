@@ -38,6 +38,7 @@ from email.mime.text import MIMEText
 API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+GCHAT_WEBHOOK_URL = os.environ.get("GCHAT_SUB_WEBHOOK_URL", "")
 BASE_URL = "https://services.api.exterro.com/api/1.0"
 RL_APP_BASE = "https://services.exterro.com/projects"
 
@@ -288,6 +289,17 @@ def compute_consumption(sub_data, time_entries):
 
     recent_entries.sort(key=lambda x: x["date"], reverse=True)
 
+    # Most recent time entry date (proxy for "most recently crossed threshold")
+    all_dates = []
+    for e in time_entries:
+        d_str = e.get("date", "")
+        if d_str:
+            try:
+                all_dates.append(datetime.strptime(d_str, "%Y-%m-%d"))
+            except ValueError:
+                pass
+    last_entry_date = max(all_dates) if all_dates else None
+
     return {
         "total_hours_used": round(total_hours_used, 1),
         "total_budgeted_hours": round(budgeted, 1),
@@ -297,6 +309,7 @@ def compute_consumption(sub_data, time_entries):
         "avg_monthly_burn": round(avg_monthly_burn, 1),
         "months_remaining": round(months_remaining, 1) if months_remaining != float("inf") else None,
         "recent_entries": recent_entries[:20],  # cap at 20
+        "last_entry_date": last_entry_date,
     }
 
 
@@ -592,6 +605,107 @@ def send_renewal_email(sub_data, html_body, dry_run=False):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# GOOGLE CHAT SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════
+def build_chat_summary(triggered, needs_fix, total_with_budget, threshold):
+    """Build a Google Chat card summarizing subscription renewal alerts."""
+    today_str = NOW.strftime("%A, %B %d, %Y")
+
+    sections = []
+
+    # KPI summary
+    kpi_text = (
+        f"<b>{len(triggered)}</b> at or above {threshold}% consumed  \u2022  "
+        f"<b>{total_with_budget}</b> total tracked  \u2022  "
+        f"<b>{len(needs_fix)}</b> need contract fix"
+    )
+    sections.append({"widgets": [{"textParagraph": {"text": kpi_text}}]})
+
+    # Triggered projects
+    if triggered:
+        lines = []
+        for sub_d, consumption, _ in triggered:
+            pct = consumption["pct_consumed"]
+            used = round(consumption["total_hours_used"], 1)
+            budget = round(consumption["total_budgeted_hours"], 1)
+            remaining = round(consumption["remaining_hours"], 1)
+            runway = consumption.get("months_remaining")
+            ae = sub_d.get("opp_owner", "N/A")
+            link = f'<a href="{RL_APP_BASE}/{sub_d["project_id"]}">{sub_d["customer"]}</a>'
+
+            last_date = consumption.get("last_entry_date")
+            last_date_str = last_date.strftime("%b %d") if last_date else "N/A"
+
+            urgency = "\ud83d\udd34" if pct >= 100 else "\ud83d\udfe0" if pct >= 90 else "\ud83d\udfe1"
+            line = f"{urgency} {link} {DASH} <b>{pct}%</b> ({used}h / {budget}h)"
+            line += f" | {remaining}h left"
+            if runway:
+                line += f" | ~{runway}mo"
+            line += f" | Last: {last_date_str} | AE: {ae}"
+            lines.append(line)
+
+        sections.append({
+            "header": f"\ud83d\udce6 Renewal Prep ({len(triggered)})",
+            "widgets": [{"textParagraph": {"text": "<br>".join(lines)}}],
+        })
+
+    # T&M projects needing correction
+    if needs_fix:
+        fix_lines = []
+        for s in needs_fix[:8]:
+            extra = ""
+            if s["tm_budget_dollars"]:
+                extra = f" (${s['tm_budget_dollars']:,.0f})"
+            fix_lines.append(
+                f"\u26a0\ufe0f [{s['contract_type']}] "
+                f'<a href="{RL_APP_BASE}/{s["project_id"]}">{s["customer"]}</a>'
+                f" {DASH} {s['project_name'][:50]}{extra}"
+            )
+        if len(needs_fix) > 8:
+            fix_lines.append(f"<i>...and {len(needs_fix) - 8} more</i>")
+        sections.append({
+            "header": f"\ud83d\udee0\ufe0f Contract Type Correction Needed ({len(needs_fix)})",
+            "widgets": [{"textParagraph": {"text": "<br>".join(fix_lines)}}],
+        })
+
+    card = {
+        "cardsV2": [{
+            "cardId": "subscription-tracker-summary",
+            "card": {
+                "header": {
+                    "title": f"Subscription Renewal Tracker {DASH} {today_str}",
+                    "subtitle": "Post-Implementation Consumption Summary",
+                },
+                "sections": sections,
+            },
+        }]
+    }
+    return card
+
+
+def post_chat_summary(card, dry_run=False):
+    """Post summary card to Google Chat webhook."""
+    if not GCHAT_WEBHOOK_URL:
+        print("  GCHAT_SUB_WEBHOOK_URL not set, skipping chat post.")
+        return
+    if dry_run:
+        print("  [DRY RUN] Would post summary to Google Chat")
+        return
+
+    data = json.dumps(card).encode()
+    req = urllib.request.Request(
+        GCHAT_WEBHOOK_URL, data=data,
+        headers={"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        status = resp.status
+        if status == 200:
+            print("  Chat summary posted successfully.")
+        else:
+            print(f"  WARNING: Chat post returned HTTP {status}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
 def main():
@@ -735,6 +849,21 @@ def main():
             if s["tm_budget_dollars"]:
                 extra = f"  |  T&M Budget: ${s['tm_budget_dollars']:,.0f}"
             print(f"  [{s['contract_type']:20s}] {s['customer'][:25]:25s}  {s['project_name'][:50]}{extra}")
+
+    # 7. Post summary to Google Chat (sorted by most recent activity first)
+    if triggered or needs_fix:
+        # Re-sort triggered by most recent time entry date (most recently crossed threshold first)
+        triggered_for_chat = sorted(
+            triggered,
+            key=lambda x: x[1].get("last_entry_date") or datetime.min,
+            reverse=True,
+        )
+        print("\nPosting summary to Google Chat...")
+        card = build_chat_summary(triggered_for_chat, needs_fix, len(with_budget), args.threshold)
+        try:
+            post_chat_summary(card, dry_run=args.dry_run)
+        except Exception as e:
+            print(f"  ERROR posting to Chat: {e}")
 
     print(f"\nDone. Processed {len(results)} subscription projects.")
 
