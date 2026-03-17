@@ -52,11 +52,19 @@ DEFAULT_THRESHOLD = 75  # percent
 # ═══════════════════════════════════════════════════════════════════════════════
 # HTTP + DATA FETCHING
 # ═══════════════════════════════════════════════════════════════════════════════
-def api_get(path):
+def api_get(path, retries=3):
     url = f"{BASE_URL}/{path}"
     req = urllib.request.Request(url, headers={"api-key": API_KEY, "accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.loads(resp.read().decode())
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < retries - 1:
+                wait = 2 ** (attempt + 1)  # 2s, 4s backoff
+                time.sleep(wait)
+            else:
+                raise
 
 
 def fetch_all_projects():
@@ -739,17 +747,44 @@ def main():
     subs = [p for p in all_projects if is_post_impl_project(p) and is_active_subscription(p)]
     print(f"  {len(subs)} active subscription projects under Post Implementation")
 
-    # 3. Extract subscription data (fetches per-project detail for financials)
-    print(f"Extracting subscription data ({len(subs)} projects, fetching details)...")
-    sub_data_list = []
-    for i, p in enumerate(subs):
-        if i > 0:
-            time.sleep(3)  # Rate limit protection for detail fetches
-        if (i + 1) % 10 == 0:
-            print(f"  {i + 1}/{len(subs)}...")
-        sub_data_list.append(extract_subscription_data(p))
+    # 3. Extract subscription data + compute consumption in one parallel pass
+    #    Each worker: fetch detail → extract sub data → fetch time entries → compute consumption
+    print(f"Processing {len(subs)} subscription projects (detail + time entries)...")
+    t_start = time.time()
 
-    # Flag projects with wrong contract type (T&M, FIXED_FEE, NON_BILLABLE, etc.)
+    def _full_process(p):
+        """Single-pass: detail fetch, extraction, time entries, consumption."""
+        sub_d = extract_subscription_data(p)
+        # Skip time entry fetch for non-SUBSCRIPTION contracts (they need correction first)
+        if sub_d["needs_correction"] or sub_d["total_budgeted_hours"] <= 0:
+            return sub_d, None, None
+        entries = fetch_time_entries_for_project(sub_d["project_id"])
+        consumption = compute_consumption(sub_d, entries)
+        sub_d["pct_consumed"] = consumption["pct_consumed"]
+        siblings = find_sibling_projects(sub_d, all_projects)
+        return sub_d, consumption, siblings
+
+    sub_data_list = []
+    results = []
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futures = {pool.submit(_full_process, p): p for p in subs}
+        done = 0
+        for f in as_completed(futures):
+            done += 1
+            if done % 10 == 0:
+                print(f"  {done}/{len(subs)}...")
+            try:
+                sub_d, consumption, siblings = f.result()
+                sub_data_list.append(sub_d)
+                if consumption is not None:
+                    results.append((sub_d, consumption, siblings))
+            except Exception as e:
+                print(f"  Error: {e}")
+
+    elapsed = time.time() - t_start
+    print(f"  Completed in {elapsed:.0f}s")
+
+    # Flag projects with wrong contract type
     needs_fix = [s for s in sub_data_list if s["needs_correction"]]
     if needs_fix:
         print(f"\n  WARNING: {len(needs_fix)} projects have incorrect contract type (should be SUBSCRIPTION):")
@@ -760,7 +795,6 @@ def main():
             print(f"    - [{s['contract_type']}] {s['customer']}: {s['project_name']}{extra}")
         print("    These need to be corrected in Rocketlane to SUBSCRIPTION with hours budget.\n")
 
-    # Filter to those with budget data
     with_budget = [s for s in sub_data_list if s["total_budgeted_hours"] > 0]
     no_budget = [s for s in sub_data_list if s["total_budgeted_hours"] == 0 and not s["needs_correction"]]
     print(f"  {len(with_budget)} have subscription budget, {len(needs_fix)} need contract type fix, {len(no_budget)} missing budget")
@@ -771,29 +805,6 @@ def main():
             print(f"    - [{s['contract_type']}] {s['customer']}: {s['project_name']}")
         if len(no_budget) > 10:
             print(f"    ... and {len(no_budget) - 10} more")
-
-    # 4. Fetch time entries and compute consumption (parallel)
-    print(f"Computing consumption for {len(with_budget)} projects...")
-    results = []
-
-    def _process(sub_d):
-        entries = fetch_time_entries_for_project(sub_d["project_id"])
-        consumption = compute_consumption(sub_d, entries)
-        sub_d["pct_consumed"] = consumption["pct_consumed"]
-        siblings = find_sibling_projects(sub_d, all_projects)
-        return sub_d, consumption, siblings
-
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        futures = {pool.submit(_process, s): s for s in with_budget}
-        done = 0
-        for f in as_completed(futures):
-            done += 1
-            if done % 10 == 0:
-                print(f"  {done}/{len(with_budget)}...")
-            try:
-                results.append(f.result())
-            except Exception as e:
-                print(f"  Error: {e}")
 
     # Sort by consumption % descending
     results.sort(key=lambda x: -x[1]["pct_consumed"])
