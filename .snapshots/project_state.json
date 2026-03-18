@@ -1,0 +1,4124 @@
+{
+  "834791": {
+    "id": 834791,
+    "name": "LCRA - OnBase Connector",
+    "health": "",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769485519136
+  },
+  "836653": {
+    "id": 836653,
+    "name": "Dealer Tire | IMPL - LH",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "11/20/25: Dharsiniy has received sample file via email. She has replied asking them to upload to SFTP.11/13/25: Customer has opted to not pause while we await IT resources.&nbsp;11/06/25: Still awaiting IT resources from the Dealer Tire side. Have explored partial live options with Chris Carino shou",
+    "weekly_status": "01/08/26: Hypercare concluded on the 5th. Project Closure meeting on the 7th. Retro on the 9th.12/18/25: Customer went live on 12/15/25. Currently in hypercare.12/11/25: HR feed job has been initiated. If successful, this customer could go live on 12/12/25.12/04/25: AE will be submitting a change or",
+    "updated_at": 1769533920138
+  },
+  "848319": {
+    "id": 848319,
+    "name": "INTERNAL - Product Development, Testing & Training",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759335515049
+  },
+  "848710": {
+    "id": 848710,
+    "name": "INTERNAL - Presales Support",
+    "health": "",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1764810660075
+  },
+  "849326": {
+    "id": 849326,
+    "name": "PWC - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534159584
+  },
+  "856109": {
+    "id": 856109,
+    "name": "RAND | AddOn - GovCloud Migration, ECM, IPP+DSD(Teams), EDDM+Review(M365&Commvault)",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "",
+    "weekly_status": "3/13/26: Hypercare remains in progress. Extended out a few days to 3/27 to account for my PTO 3/23-25.&nbsp;3/6/26: Go-Live remains set for Monday 3/9. Some troubleshooting with Teams remains ongoing. Sharan is leading a call today to resolve.&nbsp;2/27/26: Go/No-Go was successful. We are aligned fo",
+    "updated_at": 1773795615520
+  },
+  "856199": {
+    "id": 856199,
+    "name": "Yeti | IMPL - LH ECM IPP DSD EDDM/Review",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "03/12/26: Conducted project closure on 3/902/12/26: Closure call scheduled for 03/09/26.02/05/26: Hypercare concluding 02/09/2601/29/26: Customer went live on 01/26/25. Support handoff conducted on 01/27/26. Checked in on SSO issue for custodians on 01/29/26.01/22/26: Conducted Preparing for Go Live",
+    "updated_at": 1773335548323
+  },
+  "856678": {
+    "id": 856678,
+    "name": "Amerilife | IMPL - LH, IPP+DSD (M365 & Druva), EDDM",
+    "health": "red",
+    "status": "Blocked",
+    "health_notes": "03/12/26: Customer is production ready. Meeting with customer on 03/13 to go over how they would like to proceed with implementation03/05/26: Met with Druva and the customer on 3/3 for optimization discussion. Druva will be providing Samraj with a thread count while we continue to explore optimizati",
+    "weekly_status": "03/12/26: Active Technical Investigation:&nbsp;Our engineering team is performing a live analysis of the current collection, which has surpassed 90 hours.&nbsp;Our engineering team is investigating performance to determine if there are specific environmental bottlenecks we can clear immediately.&nbs",
+    "updated_at": 1773795616235
+  },
+  "859158": {
+    "id": 859158,
+    "name": "CN Rail | IMPL - LH, IPP+DSD (O365), ECM",
+    "health": "yellow",
+    "status": "Delayed",
+    "health_notes": "03/12/26: User Acceptance Testing:&nbsp;Re: IPP10017 issue (Previously General IPP/DSD issue with using shared mailbox for custodians)This issue has been confirmed to be resolved.&nbsp;Deepika to provide RCA.Duplicate Data Sources -&nbsp;Engineering team has found root cause and is working on this f",
+    "weekly_status": "03/12/26: UAT complete. Exterro team is working on an RCA for the completed IPP issue and wrapping up duplicate data source issue. Go live welcome scheduled for 03/13.03/05/26: Customer still working through UAT. ServiceNow implementation complete.02/26/26: Customer is actively working through UAT s",
+    "updated_at": 1773795616741
+  },
+  "859163": {
+    "id": 859163,
+    "name": "Arnold & Porter | IMPL - LH, DSD, IPP, EDDM, ECM, GWC",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "03/05/26: Customer is meeting on 03/12 for a final UAT walkthrough. In light of this, next week's sync will be cancelled. At that time, a go/no go decision will be made.02/26/26:&nbsp;Noting that the only remaining issues for this customer are:iManage collection within Modern view - product and engi",
+    "weekly_status": "03/12/26: Customer has completed UAT and is now live.03/05/26: Customer is meeting internally next Thursday for a final walkthrough / UAT. At that time a go/no go decision will be made.02/26/26: Noting that the only remaining issues for this customer are:iManage collection within Modern view - produ",
+    "updated_at": 1773795616663
+  },
+  "859168": {
+    "id": 859168,
+    "name": "Stantec | IMPL - LH, IPP, DSD, EDDM, Review, ECM",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "02/19/26: On hold until we have an HR technical stakeholder assigned by Stantec02/12/25: Still technically on hold.11/20/25: Spoke to Tyffany and IT resources will not be available until January. As such, today's alignment meeting was cancelled.11/13/25: Reengagement kickoff scheduled for 11/20/2510",
+    "weekly_status": "02/19/26: On hold until we have an HR technical stakeholder assigned by Stantec02/12/26: The Stantec team has completed the SendGrid configuration offered by Exterro, determining the \"From\" address as no-reply@legal-discovery.stantec.com. The Exterro team is currently working on validation, which is",
+    "updated_at": 1773795616344
+  },
+  "859177": {
+    "id": 859177,
+    "name": "Wal-Mart CA | IMPL - LH, IPP, DSD, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "11/20/25: Signed off on Slack Connector. Customer not proceeding with Confluence. Proof point asset integration moved to phase 3.&nbsp;11/13/25: Pausing temporarily on Confluence and Proofpoint.&nbsp;",
+    "weekly_status": "03/12/26: Retro scheduled for 03/13.03/05/26 : Hypercare concluded on 03/02/26. Prepping for project closure.02/26/26: Extending hypercare by a couple of days to allow Prachi to provide the following :- Schedules for each data load.- Response on CMR for the failure notifications. They need to receiv",
+    "updated_at": 1773420094478
+  },
+  "859180": {
+    "id": 859180,
+    "name": "Epic Games | IMPL - LH, IPP, DSD, EDDM, Review, ECM",
+    "health": "yellow",
+    "status": "Completed",
+    "health_notes": "11/20/25: Deepika provided documentation on how to verify User Association and DSD validation.11/13/25: Customer experiencing issues with preserving Google likely due to lack of full sync. Have extended invite to troubleshoot. Discussed partial go live option during last weekly sync.11/06/25: Unable",
+    "weekly_status": "01/22/26: Closure meeting and Go Live Welcome on 01/22. Retro scheduled for 01/26/26.01/08/25: Hypercare extended by a week to conclude 01/12/26.12/18/25: Customer went live on 12/15/25. Currently in hypercare. Alison on leave from 12/16-12/19. From 12/20-1/4, Epic Games' office will be closed in ob",
+    "updated_at": 1769533915230
+  },
+  "859188": {
+    "id": 859188,
+    "name": "City of Arlington, TX | IMPL - LH, DSD, EDDM, Review, ECM, GWC",
+    "health": "yellow",
+    "status": "Partially Live",
+    "health_notes": "3/05/2026 - Completion date still unclear as we work to finalize the feed. Currently with the customer for validation as of two days ago.2/27/2026 - TL and Samraj are meeting with the customer next week to go over feedback.2/19/2026 - Progress is being made, but an ETA has not been provided. Complet",
+    "weekly_status": "3/12/2026 - No change this week, they are still working with Workday to validate.3/05/2026 - Customer is working on validations and getting custom work done on their side with Workday. Completion date still unclear as we work to finalize the feed.&nbsp;2/27/2026 - Exterro feedback provided, Samraj a",
+    "updated_at": 1773795616380
+  },
+  "859191": {
+    "id": 859191,
+    "name": "Upstart | IMPL - LH, IPP, DSD, EDDM, Review",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/18/2025 - Retrospective call is today, then will close this out.&nbsp;12/11/2025 - Closeout call scheduled for Tuesday.11/20/2025 - Hypercare has ended, no open issues. Pending scheduling of Closure call.&nbsp;11/13/2025 - Hypercare ending on Friday. No issues to report. Ready to schedule Closure",
+    "updated_at": 1769533958634
+  },
+  "859195": {
+    "id": 859195,
+    "name": "Yardi Systems | IMPL - LH, IPP, DSD, EDDM, Review, ECM",
+    "health": "red",
+    "status": "Blocked",
+    "health_notes": "11/13 - Discussed with Manager and at this point there's nothing more for the implementation team to do, it's all up to the AE and CSM going forward.&nbsp;11/06/25 -&nbsp;Waiting on Customer. Call isn't scheduled yet due to the leadership team member being out of office.&nbsp;10/30/25 -Customer inte",
+    "weekly_status": "11/13 - Discussed with Manager and at this point there's nothing more for the implementation team to do, it's all up to the AE and CSM going forward.&nbsp;11/06 - Customer advised their leadership is out of office this week, so he will follow up next week with the AE to get a call scheduled.10/30 -&",
+    "updated_at": 1773795615787
+  },
+  "859199": {
+    "id": 859199,
+    "name": "Memorial Hermann | IMPL - LH, IPP, DSD, ECM, EDDM/Review RFP",
+    "health": "yellow",
+    "status": "Partially Live",
+    "health_notes": "03/12/26: UAT issues include:Extensive data exchange collection time issue - Prachi to open engineering ticket to see if any issues are present in the recent collection tests madeIn-place preservation is not being released as expected following a release - Pending response from Prachi. Pending confi",
+    "weekly_status": "03/12/26: Met with MH team to go over UAT issues and preparing for go live workshop. UAT picking back up on 03/17. At that time we should know more regarding go live readiness.03/05/26: Met with MH team for weekly sync. Redefined UAT and potential go live timelines.02/26/26: Met with MH team for wee",
+    "updated_at": 1773795615665
+  },
+  "859727": {
+    "id": 859727,
+    "name": "BCBS MA | IMPL - LH, DSD, IPP, EDDM, Review, ECM",
+    "health": "yellow",
+    "status": "Completed",
+    "health_notes": "2/27/26: Project remains Yellow until closure due to age of project but will be closing out today after Closure Call &amp; Internal Retrospective are completed. Documentum will be handled as a post-implementation action item once Product receives the necessary updates from OpenText.",
+    "weekly_status": "2/27/26: Project Closure Call &amp; Internal Retrospective Call set for today (2/27). Final working session for EDDM/Review set for 3/3 - owed to customer, was supposed to take place during my absence last week and did not occur.2/18/26: Hypercare remains in progress. Support Welcome call completed ",
+    "updated_at": 1772222088139
+  },
+  "859741": {
+    "id": 859741,
+    "name": "TD Bank | POC - LH, IPP, ECM, DSD, RM, Rev",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "3/13/26: Customer's insistence/process on completing all technical configurations 3 times (SIT, PAT, &amp; PROD) has significantly impacted project timeline. O365 configurations for SIT have been in progress since 1/7 with little to no progress updates. Customer insisted on tasks in Rocketlane being",
+    "weekly_status": "3/13/26: O365 progress has not changed. Customer did confirm the in progress work was only for SIT and that all configurations would have to be repeated for PAT &amp; PROD. Project tasks have been replicated for both. Smarsh is now in progress, pending only a finalized licensing agreement, however t",
+    "updated_at": 1773795615777
+  },
+  "859810": {
+    "id": 859810,
+    "name": "Worldpay | Addon - EDDM/Review, GWC",
+    "health": "red",
+    "status": "Blocked",
+    "health_notes": "02/26/26 - CSM emailed FIS on status, no response02/19/26 - Emailed FIS on status, no response02/12/26 - Project on hold pending next steps/acceptance from FIS to continue01/08/26 - New O365 connector is still discovering FIS data. &nbsp;Customer is deciding on path forward if they cannot separate t",
+    "weekly_status": "03/12/26 - Customer scheduled meeting with FIS on 03/1803/05/26 - Asked WP to followup with FIS02/26/26 - CSM emailed FIS on status, no response02/19/26 - Emailed FIS on status, no response02/12/26 - Project on hold pending next steps/acceptance from FIS to continue02/05/26 - Project on hold. &nbsp;",
+    "updated_at": 1773795615324
+  },
+  "859821": {
+    "id": 859821,
+    "name": "Washington Dept. of Fish & Wildlife | IMPL - EDDM/Review, GWC",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/11/25 - Project retro. &nbsp;Outstanding request to turn on SSO, closing project until Phase 212/04 - Hypercare ending this week. &nbsp;Scheduling implementation closure meeting while Phase 2 is scheduled for next year.11/20 - Customer is live on 11/19 and in hypercare for Phase 1. &nbsp;Phase 2 ",
+    "updated_at": 1769533941896
+  },
+  "859830": {
+    "id": 859830,
+    "name": "Solstice Advanced Materials | IMPL - LH, IPP+DSD+EDDM, Review, ECM",
+    "health": "red",
+    "status": "Completed",
+    "health_notes": "12/04 - Customer has not scheduled Phase 2 activities. &nbsp;Escalated to manager.",
+    "weekly_status": "01/29/26 - Customer sent closure documentation on 01/23, project Retro concluded 01/28. &nbsp;Closing project.01/22/26 - No response from customer. &nbsp;TLs filling out CCR, will send closure documentation tomorrow and formally end project01/08/26 - PSM sent notice of project closure. &nbsp;Will cl",
+    "updated_at": 1769718036055
+  },
+  "859835": {
+    "id": 859835,
+    "name": "HECO | IMPL - LH, IPP, DSD, ECM, RM",
+    "health": "green",
+    "status": "Closeout",
+    "health_notes": "02/19/26 - TL provided update on missing datasources, customer will followup internally and have workflow on how to handle with migrated holds. &nbsp;Support ticket opened for migrated holds re-issue issue. &nbsp;Scheduling implementation closeout with customer02/12/26 - Status update to yellow- &nb",
+    "weekly_status": "03/12/26 - This project is closed03/05/26 - Moved Retro to tomorrow, need to disable Dual Auth02/26/26 - Status update to Green. &nbsp;Hosted implementation closure meeting. &nbsp;Reissue problem identified as missing RBAC, customer will add and reissue holds. &nbsp;02/19/26 - TL provided update on ",
+    "updated_at": 1773795616338
+  },
+  "859881": {
+    "id": 859881,
+    "name": "Progressive | WO - HR Change Over",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/12/26 - Customer states connectivity has been tested, looking to provide estimated time on when test file will be delivered to Exterro03/05/26 - PGP key shared, test SFTP shared, waiting for file02/26/26 - Customer has re-engaged. &nbsp;Looking to test connectivity this week or next. &nbsp;Asking",
+    "updated_at": 1773795616126
+  },
+  "873791": {
+    "id": 873791,
+    "name": "BCBS AZ | Z2E LHP to LH",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "",
+    "weekly_status": "As of 3/12 - Project is moving through the go live process, no issues to report.&nbsp;&nbsp;As of 3/4 - Client has approved their go live this week and we're proceeding with our go live steps beginning this Friday (3/6)&nbsp;As of 2/26 - Client has submitted major LH and awaiting custodians to ackno",
+    "updated_at": 1773795616711
+  },
+  "873947": {
+    "id": 873947,
+    "name": "Charles Schwab | Z2E - LHP to LH, IPP, DSD, ECM",
+    "health": "yellow",
+    "status": "On Hold",
+    "health_notes": "2/27 KC: Yellow due to delays.",
+    "weekly_status": "3/12 KC: On 2 wk pause - resuming 3/18.3/5/26 KC: On 2 wk pause - resuming 3/18.2/27/26 KC: Schwab requested 2 week pause due to competing priorities, Geoff approved. We'll pick back up on 3/18, Moved target closure to 3/31.2/26/26 KC: Mapping delays cont. Moved target closure to 3/11. Expect cleare",
+    "updated_at": 1773795616385
+  },
+  "873985": {
+    "id": 873985,
+    "name": "Walmart | Z2E - LHP to LH, IPP, DSD, MMI",
+    "health": "yellow",
+    "status": "Partially Live",
+    "health_notes": "",
+    "weekly_status": "3/12: There seems to be continued positive progress with IPP plans successfully preserving which has allowed our migration team to continue with the IPP migration and revise our checklist.&nbsp;3/5: Customer is seeing progress with successful preservations while both Exterro and Microsoft monitor. D",
+    "updated_at": 1773795616422
+  },
+  "874030": {
+    "id": 874030,
+    "name": "Entergy Services | Z2E ZD to LH, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "2/19/26 KC: Closed. Retro on 2/20.2/12/26 KC: Project Closure meeting held. Retro booked for 2/20.2/6/26 KC: Closure moved to 2/12 - Allyson has been on storm duty (utility outage) and unavailable all of Q1 to-date.1/29/26 KC: Closure call moved to 2/5 due to Entergy availability.&nbsp;1/22/26 KC: N",
+    "updated_at": 1772072559146
+  },
+  "874052": {
+    "id": 874052,
+    "name": "Travelers | Z2E LHP to LH, IPP, DSD, ECM, RM, MMS",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "3/12 KC: Yellow - Matter team bulk set-up requires engineering exception. Under review. May put timeline at risk. Sentiment good.",
+    "weekly_status": "3/12/26 KC: Risk to Go/No-Go on 3/18 - Escalated to engineering support for bulk Matter Team creation after requirement change (~20 custom teams to 280 -- changed 2/25). Teams requirements have been submitted, awaiting feasibility assessment/confirmation. Alternative is to use Travelers API toolkit ",
+    "updated_at": 1773795616723
+  },
+  "874066": {
+    "id": 874066,
+    "name": "Eli Lilly - WGS and PM Oversight",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12: No new update. Working through Go Green items and ensuring we are meeting our expected delivery dates.&nbsp;3/5: No new update. Working through Go Green items and ensuring we are meeting our expected delivery dates.&nbsp;2/26: No new update. Working through Go Green items and ensuring we are m",
+    "updated_at": 1773795616640
+  },
+  "874095": {
+    "id": 874095,
+    "name": "Gilead | Z2E LHP to LH, IPP+DSD",
+    "health": "red",
+    "status": "Blocked",
+    "health_notes": "3/12/26:&nbsp;Go live is pending client decision on BYOK implementation. 3/5/26: BYOK and Security Review calls this week. Still waiting for them to be completed for Go Live. 2/26/26: BYOK and Sec review work is delaying Go Live.&nbsp;2/20/26: Client completing a SEC review. Prod timeline will be on",
+    "weekly_status": "3/12/26:&nbsp;Client has everything it needs for security review and is reviewing the BYOK contract. Go live is pending client decision on BYOK implementation.3/5/26: BYOK and Security Review calls this week. Still waiting for them to be completed for Go Live.&nbsp;2/26/26: BYOK and Sec review work ",
+    "updated_at": 1773795616628
+  },
+  "874112": {
+    "id": 874112,
+    "name": "Adient | Z2E ZD to LH, RM",
+    "health": "yellow",
+    "status": "Hypercare",
+    "health_notes": "03/06/26: TL provided Adient with access to the Reports API. Will send follow up email to Adient to verify all outstanding issues are complete and they are ready to sign off on the prod migration and being Hypercare. QJ02/27/26: HR validation done. Waiting on Adient to sign off on prod migration. Pe",
+    "weekly_status": "03/12/26: Adient signed off on prod migration and is live in Exterro. Hypercare began on 3/11/26. QJ03/06/26: TL provided Adient with access to the Reports API. Will send follow up email to Adient to verify all outstanding issues are complete and they are ready to sign off on the prod migration and ",
+    "updated_at": 1773795616441
+  },
+  "874122": {
+    "id": 874122,
+    "name": "FCB-FI | Impl - HR DSD EDDM Review (O365)",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/12/26 - Continuing to check in with the customer technical contact who is working to complete all initial technical tasks (including HR Integration) but seems to be taking some time due to limited technical resources which is causing less progress than I would like to see early on. Also, customer",
+    "updated_at": 1773795615277
+  },
+  "874157": {
+    "id": 874157,
+    "name": "PayPal | Z2E LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "1/8/25: Closure call ok 1/6, Retro on 1/912/30/25: No open issues, no calls this week.&nbsp;12/23/25: No new opened items with the client, Continuing check insurance until close your call.12/19/25: No open items at this time. Close your calls scheduled for January 6th.12/12/25: Other than Reporting ",
+    "updated_at": 1769533924362
+  },
+  "874471": {
+    "id": 874471,
+    "name": "Applied Materials | Z2E LHP to LH",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "1/16/26: Support made a mistake and purged their org earlier than what was mentioned in the authorized date on the form. They&nbsp;said this is the first time this has ever happened and the agent responsible admits this was a mistake.&nbsp;We did already provide their data extract, so that's the goo",
+    "updated_at": 1769533913828
+  },
+  "874515": {
+    "id": 874515,
+    "name": "Christiana Care | Z2E LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "1/22/26 - Stakeholder call rescheduled for next week. Mike is on the same page that additional resources are necessary, but has said he has difficulty convincing the team to dedicate the time needed. He's requested that we also reiterate the EOS and EOL dates in that call to incentivize the team.1/1",
+    "weekly_status": "3/12/2026 - On Track with updated timeline. Getting legal finalization on decisions present risks, but actual remaining configurations are minimal. Round 2 test migration kicking off next week3/5/2026 -&nbsp;Spoke to customer, updating GL from Apr 6 to Apr 28 w/ no change order. Configurations nearl",
+    "updated_at": 1773795615303
+  },
+  "874535": {
+    "id": 874535,
+    "name": "Halliburton | Z2E ZD to LH, IPP, DSD, EDDM (M365), Review, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "11/13/25: Project Completed. Purge Scheduled. Handed off to Support. Dustomer is arranging additional training post implementation with AE/CSM11/6 - Final Closeout activities in progress. Rescheduling purge pending customer feedback10/30/25 - project closure call with customer on 10/30/25. Working o",
+    "updated_at": 1773687106010
+  },
+  "874540": {
+    "id": 874540,
+    "name": "Cox | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/18/2025 - Completed12/11/2025 - Closeout, Retro planned12/3/2025: Hypercare ended, Closure call completed. Purge Scheduled. Closeout activities in progress11/13/25 - Target Go Live on 11/14, pending customer confirmation of acceptance of final cleanup items in progress to continue past go live11/",
+    "updated_at": 1769533929570
+  },
+  "874575": {
+    "id": 874575,
+    "name": "Reckitt | Z2E ZD to LH, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/23/25: Completed project retrospective and closed project12/19/25: Completed project closure meeting project retrospective scheduled for next week12/12/25: No open issues at this time. Closure your meeting scheduled for next Friday.&nbsp;12/5/25: Project Closure meeting scheduled for 12/19.&nbsp;",
+    "updated_at": 1773759491364
+  },
+  "874577": {
+    "id": 874577,
+    "name": "Takeda | Z2E LHP to LH, IPP, DSD, MMI, ECM, RM",
+    "health": "yellow",
+    "status": "Delayed",
+    "health_notes": "3/12/26:&nbsp;With Matts help completed matter and hold, as well as employee cleanup. Hope for project to speed up.&nbsp;3/5/26: Client still moving slowly, have Matter/Hold and HR updated from the client. Client to start working through RM Updates.&nbsp;2/20/26: &nbsp;Delays caused by extended clea",
+    "weekly_status": "3/12/26:&nbsp;Completed matter and hold, as well as employee cleanup. kicked off another round of migration and requested one time HR file to be loaded.3/5/26: Received an update file from the client, will work with getting it completed with Matt. Client still moving slowly. &nbsp;2/26/26: Takeda is",
+    "updated_at": 1773795616616
+  },
+  "874593": {
+    "id": 874593,
+    "name": "Dropbox | Z2E LHP to LH, IPP, DSD, EDDM, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "2/5/26: Email cleanup completed Duel Auth to be disabled, Project to be closed once confirmed.&nbsp;1/29/26: Closure call completed, Retro on 1/30 - duplicate email cleanup stil being completed1/22/26: Closure call on 1/231/8/26: HR file load issue resolved, email with client to schedule closure cal",
+    "updated_at": 1771433110648
+  },
+  "874603": {
+    "id": 874603,
+    "name": "AEP | Z2E - LHP to LH, MMI, ECM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "3/17/26 HA: Updated the Due Date to 6/1/26 as that is the agreed upon go-live date with the customer now that we are going to include ECM and MMI as part of this project. &nbsp;3/12/26: Looking to push go live to be in line with T 360 on June 1st3/5/26: T360 mapping completed, Remailing Workshops sc",
+    "weekly_status": "3/17/26 HA: Updated the Due Date to 6/1/26 as that is the agreed upon go-live date with the customer now that we are going to include ECM and MMI as part of this project. &nbsp;3/12/26: Two workshops completed this week. Two additional workshops scheduled for next week. Looking to push go live to be",
+    "updated_at": 1773795616684
+  },
+  "874604": {
+    "id": 874604,
+    "name": "Dana Corp | Z2E LHP to LH, RM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Green - Live as of 11/4/2025 - 2 week Hypercare complete.",
+    "weekly_status": "12/11/2025: Final Update - Retrospective Complete. Project moved to Close.12/4/2025: Project Closure meeting with customer complete this week. Retrospective next week and Close of Project11/20/2025: Project Closing - Closing meeting and retrospective todo.11/13/2025. Hypercare period ends on 11/17. ",
+    "updated_at": 1769534005560
+  },
+  "874817": {
+    "id": 874817,
+    "name": "Porsche NA | Z2E - ZD to LH",
+    "health": "green",
+    "status": "Closeout",
+    "health_notes": "Green &nbsp;- Close - Zapproved data extract and decommision outstanding.12/11/2025 - PATH TO GREEN MET - 1) Validation of migration round 2. 2) Reschedule project dates based on validation.",
+    "weekly_status": "3/12/2026 - Close and Retrospecitve meeting. Waiting on Zapproved data extract and customer verification of recceipt.03/05/2026 - Week 2 Hypercare - HR file processing and reporting.2/26/2026 - Go Live Complete. In Hypercare2/19/2026 - Production QC in customer Phase. Go live checkpoint tomorrow. Pl",
+    "updated_at": 1773795616318
+  },
+  "874829": {
+    "id": 874829,
+    "name": "Talen Energy | Z2E LHP to LH",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Green - Live as of 11/4/2025 - 2 week Hypercare complete.",
+    "weekly_status": "12/11/2025: Final Update - Retrospective Complete. Project moved to Close.12/4/2025: Project Closure meeting with customer complete this week. Retrospective next week and Close of Project11/20/2025: Project Closing - Closing meeting and retrospective todo. Closing meeting rescheduled until first wee",
+    "updated_at": 1770312376258
+  },
+  "874833": {
+    "id": 874833,
+    "name": "SEI | Z2E - LHP to LH",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Interviews - not all Interview questions migrated over to Exterro. Only showing the last set of questions and answers instead of showing the entire Interview question series. Management is aware of the issue and is working with the tech and/or DME team to resolve. QJ",
+    "weekly_status": "02/27/26: Project is closed. No further updates. QJ2/20/26: Project closure call w/customer complete. Retrospect call for internal project team scheduled. QJ02/13/26: Project closure meeting scheduled for 02/19/26. QJ02/06/26: Last day of Hypercare. Customer is ready to transition to the customer su",
+    "updated_at": 1772491354487
+  },
+  "874836": {
+    "id": 874836,
+    "name": "Excellus | Z2E - LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "10/31- Client is still working through UAT &nbsp;script- fwd issues to Roshli. &nbsp;Roshli and I will be reaching out to the client on Monday for a quick discussion. &nbsp;Client wants to speak with Roshli about the HR file- will arrange a call with Tom.10/16- Spoke with the Excellus Team today- re",
+    "weekly_status": "1/16/26: Customer is live, hypercare complete, closure meeting complete. All that remains is project retrospective. 1/8/26: Client still has not signed off on prod IPP validation, but it has been 3-4 weeks so tomorrow we are pushing them to omplementation closure and into service. 1/2/26: waiting on",
+    "updated_at": 1769533971753
+  },
+  "874837": {
+    "id": 874837,
+    "name": "Sarepta | Z2E - ZD to LH, IPP, DSD",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "1/30/26: held closure meeting, completed hypercare. Need TL updates of customer profile doc and TL to disable dual auth. Retrospect call next week. 1/22/26: granted customer one further week of hypercare due to a resource going out of office for bereavement leave. 1/16/26: Customer is entering their",
+    "updated_at": 1770308480769
+  },
+  "874863": {
+    "id": 874863,
+    "name": "Kaiser Permanente | Z2E - LHP to LH, IPP, DSD, RM, MMI, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "01/30/26 [RLR] - Closing the project today. Received signed project closure document from Eric Zunino. &nbsp; &nbsp;01/22/26 [RLR] - Trying to get project closure document returned to me with Kaiser sign off. &nbsp;Marla will request the Zapproved site purge. &nbsp; &nbsp;01/09/26 [RLR] - Wrapping u",
+    "updated_at": 1772045636238
+  },
+  "874864": {
+    "id": 874864,
+    "name": "Nationwide | Z2E - LHP to LH, IPP, DSD, SCIM, SSO, ECM, CR, MMI",
+    "health": "green",
+    "status": "Closeout",
+    "health_notes": "",
+    "weekly_status": "02/19/26 [RLR] - Project closure meeting scheduled for next Thursday, Feb 26. &nbsp; &nbsp;02/05/26 [RLR] - Hypercare officially completed today. Manish is following up with IPP Team re failures. Target Feb 6. Manish is supporting the final UAT tenant configs which are all on NW side. Target Feb 10 ",
+    "updated_at": 1773795616548
+  },
+  "874869": {
+    "id": 874869,
+    "name": "Prudential | Z2E - LHP to LH, IPP, DSD, ECM, MMI (API)",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "3/13/26: Customer continues to deprioritize migration efforts and project overall. They are slow in providing necessary responses/feedback. Z2E Migration Round 2 remains in progress. There have been several cleanups and restarts due to the state of the customers data. The most recent delay is due to",
+    "weekly_status": "3/13/26: Round 2 migration remains in progress. Significant delay in processing ~6 million interview custodian records. Engineering has found a way to process this faster for the next round of migration. Still pending response from Prudential on starting sessions w/ Michelle.3/6/26: Round 2 migratio",
+    "updated_at": 1773795616078
+  },
+  "874872": {
+    "id": 874872,
+    "name": "Toyota | Z2E - LH, IPP, DSD, ECM, RM, MMI",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "3/17/2026 - Workday API call issues are leading to Go-Live plans being pushed out. We are working with them closely to address it and determine when it will be completed.",
+    "weekly_status": "3/12/2026 - API call issues are leading to system timeouts. TL worked with engineering and customer to determine cause is the SailPoint integration. Fixes are in progress. Most likely going to delay go-live more, depending on ETAs.&nbsp;3/05/2026 - AR Migration utility upgrade was successful, custom",
+    "updated_at": 1773795615905
+  },
+  "875048": {
+    "id": 875048,
+    "name": "AbbVie | Z2E - LHP to LH, DSD, IPP",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26MigrationMoving forward with final clone of Prod to Test and starting the 3rd push next week, the week of 3/16. Exact date TBD. Should have green light from Martin by 3/13 when he's completed cleanup tasks. Discussed IPP NCDS request with Dave. This scenario should NOT impact the migration, s",
+    "updated_at": 1773795615314
+  },
+  "875050": {
+    "id": 875050,
+    "name": "Albertsons | WO - Duplicate Data Source Cleanup",
+    "health": "red",
+    "status": "Blocked",
+    "health_notes": "&nbsp;Nov 8, 25 - Emailing customer to place on hold until they're ready to engage. We've been trying to get the customer to provide required information to move forward since May.&nbsp;",
+    "weekly_status": "Jan 30, 26 - Still waiting on customer to identify list to be deleted. Marked project as blocked11/08/25 - Sending a 'we should put this on hold' message.10/17/25 - Customer replied with an ambiguous \"Please proceed with cleanup\" - but the report contained ALL data sources. Asked for clarification.1",
+    "updated_at": 1773795615792
+  },
+  "875059": {
+    "id": 875059,
+    "name": "Albertsons | WO - Employee Data Cleanup",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "Mar 13, 2026 - &nbsp;Waiting for the confirmation from client to process the full HCM feed fileMar 06, 26 - Waiting for the confirmation from client to process the full HCM feed fileFeb 27, 26 - Waiting confirmation from client to validate the change made in the UI, before processing the full HCM fe",
+    "updated_at": 1773795616483
+  },
+  "875078": {
+    "id": 875078,
+    "name": "AH4R | AddOn - EDDM Connector (Database)",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 7, 25 - Technical Resources engaged with customer shortly after deal closure, but customer still had security reviews and approvals to complete. Assisted with those and now waiting for customer to indicate they have completed their steps before we can officially start. Indicated they'd have an u",
+    "weekly_status": "",
+    "updated_at": 1773795615499
+  },
+  "875088": {
+    "id": 875088,
+    "name": "AstraZeneca | AddOn - IPP, DSD (Box & M365)",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Oct 03, 25 - Finally at the last stage of running the IPP migration (phase 2). Just waiting on this to run it's course now.Mar 07, 25 - New PM assignment (moved to Michael Garcia)Oct 25, 24 - Kicked off Implementation",
+    "weekly_status": "Feb 03, 26 - Project completed, confirmed with customer.Jan 30, 26 - Monday should probably be last weekly call if no issues arise.12/18/25: We have completed the processing the Exchange Online and OneDrive data sources. Currently, we are working on a Box API issue. But still we should be good be wi",
+    "updated_at": 1771253262127
+  },
+  "875127": {
+    "id": 875127,
+    "name": "Bill | IMPL - LH, IPP, DSD, EDDM, GWC",
+    "health": "yellow",
+    "status": "Completed",
+    "health_notes": "Trivial Issues",
+    "weekly_status": "1/22/26- Retrospect complete.1/16/26- Retrospect scheduled for 1/22/26.1/8/2026- Project Closure meeting. &nbsp;Retrospect has been scheduled.&nbsp;12/31/25 -Sent follow up email requesting availability for project closure meeting.&nbsp;12/23/25- We are ready to move forward with project closure. Pr",
+    "updated_at": 1769533933216
+  },
+  "875134": {
+    "id": 875134,
+    "name": "Black and Veatch | Z2E - LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "2/20/26: No mire blokers, Retro will be today, before closing project I will email CSM that Zapproved needs to be decomissioned and MFA needs to be disabled once IPP/DSD issue is resolved.&nbsp;",
+    "weekly_status": "2/19/26:&nbsp;Closure call completed, Retro on 2/20 then closing Project.&nbsp;&nbsp;2/12/26: Client pushing back on closure call as IPP/DSD issue is still open2/5/26: Open IPP/DSD issue to be transitioned to Support. Project needs to be closed, will reach out to schedule.&nbsp;1/29/26: Additional i",
+    "updated_at": 1773687752028
+  },
+  "875149": {
+    "id": 875149,
+    "name": "Christus | IMPL - LH, IPP, DSD, EDDM, Review, MMI, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Trivial Issues",
+    "weekly_status": "1/29/2026 - Project Closure meeting complete.1/22/26 - Project Closure meeting scheduled.&nbsp;1/16/26 - Project closure meeting scheduled for 1/29/26.1/8/2025 -12/30/25- Followed up with Christus team for availability for project closure meeting.12/23/25 - Waiting for Christus team to advise who wi",
+    "updated_at": 1770393527445
+  },
+  "875228": {
+    "id": 875228,
+    "name": "City of Denver | WO - API Toolkit",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Nov 5, 25 - Customer purchased a second bucket of non-recurring bucket of hours that expire at the end of Dec. Continue to support them until that time.",
+    "weekly_status": "02/0512/15/25: Client went live on 4th December and was in hyper care; since everything went well they have provided sign-off to transition to support.09/26/25: Customer continuing with the middleware testing in the UAT site; Has requested to provide confirmation on the Go-live date09/11/25: On trac",
+    "updated_at": 1770294628932
+  },
+  "875230": {
+    "id": 875230,
+    "name": "CNA | AddOn - IPP, DSD Connector (Carbonite)",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "March 13, 26 - Followed up with the client. Waiting for response.&nbsp;March 6, 26 - CNA informed that there are no updates and they are working on troubleshooting the issue.Feb 27, 26 - Followed up the CNA team and awaiting for response.Feb13, 26 - Met with the CNA team and continued the troublesho",
+    "updated_at": 1773795616007
+  },
+  "875232": {
+    "id": 875232,
+    "name": "Comcast | Z2E - LHP to LH, IPP, DSD, EDDM, Review, ECM, RM, API Toolkit",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Nov 20, 25 - Customer live in EDDM. Expect rest of modules to be implemented by end of January.",
+    "weekly_status": "3/12/26 - Production push complete and Comcast is live! We are just cleaning up a few last minor items. Getting ready for hypercare and Support transition.3/5/26 - Production migration push is happening! It's expected to be completed by 3/11 so that Comcast can be live on March 12th. Hypercare will ",
+    "updated_at": 1773795616276
+  },
+  "875233": {
+    "id": 875233,
+    "name": "NBC | Z2E - LHP to LH, IPP, DSD, EDDM, Review, ECM, RM, API Toolkit",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26 - Project still on track! Received QC feedback from NBCU and it's minimal. Waiting for green light to start migration push #2 while NBCU does more cleanup. Should be in the next 1-2 weeks.&nbsp;All other integrations are on track!&nbsp;&nbsp;3/5/26 - Still waiting on NBCU for their QC feedba",
+    "updated_at": 1773795615309
+  },
+  "875236": {
+    "id": 875236,
+    "name": "COUNTRY Financial | IMPL - LH, IPP, DSD, RM, ECM, Migration",
+    "health": "yellow",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/18/25: Closure scheduled for 12/1812/4/25 - The IPP bulk processing has completed Exchange and is now on OneDrive. &nbsp;All issues have been resolved or transferred to Support. &nbsp;To coordinate closure tasks.11/20/25 - The bulk IPP processing is set to begin tomorrow and to last about 22-26 d",
+    "updated_at": 1769533930769
+  },
+  "875246": {
+    "id": 875246,
+    "name": "General Mills | AddOn - IPP (Yammer)",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "11/13/25 - With recent changes by Microsoft, Yammer was unsupported by our current connector. Product developing updates, currently slated for release 11/21/25. We will pick up project again then.",
+    "updated_at": 1769534027217
+  },
+  "875249": {
+    "id": 875249,
+    "name": "Google | IMPL - LH, MMI, ECM",
+    "health": "yellow",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/18/25 - Google and Exterro teams are still working together to troubleshoot some minor issues with migration data. There are a few issues with historical data showing up accurately for custodians. Waiting for a better understanding of the timeline for completion of these items.&nbsp;12/04/25 - Pr",
+    "updated_at": 1770055202681
+  },
+  "875253": {
+    "id": 875253,
+    "name": "Intuit | WO - API Advisement",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Nov 08, 25 - Bucket of hours that expire at 20 hours spent or June 28, 26.",
+    "weekly_status": "3/13/ PG : No Updates3/6 PG: No Updates2/27 PG: No Updates2/20 PG: No Updates2/13 PG: No updates2/6 PG: It is decided to use the remaining hours for another project.Jan 30, 26 - Hours may be redirected to be used for another project.08/29/25 - Customer reached out for help on API calls. We appear to",
+    "updated_at": 1773795615548
+  },
+  "875258": {
+    "id": 875258,
+    "name": "Kimberly Clark | AddOn - IPP, DSD",
+    "health": "yellow",
+    "status": "Completed",
+    "health_notes": "Nov 9, 25 - Yellow due to project timeline delays only. We're well outside of scoped timelines",
+    "weekly_status": "",
+    "updated_at": 1769534023160
+  },
+  "875276": {
+    "id": 875276,
+    "name": "Versant | Z2E - LH, RM, IPP, DSD, ECM, API",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "1/29/26 - There is still a major delay with DSD and IPP - see Google channel. Marla, Casey and Justin are working on wrapping up the final items as well as involving Support as needed.&nbsp;12/18/25 - Justin and Casey confirmed there are still issues getting the M365 connection set up due to issues ",
+    "updated_at": 1772221120560
+  },
+  "875280": {
+    "id": 875280,
+    "name": "Oracle | WO - Data Cleanup, Test Environment & Migration",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "No Problems",
+    "weekly_status": "3/4/26 - Parthi and Engineering are working to add the historical logs. There is no ETA at this time when the Exterro team will be able to deliver their samples to check. I did advise the Oracle team that we will provide an update by EOD 3/6/26.&nbsp;2/25/26 - Historical Audit logs need to be added,",
+    "updated_at": 1773795615997
+  },
+  "875283": {
+    "id": 875283,
+    "name": "NDOT | AddOn - RMD",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/17/25 - Confirmed all deliverables complete. they have a feature request they'd like to see - tagged in account team.11/13/25 - Customer completed all known implementation work and engaged to for training. Checking to see if we can close.&nbsp;",
+    "updated_at": 1769533991116
+  },
+  "875284": {
+    "id": 875284,
+    "name": "T-Mobile | Z2E - LHP to LH, IPP, DSD, ECM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Only changing to Yellow since there have been numerous timeline delays with the technical work on their side. I've not heard any negative sentiment from the customer thus far. We will need to regroup with Harbor and the customer on the migration plan and timeline.&nbsp;",
+    "weekly_status": "3/12/26 - Cyber review is still ongoing with no deadline. Escalated internally in the Google chat channel and Sara Montgomery is trying to discuss with Sonya.&nbsp;3/5/26 - Met with Nick and the T-Mobile team this week to go over all of the migration requirements and cleanup steps. Dom and Matt atte",
+    "updated_at": 1773795615890
+  },
+  "875291": {
+    "id": 875291,
+    "name": "Rockwell Automation | AddOn - IPP, DSD",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 05, 25 - Project has been on hold for some time. We were only able to complete the DSD portion of the originally scoped work. There was an add-on project that got looped into this one as well.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795615692
+  },
+  "875294": {
+    "id": 875294,
+    "name": "Sanofi | Z2E - LHP to LH, IPP, DSD, GWC, RM",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "3/13/26: Ongoing &amp; continued delays with customer configuring and provisioning servers for O365 via GWC as well as new delays from customer's InfoSec have created major delays in project timeline.&nbsp;",
+    "weekly_status": "3/13/26: Servers are now completed. Customer's InfoSec team still refuses to provide sign-off on our proposed process. We are at a standstill until that is provided. Refresh migration has been completed.&nbsp;3/6/26: Servers remain pending 1 service installation. O365 configurations are completed bu",
+    "updated_at": 1773795616734
+  },
+  "875296": {
+    "id": 875296,
+    "name": "State Fund | WO - Data Source Cleanup & IPP Processing",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13 PG: Customer conveyed that they are still validiting the IPP Utility execution.3/6 PG: Waiting on the customer feedback on the IPP Migration.2/27 PG: IPP Preservation utility is completed and customer is validating the changes.2/6: Cutomer has tured off the IPP settings and Initiation of scopin",
+    "updated_at": 1773795616477
+  },
+  "875298": {
+    "id": 875298,
+    "name": "Tokio Marine | AddOn - GWC",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Exterro exploring options to create network shares since the addition of 2 servers as we can't use DSD (no field to differentiate which network shares go to which servers on the customer side) and manual process is cumbersome. Expect resolution by end of the month.",
+    "weekly_status": "2/11 - got confirmation from Nick that we could close the project as of 2/6Jan 30, 26 - As of last week, we will finalize the options and discuss them with the customer, including closing out the project by the end of this month. Checking if we will actually be closing today12/11/25 Exterro explorin",
+    "updated_at": 1770849732024
+  },
+  "875301": {
+    "id": 875301,
+    "name": "UNT | IMPL - LH, IPP, DSD, EDDM, PRR/FOIA-Training",
+    "health": "yellow",
+    "status": "Partially Live",
+    "health_notes": "No Problems",
+    "weekly_status": "3/12/26 - Working with team for Asset Integration. Still working with the UNT team with their PRR /FOIA and this meeting is scheduled for next week.&nbsp;3/4/26 - Prachi has been working with Brad on GWC. We are waiting on updates from Brad. PRR /FOIA workshop III conducted. The next PRR /FOIA works",
+    "updated_at": 1773795616590
+  },
+  "876763": {
+    "id": 876763,
+    "name": "H2O America | Add On - IPP, DSD, EDDM, Review",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/2026 - Documentation provided for IPP validations, pending sign off.&nbsp;3/05/2026 - Customer is working on IPP validation, then will be ready to Go Live with IPP potentially next week. EDDM configuration not yet started.&nbsp;2/27/2026 - M365 Configuration session scheduled for next week. Bus",
+    "updated_at": 1773795615319
+  },
+  "878838": {
+    "id": 878838,
+    "name": "Aledade | Z2E - ZD to LH, DSD, IPP",
+    "health": "red",
+    "status": "Cancelled",
+    "health_notes": "11/13/25 HA: Received confirmation of intent to churn. Current subscription expires 2/28/26, so we will discontinue their LHP access at that time. Unless there are objections, the active Z2E implementation project in RL should be closed out.11/4/25 HA: Customer shared they plan to churn: \"We've made",
+    "weekly_status": "11/13/25 HA: Received confirmation of intent to churn. Current subscription expires 2/28/26, so we will discontinue their LHP access at that time. Unless there are objections, the active Z2E implementation project in RL should be closed out.11/3/25: from customer: \"We've made the decision to seek ou",
+    "updated_at": 1769534092406
+  },
+  "880005": {
+    "id": 880005,
+    "name": "Peabody | Z2E - LHP to LH, IPP, DSD, RM",
+    "health": "green",
+    "status": "To be Assigned",
+    "health_notes": "6 Feb 26 NS - Weekly meetings have started, customer is responding. Moving back to green.&nbsp;16 Jan 26 NS - Requested a weekly meeting to keep the project moving, customer has not yet agreed. Customer is nonresponsive.&nbsp;Dec 8, 25 [NS] - Customer complains about delays but does not engage with ",
+    "weekly_status": "",
+    "updated_at": 1773795615660
+  },
+  "880246": {
+    "id": 880246,
+    "name": "Crowley Maritime | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "As of 3/12 - PM intro email sent to client. Look to schedule internal meeting early next week.&nbsp;&nbsp;03/11/26 - Assigned to Phase 210/01/25 - Intake Received. Working on scheduling first meeting08/14/25 - Sent intake after being intro'd",
+    "updated_at": 1773795615261
+  },
+  "880496": {
+    "id": 880496,
+    "name": "Mattel | Impl LH, ECM, MMI (CounselLink), MLLH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "2/19 - Change Order requested earlier in the week. Moving to Green since we have breathing room again now.&nbsp;2/12/2026 - Customer agreed to a change order, will keep this in Yellow until I get that requested.2/06/2026 - Moving back to Yellow until we have commitments from the Mattel team or get a",
+    "weekly_status": "3/12/2026 - Expecting delievery of Migration Round 2 tomorrow. MMI signature still pending. Configuration validation pushed to next week.&nbsp;3/05/2026 - Migration Test 2 in progress, anticipate delivery next week. MMI signature still pending. Configuration validation to start next week.2/27/2026 -",
+    "updated_at": 1773795615697
+  },
+  "880723": {
+    "id": 880723,
+    "name": "H&P | Z2E - ZD to LH, IPP, DSD, EDDM, Review, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26 KC: On track, no present delays. H&amp;P communicated a big case / competing priority which may take things off track in the future, but for now we are good. O365 error in review - likely set-up related for EDDM. HR duplicates being analyzed by H&amp;P with TL support. Biz config milestone o",
+    "updated_at": 1773795616576
+  },
+  "880724": {
+    "id": 880724,
+    "name": "Ardent | Z2E - LHP to LH, RM, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Sept 16, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616406
+  },
+  "880778": {
+    "id": 880778,
+    "name": "Clorox | Z2E - ZD to LH, IPP, DSD, EDDM, Review",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26: Kicked off, working on scheduling workshops, copying over interview and LH templates. Weekly sync scheduled. 3/6/26: PM assigned, ready for Phase 2",
+    "updated_at": 1773795616411
+  },
+  "880797": {
+    "id": 880797,
+    "name": "KofC | Z2E- ZD to LH",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "As of 11/13, internal meeting has been held and the client has scheduled thier kickoff meeting for 11/17.&nbsp;",
+    "weekly_status": "As of 3/12 - Project is moving through the go live process, no issues to report.&nbsp;As of 3/4 - Client has approved their go live this week and we're proceeding with our go live steps beginning this Friday (3/6)&nbsp;As of 2/26 - Client has confirmed Rd 2 migration and would like to proceed&nbsp;&",
+    "updated_at": 1773795616689
+  },
+  "880806": {
+    "id": 880806,
+    "name": "Alvotech | Z2E - ZD to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Jun 24, 25 - Phase 1 Kickoff",
+    "weekly_status": "As of 3/13 - Client is moving through workshops and delaying Rd 2.&nbsp;&nbsp;As of 3/4 - Client has returned Rd 1 QC and PM has requested Rd 2. Weekly meeting was skipped this week. Next week workshop is set.&nbsp;&nbsp;As of 2/26 - Client has been given PM/QC Rd 1 and workshop has been completed. ",
+    "updated_at": 1773795616695
+  },
+  "880818": {
+    "id": 880818,
+    "name": "J.F. Shea Co | Z2E - LHP to LH",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "Nov 17, 25 [VG] - Assigned to Phase 2Oct 23, 25 [VG] - Phase 2 Readiness Check sentJul 25, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "As of 3/12 -Project has entered HyperCare.&nbsp;&nbsp;As of 3/4 - Project is in go live stage. Full go live is set for 3/9. CSM has been added to oru weekly calls.&nbsp;&nbsp;As of 2/26 - Client has approved go live plans and project going into production on 2/27. Go live date within the next 2 week",
+    "updated_at": 1773795616705
+  },
+  "880828": {
+    "id": 880828,
+    "name": "Allianz Global | Z2E - LHP to LH",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "2 Feb 26 NS - On hold. Stalled on the email delivery milestone, they reject all of our options.&nbsp;16 Jan 26 NS - May need to go on hold. Stalled on the email delivery milestone, they reject all of our options.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795615766
+  },
+  "880835": {
+    "id": 880835,
+    "name": "BCBS NC | Z2E - LHP to LH, IPP, EDDM, Review",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26: Cleanup completed We'll review with client and likely need to complete another round of migration testing before go live.3/5/26: Completed Migration testing call with client, sent email of items that need to be updated to the client for approval.&nbsp;2/26/26: First Migration Round is compl",
+    "updated_at": 1773795616333
+  },
+  "880838": {
+    "id": 880838,
+    "name": "Medtronic | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "&nbsp;Oct 09, 25 [VG] - Assigned to Phase 2May 15, 25 [VG] - Z2E Phase 1 Kick off",
+    "weekly_status": "2/26/26: Project is closed,2/19/26: Waiting on confirmation from client of &nbsp;download of data extract and date for &nbsp;Zapproved tenant purge date.2/12/26: Email issue resolved, Dual auth removed, Project to be closed once purge request is completed&nbsp;2/5/26: Closure call schedule for 2/6, ",
+    "updated_at": 1772119561163
+  },
+  "880844": {
+    "id": 880844,
+    "name": "United Airlines | Z2E - LHP to LH, IPP, DSD, ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Feb 02, 26 [VG] - Assigned to Phase 2Jun 20, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "3/12/26: Workshops scheduled, working through CCR and will soon trigger first migration. 3/5/26: need confirmation from client on HR file. sent logo specs. introduced customer to main modules and walked them through configs. 2/27/26: scheduled weekly calls, need to set up workshops. 2/13/26: held ph",
+    "updated_at": 1773795616053
+  },
+  "880850": {
+    "id": 880850,
+    "name": "Bolthouse Fresh Foods | Z2E - LHP to LH, IPP, DSD, EDDM, Review",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Jan 16, 26 [VG] - Engaging to start Phase 2May 22, 25 [VG] - Met w/ Kevin. We're separating the effort from Generous BrandsFeb 11, 25 [VG] - Phase 1 kickoff w/ both brands",
+    "weekly_status": "3/12/26: Held workshop, transferred templates, added logo to tenant. Scheduled further workshops. Weekly sync scheduled. &nbsp;3/5/26: Phase 2 initiation re-scheduled for next week. 2/27/26: Phase 2 initiation call scheduled with customer. 2/13/26: PM assigned and introduced to customer.",
+    "updated_at": 1773795616028
+  },
+  "880860": {
+    "id": 880860,
+    "name": "Generous Brands | Z2E - LHP to LH, IPP, DSD, EDDM, Review",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "2/13/26: customer did not attend first workshop call, I am working with her to assure her attendance moving forward. She says the call was not on her calendar but invite was sent a week ago and I reached out during call time but she didn't respond until after. 1/30/26: customer has delayed phase 2 k",
+    "weekly_status": "3/12/26: Need Trish to reply to emails and schedule workshops. Data migration complete, waiting on customer for QC. 3/5/26: first migration complete, in PM QC. IPP workshop tomorrow. 2/27/26: migration decisions completed, first migration requested. 2/13/26: customer did not attend first workshop ca",
+    "updated_at": 1773795616048
+  },
+  "880889": {
+    "id": 880889,
+    "name": "Grady Heath | Z2E - ZD to LH, IPP, DSD, EDDM, Review",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "10/01/25 - They have mostly finished the Exterro HR integration, but just refuse to fill out or respond to the intake so we can start the rest. Trying again.09/15/25 &nbsp;Checked in again07/30/25 - AE followed up again to have them submit the form,07/28/25 - Asked again07/07/25 - Asked again for a ",
+    "updated_at": 1773795616256
+  },
+  "880890": {
+    "id": 880890,
+    "name": "Cantor Fitzgerald | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "09/17/25 - First meeting scheduled for Nov. 509/15/25 - Checked in again to get started08/04/25 - 2nd request to schedule meeting sent.07/28/25 - Sent note to kick off, they indicated they didn't want to start until august06/30/25 - Received note they're ready. Sent intake form.12/19/24 - Moving to ",
+    "updated_at": 1773795615920
+  },
+  "880897": {
+    "id": 880897,
+    "name": "AAR Corp | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Sep 17, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615535
+  },
+  "880899": {
+    "id": 880899,
+    "name": "Adventist | Z2E - LHP to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Oct 17, 25 - Met to get started on the rest of the milestones again.Apr 15, 25 - Phase 1 Kickoff",
+    "weekly_status": "Oct 17, 25 - Met to get started on the rest of the milestones again.Apr 15, 25 - Phase 1 Kickoff",
+    "updated_at": 1773795615929
+  },
+  "880908": {
+    "id": 880908,
+    "name": "Archrock | Z2E - LHP to LH, DSD, IPP, CI",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "2/13/2026 - Shayne is the only POC available and has no backup. Frequent response delays and has little control over her schedule. Talked with her this week and was able to reschedule calls to hopefully better times in the week for her.Dec 08, 25 [VG] - Assigned to Phase 2Jul 08, 24 [VG] - Phase 1 K",
+    "weekly_status": "3/12/2026 - On track. Workshops fully on track. Round 2 still pending, targeting round 2 starting next week3/5/2026 -&nbsp;On Track - Round 1 QC complete with no issues. Round 2 planned data pending cleanup. Workshop schedule nearly back on track2/27/2026 - Catching up, Customer completing Round 1 Q",
+    "updated_at": 1773795616514
+  },
+  "880913": {
+    "id": 880913,
+    "name": "Alvogen | Z2E - LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "02/24/26: Project retrospect call completed today. No outstanding tasks in RL. Updating project status to Closed.2/20/26: Project closure call complete. Internal project retrospect scheduled. QJ02/13/26: Closure call scheduled for 02/17. QJ02/06/26: Last day of Hypercare for Alvogen. They are ready ",
+    "updated_at": 1771952552323
+  },
+  "880925": {
+    "id": 880925,
+    "name": "American Transmission | Z2E - LHP to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Green - Workshops and configuration in progressCustomer available in January (2026) for WorkshopsOct 08, 25 [VG] - Phase 2 Readiness check sentFeb 27, 25 [VG] - Z2E Phase 1 Kick off",
+    "weekly_status": "3/12/2026 - Workshops continue - customer provided HR GUID File to &nbsp;Exterro. Tech lead removing all employees and adding new file to correct GUID. LHP will also need updated.2/26/2026 - Workshops continue - Waiting on IT for GUID for migration2/19/2026 - Met with IT on the GUID issue. 2 weeks f",
+    "updated_at": 1773795616525
+  },
+  "880932": {
+    "id": 880932,
+    "name": "Amneal | Z2E - LHP to LH",
+    "health": "green",
+    "status": "Closeout",
+    "health_notes": "Oct 10, 25 [VG] - Assigned to Phase 2Oct 03, 25 [VG] - Phase 2 Readiness check sentAug 21, 24 [VG] - Z2E Phase 1 Kick off",
+    "weekly_status": "As of 3/14 - Client is live and project has no issue to log.&nbsp;&nbsp;As of 3/6 - Project closing out 3/11. Client has followed up with last outstanding file update.&nbsp;As of 2/25 - Hypercare is ending and Retrospective is on Friday.As of 2/19 - Client has no issues and in Hypercare.As of 2/12 -",
+    "updated_at": 1773795615900
+  },
+  "880937": {
+    "id": 880937,
+    "name": "SCE | Z2E - ZD to LH, IPP, DSD, RM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Oct 02, 25 [VG] - Assigned to Phase 2Jun 09, 25 [VG] - Phase 1 Kick off",
+    "weekly_status": "3/5/26: worked through final issues with customer, final report configuration, last hypercare call. Closeout call tomorrow. 2/27/26: customer is live and in hypercare, fixed issues with HR feed. Resolved questions about bulk adding custodians via email address. &nbsp;2/13/26: cutover underway. LH an",
+    "updated_at": 1773082635110
+  },
+  "880950": {
+    "id": 880950,
+    "name": "Campbell's | Z2E - LHP to LH, IPP+DSD",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Yellow &nbsp;- Very detailed Customer QC for Round 2 continues &nbsp;with migration and HR Feed.&nbsp;Path to Green: Complete Migration round 2 and check HR Values.Oct 03, 25 [VG] - Phase 2 assignment made.&nbsp;Mar 18, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "3/12/2026 - Customer preforming more detailed QC/Testing. Is adding QC to HR file updates to validate Employee files are correct. IPP Workshop is still pending. I expect detailed IPP Testing before production go-live approval.3/5/2026 - Customer QCing Round 2 migration. Updated migration CCR with se",
+    "updated_at": 1773795615576
+  },
+  "880956": {
+    "id": 880956,
+    "name": "Cleveland - Cliffs | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Green - Go Live Prep in processNov 18, 25 [VG] - Assigned to Phase 2Dec 5, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "3/12/2026 - Go Live Dates approved. Go - Live prep comensing&nbsp;3/5/2026 - In Progress. Customer POCs out of office this week2/26/2026 - Tenative live date reviewed. Go live prep in process2/19/2026 - &nbsp;Customer requested meeting moved to Friday theis week. Customer working on GUIDs. Workshops",
+    "updated_at": 1773795615423
+  },
+  "880963": {
+    "id": 880963,
+    "name": "Harvard | Z2E - LHP to LH, IPP, DSD, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Dec 17, 25 - Assigned to Phase 2Oct 16, 24 - Phase 1 Kickoff",
+    "weekly_status": "3/12/2026 - On Track. Target GL on 3/31 pending final signoff on UAT/Round 2 QC (checkin planned for Tuesday) and Go decisions on Wednesday3/5/2026 - On Track. Round 2 PM QC and handoff planned this week. UAT in progress with no issues found yet2/27/2025 - On Track, Uat planned to begin next week. R",
+    "updated_at": 1773795615344
+  },
+  "880969": {
+    "id": 880969,
+    "name": "McKesson | Z2E - LHP to LH, RM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "16 Mar 26 VG - Finalluy making movement on HR integration. Should have sample file Monday (last milestone of &nbsp;Phase 1)2 Feb 26 NS - Customer rec'd approval for HR integration, waiting on them to re-engage16 Jan 26 NS - Customer rec'd approval for HR integration, waiting on them to re-engageDec ",
+    "weekly_status": "",
+    "updated_at": 1773795615564
+  },
+  "880975": {
+    "id": 880975,
+    "name": "PPL and LG&E & KU Energy | Z2E - ZD to LH",
+    "health": "green",
+    "status": "Closeout",
+    "health_notes": "Oct 9, 2025 [VG] - Assigned to Phase 2Oct 14, 2024 [VG] - Phase 1 Z2E Kickoff",
+    "weekly_status": "3/12/2026 - Customer Closure call completed. Closeout Activities in progress, still awaiting Data extract3/5/2026 - Hypercare Good. Open ticket resolved. Some configuration changes needed, but only minor and may extend a day or so past closure call2/27/2026 - Good, No major issues, One medium priori",
+    "updated_at": 1773795616756
+  },
+  "880991": {
+    "id": 880991,
+    "name": "Trinet | Z2E LHP to LH, IPP, DSD, RM, MMI (TR)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Sep 23, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616302
+  },
+  "881002": {
+    "id": 881002,
+    "name": "Ikea | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Sept 16, 25 - Phase 1 Kickoff",
+    "weekly_status": "03/09/2026 TO: Workshops have been concluded. PM QC has been done on the 1st migration and the Migration Validation Meeting has been held with the Team from Ikea.",
+    "updated_at": 1773795616230
+  },
+  "881009": {
+    "id": 881009,
+    "name": "UPMC | Z2E - LHP to LH, RM (contracting EDDM, Review & BYOK)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Sept 16, 25 - Kicked off Phase 1",
+    "weekly_status": "",
+    "updated_at": 1773795616251
+  },
+  "881015": {
+    "id": 881015,
+    "name": "Dykema | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Sept 9, 25 [VG] - Phase 1 kickoff.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795615958
+  },
+  "881018": {
+    "id": 881018,
+    "name": "National Indemnity | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Aug 27, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615256
+  },
+  "881019": {
+    "id": 881019,
+    "name": "Assurant | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Aug 25, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615354
+  },
+  "881021": {
+    "id": 881021,
+    "name": "TrueBlue | Z2E - ZD to LH, IPP, EDDM, Review, MMI (API)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "3/12: Back to GREEN - Hold Issue blocker clear. Release date 3/27",
+    "weekly_status": "3/12/26 KC: TR Tracker blocker cleared! Hold Issue feature release date in Exterro on 3/27, working on base config leading up to this date. Technical milestones are ready for sign-off / got verbal - solicitating written. Business configuration decisions are complete sans EDDM-Review tags/categories,",
+    "updated_at": 1773795616816
+  },
+  "881023": {
+    "id": 881023,
+    "name": "Dell - Z2E LHP to LH, IPP, DSD, RM, ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "2/27/2026 - Customer has stated they have the expectation that Exterro will perform all workflow setup in tenant given requirements from Dell. Additionally, Config work is in general delayed due to either complex requirements or having delayed finalization of decisions.&nbsp;Nov 21, 25 [VG] - Assign",
+    "weekly_status": "3/12/2026 - On track with updated timeline. Business Configs in progress. Customer Round 2 QC in progress, no major issues yet.3/5/2026 -&nbsp;Delayed to Apr. Exterro/Dell Stakeholder meeting this week to agree on updated timeline2/27/2026 - Potential Delay or Target GL, Beginning validations, but m",
+    "updated_at": 1773795616471
+  },
+  "881025": {
+    "id": 881025,
+    "name": "Ameritas Life | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Aug 4, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615670
+  },
+  "881028": {
+    "id": 881028,
+    "name": "Farmers Insurance | Z2E - LHP to LH, RM, DSD, IPP",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "3/12 - YELLOW - Migrator utility speed for ARs yet to be validated - migration underway. + Unclear on release date for \"Request Portal\" - working with Product to get timeline. May need to reset targets depending on schedule.",
+    "weekly_status": "3/12/26 KC: AR utility speeds + volume still present risk, though we drastically reduced the migration scope by Farmers getting approval to not move a majority of their records. Keeping in Yellow as first data migration is not complete and we've yet to actually validate speeds against Farmers datase",
+    "updated_at": 1773795616810
+  },
+  "881031": {
+    "id": 881031,
+    "name": "Heico | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "To be Assigned",
+    "health_notes": "Jul 28, 25 [VG] &nbsp;- Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616170
+  },
+  "881034": {
+    "id": 881034,
+    "name": "ZF North America | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616436
+  },
+  "881036": {
+    "id": 881036,
+    "name": "Metropolitan Transportation | Z2E - LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Jun 17, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615881
+  },
+  "881044": {
+    "id": 881044,
+    "name": "Infosys | Z2E - LHP to LH",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "Jun 26, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615369
+  },
+  "881045": {
+    "id": 881045,
+    "name": "SeaWorld | Z2E - LHP to LH",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "Jun 24, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615469
+  },
+  "881046": {
+    "id": 881046,
+    "name": "Coty | Z2E- LHP to LH, RM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Apr 8, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615587
+  },
+  "881047": {
+    "id": 881047,
+    "name": "Boston Scientific | Z2E - LHP to LH, IPP, DSD, RM, ECM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "May 28, 25 - Phase 1 Kickoff",
+    "weekly_status": "0",
+    "updated_at": 1773795615403
+  },
+  "881051": {
+    "id": 881051,
+    "name": "Avantor | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "May 22, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616136
+  },
+  "881053": {
+    "id": 881053,
+    "name": "Sotera Health | Z2E ZD to LH, IPP+DSD",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "May 6, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616043
+  },
+  "881054": {
+    "id": 881054,
+    "name": "Daimler Trucks NA | Z2E - LHP to LH, RM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Oct 30, 25 - Customer indicating they won't be able to work on this meaningfully until Q2 '26. Trying to schedule a meeting to discuss.May 2, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615379
+  },
+  "881055": {
+    "id": 881055,
+    "name": "ASM America | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Aug 29, 25 - Some progress made on tech milestones but we're stalling out.May 1, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616087
+  },
+  "881056": {
+    "id": 881056,
+    "name": "White Castle | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Apr 10, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615267
+  },
+  "881057": {
+    "id": 881057,
+    "name": "Pacific Western Bank | Z2E - LHP to LH, RM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Feb 25, 26 -Moved to Blocked. Customer has not made any progress w/ tech work. In conversation with AE they asked we pull back on reaching out while they work to ensure the customer doesn't churn.Mar 25, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615444
+  },
+  "881058": {
+    "id": 881058,
+    "name": "Air Liquide | Z2E - LHP to LH",
+    "health": "yellow",
+    "status": "On Hold",
+    "health_notes": "Dec 2, 25 [NS] - Airgas plans to add net-new connector which is holding up both Airgas and Air LiquideOct 3, 25 [NS] - NonresponsiveJun 18, 25 [VG] - Phase 1 Re KickoffJan 22, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615398
+  },
+  "881059": {
+    "id": 881059,
+    "name": "Airgas | Z2E - LHP to LH",
+    "health": "yellow",
+    "status": "On Hold",
+    "health_notes": "Dec 2, 25 [NS] - Airgas plans to add net-new connector which is holding up both Airgas and Air LiquideOct 30, 25 [NS] - Customer nonresponsiveJun 18, 25 [VG] - Phase 2 Re KickoffJan 22, 25 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615329
+  },
+  "881062": {
+    "id": 881062,
+    "name": "MIT | Z2E - ZD to LH, DSD, IPP, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Feb 27 - Phase 1 Kickoff",
+    "weekly_status": "3/12/2026 - Possible Hiatus Request in May. Otherwise Workshops and Test Migrations are on Track3/5/2026 - On track. Migration and configurations proceeding as anticipated. However additional in scope work discovered of migration of external holds into exterro from legacy holds in excel2/27/2026 - O",
+    "updated_at": 1773795615287
+  },
+  "881065": {
+    "id": 881065,
+    "name": "CBRE | Z2E - LHP to LH, RM, MMI (API)",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Feb 20, 25 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615713
+  },
+  "881067": {
+    "id": 881067,
+    "name": "Farm Bureau | Z2E- ZD to LH",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "Nov 2, 25 - No movement since kickoff. Back in Aug we got new contacts that were looped in but nothing happened.Feb 20, 25- Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615408
+  },
+  "881068": {
+    "id": 881068,
+    "name": "ITW | Z2E - ZD to LH, IPP, DSD, RM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "03/06/26: Customer QC Round 1 is still pending. Customer emailed and stated they will schedule a call for Q&amp;A on Friday 3/6. HR integration meeting on 3/5 with a path to move forward. The TL can begin work on the HR integration testing Friday 3/6/26. QJJan 28, 25 [VG] - Phase 1 Kick off",
+    "weekly_status": "03/12/26: Requested R2 QC today. HR integration testing is still in progress. QJ.03/06/26: Customer QC Round 1 is still pending. Customer emailed and stated they will schedule a call for Q&amp;A on Friday 3/6. HR integration meeting on 3/5 with a path to move forward. The TL can begin work on the HR",
+    "updated_at": 1773795616155
+  },
+  "881077": {
+    "id": 881077,
+    "name": "UCLA Campus | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Apr 7, 24 [VG] - Re-kick off again of Phase 1Dec 19, 24 [VG] - Re-kickoff Phase 1Nov 4, 24 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616453
+  },
+  "881086": {
+    "id": 881086,
+    "name": "Stellanis | Z2E - LHP to LH",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "Dec 05, 24 [VG] - Phase 1 Kick offApr 25, 24 [VG] - Full Project Kickoff (before phased approach)",
+    "weekly_status": "05/22/25 - No movement since october 2025. Sent email to reconnect06/13/24: Customer finally wrote back after Vanessa responded saying we're on hold. They said they're getting their ducks in a row.6/6/24: Have not received any response from customer. Vanessa to follow-up.&nbsp;5/30/24: sent customer",
+    "updated_at": 1773795616348
+  },
+  "881088": {
+    "id": 881088,
+    "name": "Vulcan Materials | Z2E - LHP to LH, IPP, DSD",
+    "health": "red",
+    "status": "In progress",
+    "health_notes": "Dec 12, 24 [VG] - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615865
+  },
+  "881093": {
+    "id": 881093,
+    "name": "Legacy Health System | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Dec 10, 24 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616214
+  },
+  "881096": {
+    "id": 881096,
+    "name": "Motorola Mobility | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Oct 29, 25 - They reached back out to start againDec 9, 24 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615393
+  },
+  "881097": {
+    "id": 881097,
+    "name": "Wesco | Z2E - ZD to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Oct 24, 25 [VG] - Assigned to Phase 2 TeamDec 5, 24 [VG] - Phase 1 Kickoff",
+    "weekly_status": "03/12/26: Received GO decision from customer to start prod migration. posted prod migration schedule in chat. QJ03/06/26: No 3rd test migration needed. Customer scheduled go live workshop for 3/12/26. QJ02/27/26: Customer finished QC and we will do another round to see if the errors are corrected. S",
+    "updated_at": 1773795616058
+  },
+  "881099": {
+    "id": 881099,
+    "name": "Energy Transfer | Z2E - LHP to LH, RM, ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "2.23.26 VG - Assigned to Phase 2Jan 16, 26 NS - Re-engaged for email delivery milestone, hoping we can keep the momentum and close phase 1.Oct 30, 25 NS - customer very slow to respond.&nbsp;Nov 21, 24 [VG] - Phase 1 Kickoff",
+    "weekly_status": "03/12/26: Kickoff call today. Sent email to schedule workshops and weekly sync. QJ03/06/26: Sales handoff complete. Customer still has not scheduled their kickoff call. Sent follow up to customer on 3/4/26 to schedule kickoff call ASAP. QJ02/27/26: Sales handoff scheduled for today. Will send link t",
+    "updated_at": 1773795615808
+  },
+  "881101": {
+    "id": 881101,
+    "name": "Empower Retirement | Z2E - LHP to LH, DSD, IPP, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Oct 30, 24 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795616117
+  },
+  "881102": {
+    "id": 881102,
+    "name": "Avaya | Z2E - LHP to LH, IPP, DSD",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Oct 7, 24 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615771
+  },
+  "881104": {
+    "id": 881104,
+    "name": "Motorola Solutions | Z2E - ZD to LH, IPP, DSD",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Nov 1, 25 - Customer has kicked off a couple of times. They were originally part of the DDP depreciation effort of '23 so they're already using Exterro for Review and SSO was set up at that time. To get holds moved over, they completed the Email Delivery and Google Connector work done - waiting on r",
+    "weekly_status": "",
+    "updated_at": 1773795615374
+  },
+  "881107": {
+    "id": 881107,
+    "name": "Radian | Z2E - LHP to LH, IPP, DSD",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Oct 1, 24 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615992
+  },
+  "881108": {
+    "id": 881108,
+    "name": "Equinor | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26: Client completing their migration testing and pending their response on remaining clean up items.&nbsp;3/5/26: Reviewed Migration testing with the client, sent follow up items to client for review and approval. Once responses are received will make changes and do another Migration.&nbsp;2/2",
+    "updated_at": 1773795616604
+  },
+  "881109": {
+    "id": 881109,
+    "name": "SharkNinja | Z2E - ZD to LH, IPP, DSD",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Jan 22, 26 - Met again to re-kickoffNov 3, 25 - Checked back in to see if they're ready to start againApr 17, 25 - Daniel indicated one of their key team members would be out of the office and asked to pick back up in Q3Sept 26, 24 - Phase 1 Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615655
+  },
+  "881115": {
+    "id": 881115,
+    "name": "University of Chicago | Z2E - LHP to LH, IPP, DSD",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "As of 3/12 - PM intro email sent to client. Look to schedule internal meeting early next week.&nbsp;&nbsp;12 Mar 26 VG - Assigned to Phase 216 Jan 26 NS - Customer re-engaging after holidaysDec 8, 25 [NS] - Tech POC is out for medical issues, hoping to reconnect before the end of the year or first t",
+    "weekly_status": "",
+    "updated_at": 1773795615631
+  },
+  "881116": {
+    "id": 881116,
+    "name": "Kone | Z2E - ZD to LH, IPP, Asset Integration",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "16 Jan 26 NS - Customer nonresponsive to migrations or CSM.&nbsp;Dec 15, 25 [NS] - Customer nonresponsive to migrations or CSM",
+    "weekly_status": "",
+    "updated_at": 1773795615761
+  },
+  "881119": {
+    "id": 881119,
+    "name": "SC Johnson | Z2E - ZD to LH, IPP, DSD",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Green - 2 Blockers (IPP and Email customer Email Configuration) may delay project if not resovled shortly.Aug 27, 24 [VG] - Phase 1 Kickoff",
+    "weekly_status": "3/12/2026 - 2 Blockers to customer sign off - IPP is disconnected - TL aware. Emails from system showing \"EXTERNAL\". We provded whitelist IP addresses. Their internal IT Team is looking for email security that may be causing the issue.3/5/2026 - IPP Workshop Complete. Finalizing CCRs. Email marked \"",
+    "updated_at": 1773795615915
+  },
+  "881122": {
+    "id": 881122,
+    "name": "Tenaska | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Aug 27, 24 [VG] - Phase 1 Kickoff",
+    "weekly_status": "03/09/2026 TO: Life in the day has been done and the workshops have been scheduled.",
+    "updated_at": 1773795615934
+  },
+  "881125": {
+    "id": 881125,
+    "name": "IQVIA | Z2E - LHP to LH, IPP, DSD, RM, MMI (API)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Green - Workshops in progess, Migration Round 1 in progressJan 29th - Kickoff - On hold until mid February - POC OOOJan 22, 26 [VG] - AssignedAug 26, 24 [VG] - Phase 1 kickoff",
+    "weekly_status": "03/12/2026 - Migration Round 1 started. Workshops and confguration discussions continue.&nbsp;03/05/2026 - Migration round 1 CCR and Holds workshop2/26/2026 - Day in the life of and Navigation/Matter workshop complete2/19/2026 - 2x 60 minuite workshops and 1x 30minute meeting setup for 12 weeks. Day",
+    "updated_at": 1773795616323
+  },
+  "881128": {
+    "id": 881128,
+    "name": "Viasat | Z2E - LHP to LH with Phase 2(IPP, GWC)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Mar 19, 25 - Effective 'rekick off' of project. We will only focus on like-for-like and will prioritize the add on work at a later date.Dec 19, 24 - Project moved into Phase 1 bucket due to no-movement with a dedicated Team.Apr 22, 24 - Kicked Off transition to Exterro",
+    "weekly_status": "",
+    "updated_at": 1773795615453
+  },
+  "881129": {
+    "id": 881129,
+    "name": "Abbott | Z2E - ZD to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "16 Jan 26 NS - Project has not yet kicked off.&nbsp;Dec 8, 25 [NS] - Waiting for Phase 1 kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615383
+  },
+  "881142": {
+    "id": 881142,
+    "name": "BJC | Z2E - ZD to LH, IPP, DSD, RM, ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "01/21/2026 [VG] - Customer scheduled kickoff.10/01/2025 [VG] - Attempted to kick off Phase 1 of Z2E, but blocked by security reviews.",
+    "weekly_status": "01/21/2026 [VG] - Customer scheduled kickoff.09/15/25 - Still in security reviews, they won't start until done.08/04/25 - Received intake, they have a security form that needs submitted for off shore resources. Going to try to get them started in the meantime.07/30/25 - Received intro, sent intake07",
+    "updated_at": 1773795615388
+  },
+  "881143": {
+    "id": 881143,
+    "name": "Mallinckrodt/ParHealth - Z2E LHP to LH",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "02.23.26 - Customer still working on getting approval to move ahead08/27/25 [VG] - Met to review project, on hold until they finalize the merger details.",
+    "weekly_status": "08/27/25 - First meeting scheduled. They're on hold while they finalize the merger08/08/25 - Sent intake08/07/25 - Requested intro",
+    "updated_at": 1773795615718
+  },
+  "881164": {
+    "id": 881164,
+    "name": "Dawn Foods | IMPL - LH, ECM, IPP, DSD, Review",
+    "health": "yellow",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "12/19/25 [VG] From AE: This account will not be moving forward with any implementation on anything12/17/25 [RR] Senior leadership involved. No actions for project coordination at this time. &nbsp; &nbsp;12/09/25 [RR] Reached again to Michael Wong for next steps for moving this customer toward projec",
+    "updated_at": 1769534091219
+  },
+  "881174": {
+    "id": 881174,
+    "name": "Unisys | AddOn - EDDM, Review, Workday API",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "",
+    "weekly_status": "03/10/26 [RLR] - Moving to Blocked status pending scope, OF and SOW alignment. &nbsp; &nbsp;03/09/26 [RLR] - Project intake pending. SNOW integration to be removed from scope.02/23/26 [RLR] - Internal sales sync complete. Gabe will schedule the project intake with the customer. &nbsp; &nbsp;02/20/26",
+    "updated_at": 1773795616122
+  },
+  "881182": {
+    "id": 881182,
+    "name": "UST Global | IMPL: LH, ECM, DSD, IPP, EDDM, Review (O365)",
+    "health": "green",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/09/26 [RLR] - Sadia requested technical calls. OF &amp; SOW for WorkdayAPI still pending. Project plan sign off pending. &nbsp;&nbsp;&nbsp;02/20/26 [RLR] - Sadia requested kickoff at the end of March. They need to submit POs for the technical resources. In the meantime they will &nbsp;become fami",
+    "updated_at": 1773795615982
+  },
+  "881188": {
+    "id": 881188,
+    "name": "OpenAI | Add On - MMI (CSV)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "Mar 13, 2026 - Waiting for the update from the clientMar 9, 2026 - Followed up regarding the status of validationFeb 27, 2026 - Followed up regarding the status of validation.Feb 13, 2026 - The client has asked a doubt regarding the Tokenean tool, and the Matter feed file uploaded by client has been",
+    "updated_at": 1773795616271
+  },
+  "882115": {
+    "id": 882115,
+    "name": "INTERNAL - Customer Support",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1768905492152
+  },
+  "882689": {
+    "id": 882689,
+    "name": "Arcfield | IMPL - LH DSD+IPP (M365) ECM",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "3/5/26: Go live call today for go live on 3/13. Client came in today with additional HR feed updates.&nbsp;2/20/26: Project is still slow &nbsp;due to dependencies with HR and O365 set up. Proposed to client going live&nbsp;",
+    "weekly_status": "3/12/26: Client approved go-live today. matters and holds purged from the tenant. Need to discuss hypercare and office 365 integration&nbsp;3/5/26: Go live call today for go live on 3/13. Client came in today with additional HR feed updates.&nbsp;2/26/26: Still moving towards Go-Live, HR and O365 st",
+    "updated_at": 1773795616266
+  },
+  "882731": {
+    "id": 882731,
+    "name": "Baxter | WO - Baxter - Vantive Split",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/12/26 - Phase 2 started. &nbsp;Baxter/Vantive finishing tenant configurations, cloning set to start tomorrow03/05/26 - Confirmed with Baxter that Vantive can issue holds in Baxter tenant until Vantive Go-live. &nbsp;Ready to start cloning process next week, dependent upon Vantive IPP smoke test02",
+    "updated_at": 1773795615582
+  },
+  "882754": {
+    "id": 882754,
+    "name": "General Motors | WO - Migration to Cloud",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13/26: Migration remains in progress. ETA 3/18. Business workshops are now underway. Initial configurations will be reviewed upon completion of migration.&nbsp;3/6/26: Completed CCR orientation on 3/3 &amp; DITL on 3/5. Modern View Demo set for today (3/6). DB for migration has been uploaded by cu",
+    "updated_at": 1773795616599
+  },
+  "882773": {
+    "id": 882773,
+    "name": "Recor Medical | IMPL - LH, DSD, IPP, ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Oct 14, 25 [VG] - Intake call",
+    "weekly_status": "3/12/2026 - Configuration validation completed. Planning go live for the week of the 23rd.&nbsp;3/05/2026 - Configuration validation in progress.&nbsp;2/27/2026 - Configuration validation planned for next week.&nbsp;2/19/2026 - HR feed pending sign off. Currently in planning stages for Configuration",
+    "updated_at": 1773795616830
+  },
+  "882788": {
+    "id": 882788,
+    "name": "Grail | AddOn - Slack Connector",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "1/22/25 KC: Closed.&nbsp;1/16/25 KC: Ready to close - waiting for final CSAT and Geoff's approval to close all tasks.1/9/25 KC: Implementation closed - waiting for final CSAT. Geoff confirming if retrospective necessary for add-ons.12/30/25 KC: Scope completed. Closure doc delivered via email. Req o",
+    "updated_at": 1769534156430
+  },
+  "882797": {
+    "id": 882797,
+    "name": "Home Depot | Z2E - LHP to LH, IPP, DSD, MMI (CSV)",
+    "health": "green",
+    "status": "On Hold",
+    "health_notes": "03.02.26 - Customer contracing with Harbor, delaying start of Phase 1",
+    "weekly_status": "",
+    "updated_at": 1773795615509
+  },
+  "882837": {
+    "id": 882837,
+    "name": "Arvest Bank | AddOn - SCIM, Connectors",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "2/13/26: customer, AE, and PS Manager agreed to no-cost change order to extend project timeline beyond scoped duration. 2/5/26: Notified late last friday client POC will be OOO all this week for training. Has responded to some emails related to Zoom and SCIM connectors but not Slack. This delay adds",
+    "weekly_status": "3/12/26: SCIM being tested, troubleshooting Zoom issue 3/5/26: Slack essentially done and tested. Meeting to complete SCIM on Monday. Troubleshooting Zoom. 2/27/26: Completed Slack connector config, performing testing. 2/13/26: customer, AE, and PS Manager agreed to no-cost change order to extend pr",
+    "updated_at": 1773795615489
+  },
+  "882850": {
+    "id": 882850,
+    "name": "CNA | WO - DSD for New O365 Tenant",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "Feb 27. 26 - The client provided the sign-off and the project is completed.Feb 13, 26 - Followed up on the preservation results, waiting for the client to respond.Feb 6, 26 - The DSD validation has been completed, and the test IPP has been initiated. We are currently awaiting the client\u2019s results an",
+    "updated_at": 1772201652100
+  },
+  "882946": {
+    "id": 882946,
+    "name": "CDS | AddOn - EDDM, GWC, AWS S3 Connector, Review",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Mar 29, 24 - Project was never kicked off. This work is being delayed by CDS\u2019s client (CDS is Service Provider Partner). We\u2019re actively working with CDS to help move this forward.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1769534088101
+  },
+  "882955": {
+    "id": 882955,
+    "name": "LVVWD | WO - Matter Integration Updates w/Test Site",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 04, 25 - The project has been on hold since June 2024 with no further engagement or communication from the customer. Despite multiple outreach attempts and offers to re-engage, no updates or timelines have been provided. The customer previously cited delays in other areas of their program, and t",
+    "weekly_status": "06/27/24: No change. Will send an email informing them to contact their CSM when they are ready to re-engage.06/13/24: No change. No contact. Requested update. Placed project hold.06/06/24: No change.05/30/24: Meeting on June 4th has been cancelled. Apparently they are experiencing delays with other",
+    "updated_at": 1773795615708
+  },
+  "882992": {
+    "id": 882992,
+    "name": "LCRA | AddOn - Citrix Connector",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 4, 25 - The project remains on hold pending the customer\u2019s internal decision regarding data access and sensitivity concerns related to the Citrix Connector. The issue of providing super user access to the service account has been unresolved since June 2024, with no further communication or progr",
+    "weekly_status": "07/23: Per Tracy Rhinehart, the project is being placed on hold until they decide on the path forward regarding&nbsp; access/sensitivity of data.ISSUE 07/25: Customer discussions around the required access/sensitivity of data are ongoing.07/19: (JB) Client checking to see if they can provide permiss",
+    "updated_at": 1773795615364
+  },
+  "883118": {
+    "id": 883118,
+    "name": "Axon | AddOn - M365 Connectors",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 5, 25 - We\u2019re waiting on Axon to resolve the privacy concerns raised by their acquisition.",
+    "weekly_status": "06/20/25: Checking if we can start on work again01/22/25: Hi Vanessa. We\u2019re waiting on Axon to resolve the privacy concerns raised by their acquisition. &nbsp;They have everything they need from us so far. &nbsp;Jenny Hamilton is involved.12/06/24 - Geoff has been engaged to get this off the ground",
+    "updated_at": 1773795615729
+  },
+  "883182": {
+    "id": 883182,
+    "name": "Booking.com | WO - Agoda Migration",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Oct 11, 25: Pallavi Thakur from Agoda requested to put work on hold until Q4. Synced with them this week, they don't want to start until January (due to IT freezes).&nbsp;",
+    "weekly_status": "02/06/26: Have to sync with the customer about the implementation11/11/25: Synced with customer, they don't want to actually start until January, just want questions answered so they're ready to start in Jan. Sending access to Rocketlane.10/01/25: Checked w/ AE, they're still not ready/05/27/25: Pal",
+    "updated_at": 1773795615724
+  },
+  "883196": {
+    "id": 883196,
+    "name": "guard.me | IMPL - LH, IPP, DSD, EDDM, Review, ECM",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 11, 25 - This project has been on indefinite hold since late 2024, with no meaningful engagement from the customer despite repeated follow-ups. After a brief period of activity mid-2024, where several integrations and workshops were completed, customer participation declined steadily beginning i",
+    "weekly_status": "03/14/25: No Update. On Hold03/07/25: No Update. On Hold02/27/25:&nbsp;Pending Team Manager action.&nbsp;01/30/25:&nbsp;Escalated to manager and Sales regarding chronic pattern of non-communication. No further PM or TL action needed for the foreseeable future.01/23/25:&nbsp;Followed up again.&nbsp;0",
+    "updated_at": 1773795615604
+  },
+  "883209": {
+    "id": 883209,
+    "name": "Zurich | AddOn - IPP, DSD (O365 and Proofpoint)",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 08, 25 - The project is blocked due to pending SOW approval. Despite multiple follow-ups, demos, and workshops, the customer has not agreed to the scope, has requested additional time, and has raised questions that remain unresolved. Escalations have been required, and no clear path to agreement",
+    "weekly_status": "3/6/25 HA: Removing Drew from project assignment given the extensive hold period. Will reassign a PM when the customer is ready.07/10/25: Haydee has placed customer on hold waiting for SOW clearance after customer receives demo of Proofpoint &amp; Asset Integration. &nbsp;07/03/25: Customer has ques",
+    "updated_at": 1773795615418
+  },
+  "883213": {
+    "id": 883213,
+    "name": "Trinity Industries | Add On- Connector: Azure File EDDM + DSD",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "02/19/26 - Status update to Red.&nbsp; Provided customer with failure logs and explanation on their Azure environment. &nbsp;Weekly sync not attended. &nbsp;No response from customer this week. &nbsp;Will approach with Go-Live if no reponse as connector is production ready for use02/12/16 - Some Azu",
+    "weekly_status": "03/12/26 - Issues with DSD not syncing, checking with customer if resolved. &nbsp;Issue with root folder not auto-populating, TL investigating next steps03/05/26 - In Hypercare, issue with DSD not syncing since Feb. &nbsp;TL is investigating02/26/26 - Status update to Green. &nbsp;Customer has confi",
+    "updated_at": 1773795616401
+  },
+  "883216": {
+    "id": 883216,
+    "name": "TikTok | WO - Google Vault IPP Migration",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "May 6, 25: Received email confirmation from Lisa that we are pausing this project due to re-prioritization on their end. They will reach out when they are ready to re-engage.",
+    "weekly_status": "05/06/25 HA: Received email confirmation from Lisa that we are pausing this project due to re-prioritization on their end. They will reach out when they are ready to re-engage.04/22/25: Customer hasn't engaged since March. Asking Tim and Ashley if they've heard anything. If not, Haydee to reach out ",
+    "updated_at": 1773795615479
+  },
+  "883217": {
+    "id": 883217,
+    "name": "Societe Generale | WO - Data Cleanup",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "08/06/25 - Soc Gen we will pick up our meetings again in September as they have PTO most of August. Placing on perm hold07/25/25 - TL keeps trying to get in touch with customer to no avail. Asking account team for help or we'll end up cancelling this request and have them resubmit when the customer ",
+    "updated_at": 1769790014727
+  },
+  "883218": {
+    "id": 883218,
+    "name": "Boeing | IMPL - On-Prem to SaaS, Asset Feed, Test IPP+DSD",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615621
+  },
+  "883220": {
+    "id": 883220,
+    "name": "Rocket Lab | IMPL - LH, IPP, DSD, EDDM",
+    "health": "red",
+    "status": "Blocked",
+    "health_notes": "12/17/25 [RR] - Reached out to Danny Oyama for next steps for moving this customer toward project planning and subsequent engagement? &nbsp;&nbsp;Nov 08, 25 - Customer put implementation on hold 4/8/25 while CAB approvals were being done. Still ongoing.",
+    "weekly_status": "03/09/26 [RLR] - Reached out to Danny for an update. &nbsp; &nbsp;02/11/26 [RLR] - Danny: still waiting for final greenlight from CFO/GC but could hear by EOW &nbsp; &nbsp;01/28/26 [RLR] - No updates. Reached out to Danny again. &nbsp; &nbsp;01/06/26 [RLR] - Reached out to Danny regarding scope and ",
+    "updated_at": 1773795615339
+  },
+  "883226": {
+    "id": 883226,
+    "name": "Kenvue | WO - JnJ employees to Kenvue instance",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "May 21, 25: Customer not ready to start work at this time. They'll reach out to the CSM/AE when they're ready",
+    "weekly_status": "",
+    "updated_at": 1773795615484
+  },
+  "883230": {
+    "id": 883230,
+    "name": "Novo | AddOn - DSD",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534110761
+  },
+  "883235": {
+    "id": 883235,
+    "name": "Marsh & McLennan | AddOn - DSD, IPP (Geocode)",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Jul 09, 25 - We don't yet have a clear understanding of the contractual scope. There are documents attached to the opportunity, but none are signed, and it's unclear whether implementation is approved to begin.&nbsp;Of note: The SOW on the opp does not include migration services, which required a ch",
+    "weekly_status": "07/10/25 - Haydee has placed customer on hold waiting for SOW clearance on bulk preservation apply. &nbsp;07/03/25 - JB asked for SOW / scope clarification on06/30/25 - No other updates. &nbsp;06/26/25 - Asked for SOW update internally on 06/24, no update. &nbsp;06/18/25 - Guhan is reviewing propose",
+    "updated_at": 1769534102748
+  },
+  "883238": {
+    "id": 883238,
+    "name": "Procter and Gamble | Z2E - LHP to LH, DSD, IPP, RM",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Feb 27, 25 - (Re) kickoff of Phase 1.",
+    "weekly_status": "",
+    "updated_at": 1773795616261
+  },
+  "883242": {
+    "id": 883242,
+    "name": "Avanade | Z2E - LHP to LH, DSD, IPP, ECM (Merge 3 instances)",
+    "health": "red",
+    "status": "Cancelled",
+    "health_notes": "Mar 17, 26: Accenture, the parent company, churned. Avanade never completed their transition to Exterro - cancelling this projectFeb 28, 25: Customer decided to go On Hold because they are being absorbed by Accenture LLP and are working on a path forward. AE, CSM, TL, and Manager emailed.",
+    "weekly_status": "03/17/26: Accenture, the parent company, churned. Avanade never completed their transition to Exterro - cancelling this project02/28/25: Customer decided to go On Hold because they are being absorbed by Accenture LLP and are working on a path forward. AE, CSM, TL, and Manager emailed.02/27/25: Meeti",
+    "updated_at": 1773785426195
+  },
+  "883243": {
+    "id": 883243,
+    "name": "Solvay | WO - HR Cleanup",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770235094573
+  },
+  "883246": {
+    "id": 883246,
+    "name": "University of Toledo | IMPL - LH, IPP, DSD, ECM, EDDM, Review, GWC",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "02/17/26 [RLR] - Second planning session scheduled for Monday, Feb 23. &nbsp; &nbsp;01/30/26 [RLR] - Customer was to schedule second meeting two weeks after the Jan 9 planning session. Sent email requesting status.01/08/26 [RLR] - Initial planning scheduled for tomorrow. &nbsp; &nbsp;12/17/25 [RR] -",
+    "updated_at": 1773795615885
+  },
+  "883247": {
+    "id": 883247,
+    "name": "Doosan Bobca | WO - HR Integration",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534093396
+  },
+  "883248": {
+    "id": 883248,
+    "name": "Hanover - Subscription",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1765383935238
+  },
+  "883250": {
+    "id": 883250,
+    "name": "TD Bank | IMPL - LH, IPP, ECM, DSD, RM, Rev",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534130288
+  },
+  "888759": {
+    "id": 888759,
+    "name": "Lumen | AddOn - Teams & SharePoint Connectors",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "Jan 30, 26 - Will be closingNov 18, 25 [VG] - AssignedNov 17, 25 [RR] - Plan review with customer complete. They are ready to meet with PM and TL. &nbsp;&nbsp;Nov 14, 25 [RR] - Project plan review scheduled for Nov 17. &nbsp;&nbsp;Oct 22, 25 [VG] - Intake. Sending docs and",
+    "updated_at": 1770375318072
+  },
+  "889974": {
+    "id": 889974,
+    "name": "AMEX | WO - SSO with SCIM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13 PG: Requested customer to open a ticket with OKTA support.3/6 PG: Requested customer to update the configuration and perform connection through SCIM2/27 PG: Requested customer to complete all the prerequisites.2/20 PG: still working with Product team2/13 PG: Working with Product Management Team",
+    "updated_at": 1773795616427
+  },
+  "891117": {
+    "id": 891117,
+    "name": "Cambium Learning Group | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Jan 26, 26 - Assigned to Phase 2Nov 04, 25 - Phase 1 Kickoff Scheduled",
+    "weekly_status": "03/12/26: Customer QC is still pending. Sent follow up message today for status. Customer canceled weekly sync call on 3/11/26. QJ03/06/26: PM R1 QC complete. Sent email to customer w/instructions on how to do their QC. QJ02/27/26: Business configuration workshops complete. Will request 1st test rou",
+    "updated_at": 1773795616018
+  },
+  "891647": {
+    "id": 891647,
+    "name": "INTERNAL - Z2E Program",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1763097371194
+  },
+  "891995": {
+    "id": 891995,
+    "name": "Abnormal Security | IMPL LH, DSD, IPP (Google&Slack), ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26 - AI Team has submitted their templates and customizations to be added. They will be added today.3/3/26 - Configurations and Templates is a continuation, is scheduled for 3/6/26.2/25/19/26- &nbsp;RBAC's workshop complete. Meeting with customer for Configurations workshop on 2/27/26.2/19/26 -",
+    "updated_at": 1773795615349
+  },
+  "892821": {
+    "id": 892821,
+    "name": "Davita | IMPL - LH, DSD, IPP, ECM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "3/12/26 - Timeline is still the same. Harbor is trying to get Davita to stay on schedule with their requirements gathering and configurations. I will get another firm update on this tomorrow morning during the weekly sync and update again.&nbsp;&nbsp;3/6/26 Update: The below timeline is the current ",
+    "weekly_status": "",
+    "updated_at": 1773795615963
+  },
+  "892984": {
+    "id": 892984,
+    "name": "Solstice - 50 PS Hours + API toolkit",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769024827636
+  },
+  "897134": {
+    "id": 897134,
+    "name": "Volvo | Z2E - LHP to LH",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.18.26 - Cannot get customer to respond08.04.25 [VG] - Kicked off phase 1 and immediately on hold for Security Reviews. Back in hands of AE and CSM.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795615458
+  },
+  "897178": {
+    "id": 897178,
+    "name": "Williams | Z2E - LHP to LH, MMI",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.18.26 - Customer doesn't want to move based on feedback about poor experiences",
+    "weekly_status": "",
+    "updated_at": 1773795616354
+  },
+  "897182": {
+    "id": 897182,
+    "name": "Whirlpool | Z2E - LH",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.03.26 - AE trying to get ahold of customer",
+    "weekly_status": "",
+    "updated_at": 1771885930792
+  },
+  "897224": {
+    "id": 897224,
+    "name": "Vail Resorts | Z2E - LHP to LH",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02/20/26 [RLR]&nbsp;",
+    "updated_at": 1773795615895
+  },
+  "897243": {
+    "id": 897243,
+    "name": "Partners HealthCare | Z2E - LHP to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615782
+  },
+  "899230": {
+    "id": 899230,
+    "name": "Irvine | AddOn - EDDM (Google), Review",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "3/05/2026 - Moving to Green, Go-Live acceptance provided.2/27/2026 - Go-Live was intended to be this past Monday, but customer has not been satisfied with validations. They are meeting with the Product team today.&nbsp;",
+    "weekly_status": "3/12/2026 - Normal hypercare activities. Working on outstanding permissions items.&nbsp;3/05/2026 - Go-Live Acceptance provided this afternoon. We are in Hypercare!2/27/2026 - Technical validation has not been signed off on, pending a meeting between the customer and the Product team. Go Live expect",
+    "updated_at": 1773795616038
+  },
+  "901245": {
+    "id": 901245,
+    "name": "Callaway Golf | Z2E - ZD to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Oct 15, 25 [VG] - Phase 1 (re) Kickoff",
+    "weekly_status": "",
+    "updated_at": 1773795615968
+  },
+  "908187": {
+    "id": 908187,
+    "name": "Foundation Medicine | IMPL LH, DSD, IPP, EDDM, Review, ECM",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "02/12/26: Customer has rescheduled final 1x1 with training team numerous times and this is a hard blocker for them prior to go live. This is the only task remaining prior to go/no go decision.",
+    "weekly_status": "03/12/26: Retro scheduled for 03/1303/05/26: Hypercare concluded on 03/03. Prepping for project closure.02/26/26: Met with customer for hypercare. No significant issues reported.02/19/26: Customer went live on 2/18. Hypercare has begun and concludes 3/4/26.02/12/26: Customer has signed off on UAT. M",
+    "updated_at": 1773683569599
+  },
+  "909155": {
+    "id": 909155,
+    "name": "Phillips 66 | Asset Integration Support",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "Jan 30, 26 - Closing project, asset integration is done. Harbor is continuing to ask questions on issues with IPP but Asset integration is completed.",
+    "updated_at": 1769795356784
+  },
+  "909266": {
+    "id": 909266,
+    "name": "PepsiCo | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02/03/26 - Intake received. Scheduling first meeting.",
+    "updated_at": 1773795615750
+  },
+  "911679": {
+    "id": 911679,
+    "name": "NRG | WO - Employee & Data Source Clean up",
+    "health": "green",
+    "status": "Delayed",
+    "health_notes": "",
+    "weekly_status": "3/13 (GM): Still waiting for the customer to provide feedback about the reports2/27 (GM): Customer hasn't provided feedback about the reports we delivered. I have followed up2/3 (GM): Delivered the reports to the customer. Waiting for the customer to get back11/24/25 [VG] - Intake call, they want to",
+    "updated_at": 1773795616364
+  },
+  "916017": {
+    "id": 916017,
+    "name": "Clearwater Paper | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616292
+  },
+  "918410": {
+    "id": 918410,
+    "name": "Arnold & Porter | Addon - GWC (2)",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "Oct 24, 25 [VG] - Customer purchased 2 additional GWC's but doesn't want to start work until January of '26",
+    "weekly_status": "",
+    "updated_at": 1769534378867
+  },
+  "929016": {
+    "id": 929016,
+    "name": "GDIT - Migration to FedRAMP (active)",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "Customer escalating need for modern view w/ features",
+    "weekly_status": "12/11/25- Cert of test destruction issued. &nbsp;Customer sign off on test tenant and project closure. &nbsp;12/04 - Customer test tenant delivered. &nbsp;Awaiting sign off and Cert of Destruction for test. &nbsp;11/20 - Customer sign-off on Prod migration. &nbsp;Starting migration of test tenant11/",
+    "updated_at": 1769035592333
+  },
+  "930761": {
+    "id": 930761,
+    "name": "Collibra | Z2E - ZD to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615973
+  },
+  "959567": {
+    "id": 959567,
+    "name": "Agilent Technologies | Z2E - LHP to LH",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "02.20.26 - \"Customer\" wants to complete renewal with add ons before starting.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795615813
+  },
+  "960117": {
+    "id": 960117,
+    "name": "Sandoz | IMPL - Remote Mobile Discovery",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13/26: Training &amp; troubleshooting has been completed. Working to finalize CCR (currently no template) and move in to hypercare process.&nbsp;3/6/26: Chat Viewer &amp; S3 training with Michelle set for Monday 3/9.2/27/26: Wireless collections confirmed functional by customer as of today. Now re",
+    "updated_at": 1773795616717
+  },
+  "960785": {
+    "id": 960785,
+    "name": "Okta - IP Whitelisting",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 05, 25 - Waiting on approval from customer to start. AE to inform PS when the customer is ready",
+    "weekly_status": "",
+    "updated_at": 1770834768603
+  },
+  "963203": {
+    "id": 963203,
+    "name": "Key Events Test RL",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615745
+  },
+  "963937": {
+    "id": 963937,
+    "name": "OneMain | AddOn - IPP (Mobius), Test Environment",
+    "health": "red",
+    "status": "On Hold",
+    "health_notes": "Nov 8, 25 - Has not been submitted to start. This project involves Product building a new connector, Mobius which isn't scheduled to be released until (tentative) Q1 '26",
+    "weekly_status": "",
+    "updated_at": 1769534417311
+  },
+  "965038": {
+    "id": 965038,
+    "name": "MMC-Enhancements | WO - Product Enhancements for IPP",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "2/24 PG: Customer has validated the changes and confirmed that the required changes regarding the NCDS loading in the legal hold creation page is reflected properly. Hence marking this project as complete.2/20 PG: Followed up with the customer on testing2/13 PG - Engineering team has provided the fi",
+    "updated_at": 1771927854689
+  },
+  "968429": {
+    "id": 968429,
+    "name": "Gainwell | Z2E - ZD to LH, DSD, IPP",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Nov 12, 25 - Customer indicated they didn't want to start until next year. Trying to get them moving on any part they can.",
+    "weekly_status": "",
+    "updated_at": 1773795616063
+  },
+  "970445": {
+    "id": 970445,
+    "name": "Advanced Bionics | Z2E - LHP to LH",
+    "health": "green",
+    "status": "Blocked",
+    "health_notes": "02.18.26 - Blocked by Infosec Reviews",
+    "weekly_status": "",
+    "updated_at": 1773795616185
+  },
+  "970577": {
+    "id": 970577,
+    "name": "Tokio Marine | AddOn - RMD",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "3/13/26: Project was red at assignment so I left it as such. Likely as customer was uncertain about proceeding with project last fall. Now that project is in progress it will remain Yellow due to age.",
+    "weekly_status": "3/13/26: Manish continues to troubleshoot certificate issues with Nick.3/6/26: New agents are installed. Manish is meeting with Nick today (3/6) to validate configurations.&nbsp;2/27/26: Ports have been updated. Manish has requested the customer uninstall existing agent and install new agent w/ upda",
+    "updated_at": 1773795616458
+  },
+  "970813": {
+    "id": 970813,
+    "name": "KE test - Ignore",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615515
+  },
+  "970821": {
+    "id": 970821,
+    "name": "KE test 2",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770915627168
+  },
+  "971263": {
+    "id": 971263,
+    "name": "Altria | WO - EDiscovery and Privacy Sandbox",
+    "health": "green",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "3/10 (GM): Customer agreed to close the project2/27 (GM): Waiting for customer to correct the SSO configuration on their end2/13 (GM): Waiting for confirmation fromcustomer to close the project2/6 (GM): Working on additional data cleanup activities in the Test SiteJan 30, 26 - Some confusion initial",
+    "updated_at": 1773138549005
+  },
+  "974484": {
+    "id": 974484,
+    "name": "Key events test",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615433
+  },
+  "974904": {
+    "id": 974904,
+    "name": "University of Minnesota | Z2E - LHP to LH",
+    "health": "green",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "03.22.26 - Customer informed us they have decided to move to Relativity LH&nbsp;03.02.26 - Consistent start and stops. Requested AE/csm to get them back engaged",
+    "updated_at": 1773260342254
+  },
+  "975302": {
+    "id": 975302,
+    "name": "Molina Healthcare | Z2E LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615650
+  },
+  "981898": {
+    "id": 981898,
+    "name": "RL Test - Nov 25",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615428
+  },
+  "982105": {
+    "id": 982105,
+    "name": "Cambia Health | Add On - A360 Connector",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "01/28/26 [RLR] - Assigned to TL for execution on Dec 23. On Jan 21 the customer discovered they require an Archive2Azure upgrade. Today sent request for target date.12/17/25 [RLR] - Awaiting acceptance of the project plan. Cambia would like a working session before the second week of January &nbsp;2",
+    "updated_at": 1773795616002
+  },
+  "982298": {
+    "id": 982298,
+    "name": "Shelby County- Regional One | Z2E - ZD to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26: migration complete, PM working on QC. 3/5/26: requested TL to handle HR feed one time manual upload. Workshopped several items with customer. Triggered first migration. 2/27/26: need one time HR file upload completed, then we can trigger first migration. 2/13/26: Held first workshop, covere",
+    "updated_at": 1773795616195
+  },
+  "982905": {
+    "id": 982905,
+    "name": "Aon | IMPL LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26 - Went over RBAC's team is making final decisions.3/5/26 - Reports and IPP workshops complete2/26/26 - Settings and Notifications Workshop complete: SSO and RBAC's are scheduled for 2/27/26.02/19/2026 - LH and Interview Workshop almost complete; only a couple of sections to get through. We w",
+    "updated_at": 1773795616843
+  },
+  "987031": {
+    "id": 987031,
+    "name": "College Board | IMPL: LH IPP DSD ECM EDDM Review GWC",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/12/13: Conducted kickoff on 03/1103/04/26 [VKG] - Assigned to Project Team02/20/26 [RLR] - Plan review session scheduled for Monday, Feb 23. &nbsp; &nbsp;02/17/26 [RLR] - Emailed customer to reconnect and to determine if they are ready to approve the project plan. &nbsp;01/28/26 [RLR] - First cus",
+    "updated_at": 1773795616013
+  },
+  "989332": {
+    "id": 989332,
+    "name": "Westrock | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616564
+  },
+  "989471": {
+    "id": 989471,
+    "name": "Temi Okeowo - Project Manager Onboarding",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770083883816
+  },
+  "992324": {
+    "id": 992324,
+    "name": "Dealer Tire Change Order_ Project extension",
+    "health": "",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "12/05/25 (Kristen Moreno) : Project change order extending this timeline from 12 to 16 weeks for $0 was submitted to the AE.",
+    "updated_at": 1769027563416
+  },
+  "993370": {
+    "id": 993370,
+    "name": "Genesee & Wyoming | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "12/5/25 - Created ahead of submission.",
+    "updated_at": 1773795616033
+  },
+  "993474": {
+    "id": 993474,
+    "name": "Boyd Gaming | Z2E - LHP to LH, DSD, IPP, ECM, MMI (TR)",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.18.26 - Customer depriortized project, we were also awaiting security approvals",
+    "weekly_status": "",
+    "updated_at": 1771885876815
+  },
+  "993523": {
+    "id": 993523,
+    "name": "Duracell | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616241
+  },
+  "993608": {
+    "id": 993608,
+    "name": "Lincoln Financial | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "02/03/26 - Received intake form, sent link to schedule.",
+    "weekly_status": "",
+    "updated_at": 1773795615944
+  },
+  "993660": {
+    "id": 993660,
+    "name": "Arthur J Gallegher | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "02/03/26 - Received notice they're ready to start. Requested introduction. Sent intake",
+    "updated_at": 1773795615676
+  },
+  "993669": {
+    "id": 993669,
+    "name": "Ascension Health | Z2E - LHP to LH, DSD, IPP",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "02.16.26 - We are awaiting their Governance Board approval,&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1771879526977
+  },
+  "993672": {
+    "id": 993672,
+    "name": "Bloomberg | Z2E - LHP to LH, DSD, IPP",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.18.26 - AE/Brad trying to schedule a meeting to connect",
+    "weekly_status": "",
+    "updated_at": 1771879525211
+  },
+  "993677": {
+    "id": 993677,
+    "name": "Blue Cross of Idaho | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616359
+  },
+  "993682": {
+    "id": 993682,
+    "name": "Briggs and Stratton | ZD to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02/03/26 - Intake received, first meeting scheduled.&nbsp;",
+    "updated_at": 1773795616246
+  },
+  "993686": {
+    "id": 993686,
+    "name": "Cadence Design | Z2E - ZD to LH",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.04.26 - they are evaluating alternatives, with intent to make a decision prior to April.",
+    "weekly_status": "",
+    "updated_at": 1771879520919
+  },
+  "993690": {
+    "id": 993690,
+    "name": "CDK Global | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "2.23.26 - Phase 1 Kickoff",
+    "updated_at": 1773795616491
+  },
+  "993694": {
+    "id": 993694,
+    "name": "Chiquita Brands | Z2E - LHP to LH",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.23.26 - Checked in, not ready to start work",
+    "weekly_status": "",
+    "updated_at": 1771879569677
+  },
+  "993702": {
+    "id": 993702,
+    "name": "Danone NA | Z2E - LHP to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "02.23.26 - Check in call, customer ready to start",
+    "weekly_status": "",
+    "updated_at": 1773795616531
+  },
+  "993706": {
+    "id": 993706,
+    "name": "Dick's Sporting | Z2E - LHP to LH, DSD, IPP",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "02.09.26 - Customer unresponsive",
+    "weekly_status": "",
+    "updated_at": 1773795616175
+  },
+  "993730": {
+    "id": 993730,
+    "name": "General Dynamics IT | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615449
+  },
+  "993747": {
+    "id": 993747,
+    "name": "General Dynamics | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616417
+  },
+  "993760": {
+    "id": 993760,
+    "name": "General Dynamics NASSCO | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02.23.26 - Kick off Phase 1",
+    "updated_at": 1773795615924
+  },
+  "993764": {
+    "id": 993764,
+    "name": "General Dynamics Mission Systems | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "2.16.26 - Brad met with customer to kick off phase 1. Justin to follow up with email series and offer to meet.",
+    "updated_at": 1773795616770
+  },
+  "993782": {
+    "id": 993782,
+    "name": "General Dynamics O&T | Z2E- ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02/23/26 - Phase 1 Kickoff.",
+    "updated_at": 1773795616369
+  },
+  "993786": {
+    "id": 993786,
+    "name": "General Dynamics Land Systems - US | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "02.24.26 - Meeting to discuss all GDLS",
+    "weekly_status": "",
+    "updated_at": 1773795616553
+  },
+  "993829": {
+    "id": 993829,
+    "name": "McCormick and Co. | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "02/20/26 - Met w/ McCormick Team to discuss next steps. Kicking off email series.01/20/26 - Tenant created",
+    "weekly_status": "",
+    "updated_at": 1773795616570
+  },
+  "993830": {
+    "id": 993830,
+    "name": "Memorial Healthcare | Z2E - LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "02.18.26 - Still trying to establish contact and schedule a call to discuss migration.",
+    "weekly_status": "",
+    "updated_at": 1773795616190
+  },
+  "993831": {
+    "id": 993831,
+    "name": "MUFG | Z2E - LHP to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616082
+  },
+  "993832": {
+    "id": 993832,
+    "name": "Pernod Ricard | Z2E - LHP to LH, DSD, IPP",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "02.18.26 - Meeting on 2/25. Previously blocked by cyber assessment.",
+    "weekly_status": "",
+    "updated_at": 1771885920245
+  },
+  "993833": {
+    "id": 993833,
+    "name": "The Estee Lauder Co | Z2E - LHP to LH, DSD, IPP",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "02.23.26 - Still waiting on their InfoSec approval, and their internal project manager assignment. Remains on hold until then.",
+    "weekly_status": "",
+    "updated_at": 1771888260122
+  },
+  "993836": {
+    "id": 993836,
+    "name": "UC Santa Barbara (UCSB) | Z2E - LHP to LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "2.11.26 - Brad Harris met w/ cusstomer to kick off work. Introduced Justin via email.",
+    "updated_at": 1773795616520
+  },
+  "993837": {
+    "id": 993837,
+    "name": "UC Davis Health | Z2E - ZD to LH, DSD, IPP, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615829
+  },
+  "993839": {
+    "id": 993839,
+    "name": "Trustage | Z2E - ZD to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616700
+  },
+  "993840": {
+    "id": 993840,
+    "name": "Trinity Health | Z2E - LHP to LH, RM",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02/03/26 - Sent intake form",
+    "updated_at": 1773795616375
+  },
+  "995030": {
+    "id": 995030,
+    "name": "Cigna | WO - Deactivate Resend/Reissue Reminders",
+    "health": "green",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "2/6/26 (GM): Customer is not ready for this right now. They will get back to us when they are ready",
+    "updated_at": 1773795616297
+  },
+  "996884": {
+    "id": 996884,
+    "name": "Bread Financial | AddOn - Slack Connector (DSD, IPP)",
+    "health": "green",
+    "status": "Blocked",
+    "health_notes": "",
+    "weekly_status": "03/09/26 [RLR] - Reached out to Peter and Nate regarding status of the SOW. &nbsp;Per Nate: close but waiting for customer to align resources. &nbsp;&nbsp;02/11/26 [RLR] - Request update from AE/CSM on requirements for moving forward. &nbsp; &nbsp;01/30/26 [VKG] - Informed team we're moving to block",
+    "updated_at": 1773795616146
+  },
+  "999906": {
+    "id": 999906,
+    "name": "Cloudflare | Sample Project Plan",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615870
+  },
+  "1001568": {
+    "id": 1001568,
+    "name": "Klaviyo | IMPL - LH, DSD, IPP, Workday",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "",
+    "weekly_status": "03/09/26 [RLR] - Transferred to Susan Gooch. Per Arthur Delarosa, still waiting on signed contracts. &nbsp; &nbsp;02/11/26 [RLR] - Missing SOW. Placed planning project in Blocked status.01/29/26 [RLR] - Waiting on customer legal. Arthur estimates a couple more weeks. &nbsp; &nbsp;01/28/26 [RLR] - Re",
+    "updated_at": 1773795615854
+  },
+  "1017495": {
+    "id": 1017495,
+    "name": "Masco Corp | IMPL LH, DSD, IPP, ECM, Workday",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/19/26: Customer completed legal hold process workshop and began interviews workshop.03/12/26: Customer has begun overall training. Conducted matters and general navigation workshop. Day in the life scheduled for 3/13.03/05/26: Customer prepping for Day in the Life scheduled for 03/06.02/26/26: Co",
+    "updated_at": 1773795615978
+  },
+  "1018579": {
+    "id": 1018579,
+    "name": "Rimac | IMPL - LH, DSD, IPP, EDDM, Review",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "03/12/26: Customer has been updated that their project plan reflects a 1 month delay given the current progress and inability to work on more than one milestone at a time. Leadership and AE have been informed.",
+    "weekly_status": "03/12/26: Customer was a no show on this week's sync. No progress made this week.03/05/26: This customer is currently working through O365 configurations within their lower environment and will push to production when applicable. In the meantime, we have continued to work on non-configuration decisi",
+    "updated_at": 1773795615645
+  },
+  "1021110": {
+    "id": 1021110,
+    "name": "Constellation | AddOn -DSD (O365)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/5/26 - Nick and the Constellation team are working with us on a couple of preservation issues. Project is still on track.&nbsp;2/19/26 - DSD is up and running as of this week. Nick and team feel like they're on track for a 9 week implementation - which puts us at first week of April.&nbsp;2/12/26 ",
+    "updated_at": 1773795616464
+  },
+  "1021552": {
+    "id": 1021552,
+    "name": "Rocket Ltd | IMPL - LH, DSD, IPP, ECM, EDDM, Exterro Assist",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "02/27/26 [RLR] - I received verbal acceptance of the project plan today. Upon making final adjustments, I initiated the customer sign off via RL. I anticipate Amy's approval early next week. Additionally, I raised the Project Manager request via RL. Rocket is ready to start on the technical delivera",
+    "updated_at": 1773795616610
+  },
+  "1021584": {
+    "id": 1021584,
+    "name": "Amrize | IMPL LH, DSD, IPP, ECM, EDDM (Google)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/12/26 - Kickoff held, Business &amp; Tech workshops progressing03/05/16 [RLR] - One and only planning session held today. Ready to turn over to Drew. &nbsp; &nbsp;02/25/26 [RLR] - SOW received. &nbsp; &nbsp;02/11/26 [RLR] - SOW pending. Feb 4 initial planning session transitioned to technical cal",
+    "updated_at": 1773795616836
+  },
+  "1022155": {
+    "id": 1022155,
+    "name": "Adidas America - Assist & Request Management",
+    "health": "",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "02/26/26 [RLR] - Project cancelled. &nbsp; &nbsp;01/28/26 [RLR] - On hold until Q2. &nbsp; &nbsp;01/06/26 [RLR] - Assign to eDiscovery PSG and initiate.",
+    "updated_at": 1773251595161
+  },
+  "1023568": {
+    "id": 1023568,
+    "name": "Constellation | WO - Move from static IP to SMTP2GO",
+    "health": "",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "2/13 PG: COnfiguration completed and testing completed on a screensharing session. Customer needed a week or 10 days time to test and monitor the behavior.2/6: We have a call today.2/3 PG: Customer has completed the configurations of CNAME and DKIM records. A call has been scheduled to update the co",
+    "updated_at": 1771240052211
+  },
+  "1025752": {
+    "id": 1025752,
+    "name": "Hertz - PRR Subpoena Intake Tool",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "01/05/26 [RLR] - Assigned to eDiscovery PSG.",
+    "updated_at": 1773795616141
+  },
+  "1028207": {
+    "id": 1028207,
+    "name": "Kraken | IMPL LH, DSD, IPP, ECM, MLLH, MIPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/2026 - First workshops scheduled, HR conversation started, and customer is reviewing documentation for technical milestones.&nbsp;3/05/2026 - KOC occurred today, removed Legacy Legal Hold Migration as a dependency for Go-Live. Customer wants to Go-Live ASAP, so project timeline will need to be ",
+    "updated_at": 1773795615803
+  },
+  "1028939": {
+    "id": 1028939,
+    "name": "HF Sinclair | IMPL - LH, ECM, DSD, IPP, EDDM/Review, RMD",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13/26: CCR Intro completed 3/10. Day in the Life - Legal completed 3/11. Legal team provided LH &amp; Interview template, recreated in Exterro 3/13. Activated user accounts for Project Team and had Support access established for same group. Requested Dale (PM) begin looking ahead and scheduling fi",
+    "updated_at": 1773795616673
+  },
+  "1030381": {
+    "id": 1030381,
+    "name": "White & Case | IMPL: On Prem to SaaS",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/17/26 [RLR] - Signatures received. Jeff requested the project intake call. &nbsp; &nbsp;03/09/26 [RLR] - Requested Jeff to schedule the project intake call with customer. &nbsp; &nbsp;02/20/26 [RLR] - Informed the SOW is ready. Requested AE (Jeff Coletta) it add it to SF as well as complete the o",
+    "updated_at": 1773795616068
+  },
+  "1030676": {
+    "id": 1030676,
+    "name": "Honeywell-Aero Spinoff | IMPL LH DSD IPP EDDM ECM MLLH",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "03/12/26 - Status update to Yellow. &nbsp;Not unexpected due to rushed timeline. &nbsp;Business workshops progressing, issues with SSO, no O365 connector meetings scheduled yet as customer is still identifying Microsoft team to handle install.",
+    "weekly_status": "03/12/26 - Status update to Yellow. &nbsp;Not unexpected due to rushed timeline. &nbsp;Business workshops progressing, issues with SSO, no O365 connector meetings scheduled yet as customer is still identifying Microsoft team to handle install.03/05/26 - SSO testing, First round of HR file loaded, bu",
+    "updated_at": 1773795616390
+  },
+  "1030740": {
+    "id": 1030740,
+    "name": "StubHub | IMPL LH, DSD, IPP",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26- Day In The Life; General Navigation and Matter Creation complete.3/3/26 - Started Connectors workshop for Google, Slack and &nbsp;O365.&nbsp;2/24/26 - Kickoff meeting complete; Connectors Workshop for Google, Slack and O365 scheduled for 2/27/26.02/12/26 [RLR] - Project plan approved. Setti",
+    "updated_at": 1773795615494
+  },
+  "1030802": {
+    "id": 1030802,
+    "name": "Arris-Vistance Network | IMPL LH DSD IPP (O365)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12/26 - Followed up with Nick to schedule their Kick off and LLH migration. We are still waiting on legal.02/11/26 [RLR] - Customer wants a walk through with all the team members prior to approving the project plan. &nbsp; &nbsp;02/09/26 [RLR] - Customer review #2 complete. They are moving on tech",
+    "updated_at": 1773795615860
+  },
+  "1033397": {
+    "id": 1033397,
+    "name": "Test - KE",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615293
+  },
+  "1036481": {
+    "id": 1036481,
+    "name": "Capital Group | WO - Smarsh Connector",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "",
+    "weekly_status": "03/09/26 [RLR] - Reached out to &nbsp;Todd to determine if services are needed. Customer wants to return the Smarsh Connector. &nbsp; &nbsp;02/20/26 [RLR] Changed status to Blocked until we receive an update on the SOW. &nbsp; &nbsp;01/21/26 [VG] - Awaiting SOW &nbsp;&nbsp;01/21/26 [RLR] - Initial p",
+    "updated_at": 1773795615849
+  },
+  "1041697": {
+    "id": 1041697,
+    "name": "Vantive | WO - Split from Baxter",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "03/05/26 - Health change to Yellow. &nbsp;Vantive IPP smoke test delayed. &nbsp;DSD issue, CMR raised, should be completed by Monday. &nbsp;If not, will need to adjust dates for both projects",
+    "weekly_status": "03/12/26 - Status change to Green. &nbsp;DSD issues resolved, testing completed, UAT signed off, Phase 1 Accepted on time03/05/26 - Health change to Yellow. &nbsp;Confirmed with Baxter that Vantive can issue holds in Baxter tenant until Vantive Go-live. &nbsp;Ready to start cloning process next week",
+    "updated_at": 1773795615939
+  },
+  "1048159": {
+    "id": 1048159,
+    "name": "Hanover- SaaS Legal Hold & EDDM",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "03/10/26 [RLR] - Per Jen, should be ready in the next couple of weeks. &nbsp; &nbsp;03/09/26 [RLR] - No change. Reached out to Jen re customer readiness. &nbsp; &nbsp;02/02/26 [RLR] - Placing planning on hold until Customer is ready to move forward. &nbsp; &nbsp;01/28/26 [RLR] - Reached out to Jenni",
+    "updated_at": 1773795616328
+  },
+  "1049743": {
+    "id": 1049743,
+    "name": "Worldpay | Addon Slack & SFDC Connectors",
+    "health": "",
+    "status": "Blocked",
+    "health_notes": "",
+    "weekly_status": "03/09/26 [RLR] - Reached out to Peter to see if SOW has been signed. &nbsp; &nbsp;02/20/26 [RLR] - Reached out to Peter again. &nbsp; &nbsp;01/28/26 [RLR] Project has been on hold since Jan 21 due no SOW. Reached out to Peter for status. &nbsp;&nbsp;01/21/26 [RLR] - Planning initiated. Need to creat",
+    "updated_at": 1773795616204
+  },
+  "1051356": {
+    "id": 1051356,
+    "name": "Jackie Ayendi - Project Manager Onboarding (eDisc)",
+    "health": "green",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770083865643
+  },
+  "1058793": {
+    "id": 1058793,
+    "name": "Logile- Review Consumption",
+    "health": "",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "02/16/26 [RLR] - Cancelled project. There are no Ediscovery or PS work. &nbsp; &nbsp;02/16/26 [RLR] - Assign to eDiscovery PSG and initiate planning.&nbsp;",
+    "updated_at": 1771285275559
+  },
+  "1063548": {
+    "id": 1063548,
+    "name": "Test - Bug testing",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616180
+  },
+  "1063555": {
+    "id": 1063555,
+    "name": "Test - Bug Jan 22",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616165
+  },
+  "1063602": {
+    "id": 1063602,
+    "name": "RL Test - KE - Jan 22",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616199
+  },
+  "1063651": {
+    "id": 1063651,
+    "name": "Test - Bug 2 - Jan 22",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616209
+  },
+  "1084008": {
+    "id": 1084008,
+    "name": "Life Time, Inc. | Addon Backend DSD to Frontend DSD (0365)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/13/26 : Call scheduled to discuss about O36503/06/26 : Waiting for an update fom Cameron02/25/26 : &nbsp;Cameron shared our M365 document with their M365 admin and waiting for his schedule to proceed further.02/12/26 [VKG] - Met w/ Cameron, they're ready to get going. Sent tech docs, making team ",
+    "updated_at": 1773795616536
+  },
+  "1091576": {
+    "id": 1091576,
+    "name": "Sample Z2E Project",
+    "health": "green",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615439
+  },
+  "1094429": {
+    "id": 1094429,
+    "name": "St. Luke's | WO: Update GWC",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/09/26 [RLR] - Project intake held on Feb 24th. Project still in planning. &nbsp;&nbsp;02/20/26 [RLR] - Reached out to AE (Sara Montgomery) regarding project intake/intro. &nbsp; &nbsp;&nbsp;02/12/26 [RLR] - Assign to eDiscovery PSG and initiate planning.",
+    "updated_at": 1773795615528
+  },
+  "1094597": {
+    "id": 1094597,
+    "name": "Starbucks | Add On: RM",
+    "health": "green",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "3/5/26 - Kickoff scheduled for 3/17!02/20/26 [RLR] - Reached out to AE (Sara Montgomery) regarding project intake/intro. &nbsp; &nbsp;&nbsp;02/14/26 [RLR] - Assign to eDiscovery PSG and initiate planning.",
+    "updated_at": 1773795616747
+  },
+  "1097834": {
+    "id": 1097834,
+    "name": "Endo/Keenova | Z2E LHP to LH",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773797287382
+  },
+  "1098891": {
+    "id": 1098891,
+    "name": "RFP Response for Fidelity",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615474
+  },
+  "1098952": {
+    "id": 1098952,
+    "name": "McKinsey | Add On: Connector AWS S3 (DSD/EDDM)",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/17/26 [RLR] - Customer set up a manual realm, created datasources manually, and handled collections independently. Manish validated the setup and confirmed customer initiated collections were successful. &nbsp; &nbsp;02/18/26 [RLR] - Assign to eDiscovery PSG and initiate planning.",
+    "updated_at": 1773795616649
+  },
+  "1100843": {
+    "id": 1100843,
+    "name": "Mosaic - PS Hours - ticket #00143190",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615610
+  },
+  "1102777": {
+    "id": 1102777,
+    "name": "Albertsons - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616542
+  },
+  "1107810": {
+    "id": 1107810,
+    "name": "[PC Internal] Ediscovery - Exterro Platform Essential Package w/GWC",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616559
+  },
+  "1125810": {
+    "id": 1125810,
+    "name": "Experian | WO - Crashplan Connector Replacement",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/11/26 [RLR] - Assign to eDiscovery PSG and initiate.",
+    "updated_at": 1773795615570
+  },
+  "1125865": {
+    "id": 1125865,
+    "name": "Reckitt | Add On - DSD, IPP (O365)",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/12/26 [RLR] - SOW received from Katie. &nbsp; &nbsp;03/11/26 [RLR] - Assign to eDiscovery PSG and initiate. No SOW attached to SF Opp.",
+    "updated_at": 1773795615334
+  },
+  "1128159": {
+    "id": 1128159,
+    "name": "Test - ke",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615592
+  },
+  "1128162": {
+    "id": 1128162,
+    "name": "Test - Key events - March 13",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615598
+  },
+  "1128878": {
+    "id": 1128878,
+    "name": "Paramount | WO: Duplicate Employee Data Cleanup",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/13/26 [RLR] - Reassigned from Professional Services to Ediscovery.",
+    "updated_at": 1773795615987
+  },
+  "1128925": {
+    "id": 1128925,
+    "name": "TD Bank | Add On: Smarsh IPP Connector & Asset Integration",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/16/26 [RLR] - Assign to eDiscovery PSG and initiate.",
+    "updated_at": 1773795616023
+  },
+  "1128980": {
+    "id": 1128980,
+    "name": "Stantec | Add On: Commvault EDDM Connector",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "03/16/2026 [RLR] Create project for POC. No OF. No SOW.",
+    "updated_at": 1773795615876
+  },
+  "1131153": {
+    "id": 1131153,
+    "name": "test project for key events",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615798
+  },
+  "1131767": {
+    "id": 1131767,
+    "name": "test rl",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773756172588
+  },
+  "840041": {
+    "id": 840041,
+    "name": "ServiceNow - Subscription",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1761918061422
+  },
+  "848063": {
+    "id": 848063,
+    "name": "Mckinsey Workflow - Subscription Hours",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772625141396
+  },
+  "856204": {
+    "id": 856204,
+    "name": "JCP - Subscription",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773674586483
+  },
+  "857003": {
+    "id": 857003,
+    "name": "Accenture - Subscription",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773675385827
+  },
+  "859777": {
+    "id": 859777,
+    "name": "Wells Fargo - Staff Aug",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1761856448804
+  },
+  "860071": {
+    "id": 860071,
+    "name": "Huntington Bank - PS Subscription 2027/09/30 - 25 hrs Annually",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772498769001
+  },
+  "862597": {
+    "id": 862597,
+    "name": "ABC Supply - Subscription",
+    "health": "",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773423278571
+  },
+  "874039": {
+    "id": 874039,
+    "name": "American Fidelity - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759086257112
+  },
+  "874059": {
+    "id": 874059,
+    "name": "Aramco - Subscription 2026/12/31 25hrs Annually",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1771963258060
+  },
+  "874137": {
+    "id": 874137,
+    "name": "Arnold & Porter - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759086050052
+  },
+  "874191": {
+    "id": 874191,
+    "name": "Booking - Subscription",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772642802817
+  },
+  "875208": {
+    "id": 875208,
+    "name": "BJC HealthCare - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759346837839
+  },
+  "882440": {
+    "id": 882440,
+    "name": "Centers For Medicare and Medicaid Services (CMS) - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759329871947
+  },
+  "882453": {
+    "id": 882453,
+    "name": "CN Rail - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759330174873
+  },
+  "883609": {
+    "id": 883609,
+    "name": "UPS 25 - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759413679621
+  },
+  "883667": {
+    "id": 883667,
+    "name": "GRAIL, Inc. - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759416523441
+  },
+  "883737": {
+    "id": 883737,
+    "name": "General Mills 25 - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772198787027
+  },
+  "884311": {
+    "id": 884311,
+    "name": "Buc-ee's - Subscription",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773075835800
+  },
+  "885030": {
+    "id": 885030,
+    "name": "Defense Logistics Agency (DLA) 25 - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759498286042
+  },
+  "885883": {
+    "id": 885883,
+    "name": "Exeter - PS Subscription - 2026/05/15 - FTK Enterprise - 25 hrs",
+    "health": "green",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615739
+  },
+  "888365": {
+    "id": 888365,
+    "name": "Tokio Marine - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759768549751
+  },
+  "888617": {
+    "id": 888617,
+    "name": "Solstice Advanced Materials - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759777068330
+  },
+  "889829": {
+    "id": 889829,
+    "name": "Florida Crystals - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1759857411650
+  },
+  "892482": {
+    "id": 892482,
+    "name": "KoC Addd-on | ECM, IPP, DSD",
+    "health": "",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772228590355
+  },
+  "897611": {
+    "id": 897611,
+    "name": "Cloud Software Group -employee GUID - SOW",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769025620543
+  },
+  "898885": {
+    "id": 898885,
+    "name": "Cloud Software Group - Subscription",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773442156061
+  },
+  "899133": {
+    "id": 899133,
+    "name": "Alabama Attorney General Office - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1760374955193
+  },
+  "899143": {
+    "id": 899143,
+    "name": "Booz Allen - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1760375567977
+  },
+  "899158": {
+    "id": 899158,
+    "name": "Devon Energy - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1760376269943
+  },
+  "900449": {
+    "id": 900449,
+    "name": "Merck Sharp and Dohme LLC - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1760456848074
+  },
+  "908273": {
+    "id": 908273,
+    "name": "San Jose Water - Subscription",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082442727
+  },
+  "912643": {
+    "id": 912643,
+    "name": "Stag Liuzza - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769034628990
+  },
+  "930671": {
+    "id": 930671,
+    "name": "Meta - Support Hours PS",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534386109
+  },
+  "931035": {
+    "id": 931035,
+    "name": "Meta - CentOS 9 Support",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534389155
+  },
+  "953410": {
+    "id": 953410,
+    "name": "Staples Inc. - Subscription - 2026/09/15 - 50 hrs",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616803
+  },
+  "953535": {
+    "id": 953535,
+    "name": "SAIC - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769028189636
+  },
+  "955517": {
+    "id": 955517,
+    "name": "Aflac - PSS - 2026/12/31- 25 hrs",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615839
+  },
+  "959540": {
+    "id": 959540,
+    "name": "PNC Financial Group - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082438074
+  },
+  "961174": {
+    "id": 961174,
+    "name": "Walmart (Forensics)- GLAM",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770062193764
+  },
+  "967799": {
+    "id": 967799,
+    "name": "Irvine Company - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772564334864
+  },
+  "968002": {
+    "id": 968002,
+    "name": "Skatteetaten - PSS - 2026/11/09 - FTK Lab - 25 hrs",
+    "health": "green",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616786
+  },
+  "970900": {
+    "id": 970900,
+    "name": "Kaiser Permanente - GOLD SUPPORT Subscription 25-26 - up to 4 FTK upgrades annually",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770226965332
+  },
+  "978272": {
+    "id": 978272,
+    "name": "Bath & Body Works - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082433963
+  },
+  "981066": {
+    "id": 981066,
+    "name": "Renewal - Booking.com - AssetRNWL - Sep25 - KC",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1771253327098
+  },
+  "981124": {
+    "id": 981124,
+    "name": "Tiktok",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1764016151058
+  },
+  "981974": {
+    "id": 981974,
+    "name": "Deutsche B\u00f6rse - GLAM - 2026/11/17 - FTK Central - 80 hrs",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "No Blocker, Customer is doing good.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795615834
+  },
+  "983021": {
+    "id": 983021,
+    "name": "HECO - Add'l PS Hours",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769027375236
+  },
+  "987036": {
+    "id": 987036,
+    "name": "College Board - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1771351617553
+  },
+  "987474": {
+    "id": 987474,
+    "name": "Nexteer, Professional Services",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769034527860
+  },
+  "987545": {
+    "id": 987545,
+    "name": "SentinelOne - Subscription - 2026/09/10 - 25 Hrs.",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615824
+  },
+  "987933": {
+    "id": 987933,
+    "name": "GT Spain - GLAM - 2026/11/30 - FTK Central - 160 hrs",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "Recently helped them with the case restoration, they are quite happy with our support.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1771411344474
+  },
+  "991571": {
+    "id": 991571,
+    "name": "Casey's - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082416930
+  },
+  "994612": {
+    "id": 994612,
+    "name": "Cigna - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1765404458462
+  },
+  "994848": {
+    "id": 994848,
+    "name": "MMC - PS - Add NCDS for Exchange Shared Mailboxes and Auto Apply of IPP for Exchange and OneDrive",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773167340053
+  },
+  "996883": {
+    "id": 996883,
+    "name": "Renewal - Bread Financial 12/21/2025",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769027731733
+  },
+  "998000": {
+    "id": 998000,
+    "name": "RSM - FTK PS Hours",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769028058706
+  },
+  "998246": {
+    "id": 998246,
+    "name": "Bon Secours Mercy Health - PSS - 2027/08/30 - FTK Enterprise 8 Hrs Annually",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616092
+  },
+  "1004262": {
+    "id": 1004262,
+    "name": "J&J - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773666117905
+  },
+  "1017496": {
+    "id": 1017496,
+    "name": "Masco Corp Subscription 2026",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769028568055
+  },
+  "1018380": {
+    "id": 1018380,
+    "name": "Lumen - GLAM - 2026/12/18 - FTK Central, FTK Enterprise, RMD & Connectors - 80 hrs",
+    "health": "green",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616821
+  },
+  "1021554": {
+    "id": 1021554,
+    "name": "Rocket - Redfin Expansion",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769205961802
+  },
+  "1027827": {
+    "id": 1027827,
+    "name": "NHCI - GLAM - 2029/01/27 - FTK Central, FTK Connect - 80 hrs",
+    "health": "green",
+    "status": "In Planning",
+    "health_notes": "Got the SOW signed, Awaiting customer response to start the Implementation.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773795616657
+  },
+  "1028204": {
+    "id": 1028204,
+    "name": "Kraken - RFP - LH, IPP, DSD",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769028589674
+  },
+  "1029043": {
+    "id": 1029043,
+    "name": "City of Arlington_Services Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769622397351
+  },
+  "1029253": {
+    "id": 1029253,
+    "name": "Hoag Health System - GLAM - 2028/01/29 - FTK Central, FTK Enterprise, RMD & Connectors - 80 Hrs Annually x2yrs",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "New Project in planning",
+    "weekly_status": "",
+    "updated_at": 1773795616224
+  },
+  "1029452": {
+    "id": 1029452,
+    "name": "WIN BACK: Renewal - MUFG Bank, Ltd. - 2025 Zapproved",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770739650792
+  },
+  "1029543": {
+    "id": 1029543,
+    "name": "Cap Group Impact Analysis for changes in GUID data",
+    "health": "",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770919997195
+  },
+  "1030675": {
+    "id": 1030675,
+    "name": "HW_ Aero SpinCo_eDiscovery Essentials package",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769036713278
+  },
+  "1030739": {
+    "id": 1030739,
+    "name": "StubHub - LH IPP",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769036735864
+  },
+  "1036725": {
+    "id": 1036725,
+    "name": "ArcelorMittal - GLAM - 2027/01/31 - FTK Central - 80 hrs",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "After few attempts now the issue has been resolved, customer can connect 2 users simultaneously.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773224371658
+  },
+  "1038811": {
+    "id": 1038811,
+    "name": "ExxonMobil - PSS - 2028/11/30 - FTK Central - Premium Support",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769534402912
+  },
+  "1042324": {
+    "id": 1042324,
+    "name": "Halliburton - 50 hours PS",
+    "health": "",
+    "status": "Cancelled",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769036972353
+  },
+  "1047794": {
+    "id": 1047794,
+    "name": "Social Security Administration - PSS - 2027/01/14 - FTK Central - 25 hrs",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616500
+  },
+  "1051090": {
+    "id": 1051090,
+    "name": "ABC Supply - White Glove Support Services",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770238323992
+  },
+  "1064081": {
+    "id": 1064081,
+    "name": "Deutsche Bank - GLAM - 2028/11/21 - FTK Central - 80 hrs",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "DB Connection issue has been resolved, SAML configuration is In-progress and its in control. SAMBA issue is with the customer as they are facing problem with their Linux machines.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773224309830
+  },
+  "1064172": {
+    "id": 1064172,
+    "name": "Logile - PS Subscription 2027/01/19 - 30 hrs",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769163827482
+  },
+  "1070127": {
+    "id": 1070127,
+    "name": "Black and Veatch Subscription",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "Waiting on internal TE",
+    "updated_at": 1773255997419
+  },
+  "1070145": {
+    "id": 1070145,
+    "name": "GDIT - PSR for Custom Fields",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1769624136224
+  },
+  "1073598": {
+    "id": 1073598,
+    "name": "Northwell Health-Upgrade- FTK Enterprise 7.6 SP5 >8.2 SP2",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615554
+  },
+  "1074381": {
+    "id": 1074381,
+    "name": "IDF - GLAM - 2027/02/28 - FTK Central - 80 hrs",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772549970769
+  },
+  "1082098": {
+    "id": 1082098,
+    "name": "Illumina - Sandbox and Prof Bucket of Hours",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770313995246
+  },
+  "1084150": {
+    "id": 1084150,
+    "name": "Khan Bank - GLAM - 2027/01/30 - FTK Central, FTK Connect - 160 hrs",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "The customer requested support with YARA rule development. We denied as it\u2019s outside the PS scope, on Request the internal Library of YARA rules has been shared with the customer for their reference.&nbsp;",
+    "weekly_status": "",
+    "updated_at": 1773224124828
+  },
+  "1089345": {
+    "id": 1089345,
+    "name": "Renewal - Dealer Tire LLC- Legal Hold",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770675548799
+  },
+  "1091351": {
+    "id": 1091351,
+    "name": "US Bank - Workday Conenctor",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/5/26: Call held to outline requirements. Wtg for answer from customers on Workday XPaths before we can determine the PS.&nbsp;2/10/26: Assigned to Guhan and Oronde to provide estimate for PS Bucket of hours.&nbsp;",
+    "updated_at": 1773171819158
+  },
+  "1092785": {
+    "id": 1092785,
+    "name": "Rockwell Automation - Subscription 2027/02/06 - 650 Hrs Annually",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1771609762660
+  },
+  "1092876": {
+    "id": 1092876,
+    "name": "Box Health Check",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772703704553
+  },
+  "1093226": {
+    "id": 1093226,
+    "name": "Professional Services for possible deletion of all existing employee records",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772617347600
+  },
+  "1094598": {
+    "id": 1094598,
+    "name": "Starbucks - PS, Request Management and Training",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1771439961146
+  },
+  "1100345": {
+    "id": 1100345,
+    "name": "Mallinckrodt - Like for Like Additional PS",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772657676907
+  },
+  "1103142": {
+    "id": 1103142,
+    "name": "OSU Wexner Medical Center - SMS Subscription - 2027/01/31",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795615359
+  },
+  "1109224": {
+    "id": 1109224,
+    "name": "Hawaii Pacific Health - Subscription",
+    "health": "",
+    "status": "In Planning",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772031704519
+  },
+  "1111528": {
+    "id": 1111528,
+    "name": "Endo - Like for Like Additional PS",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772127997235
+  },
+  "1116107": {
+    "id": 1116107,
+    "name": "Adidas America - Assist & Request Management",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772455251008
+  },
+  "1117494": {
+    "id": 1117494,
+    "name": "CNA - PS - Custom Report",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772495575185
+  },
+  "1119760": {
+    "id": 1119760,
+    "name": "Change Order PSR 000615",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1772651591535
+  },
+  "1119775": {
+    "id": 1119775,
+    "name": "Sempra Infrastructure LH",
+    "health": "",
+    "status": "Completed",
+    "health_notes": "",
+    "weekly_status": "03/06/26: Provided new SOW for Data Export services only",
+    "updated_at": 1773260511997
+  },
+  "1120919": {
+    "id": 1120919,
+    "name": "McKinsey - PS Bucket Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773687276073
+  },
+  "1124080": {
+    "id": 1124080,
+    "name": "Library and Archives Canada - Upgrade - FTK LAB 7.5.1 > 8.2 SP2 HF5 - 74hrs",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773795616219
+  },
+  "1127035": {
+    "id": 1127035,
+    "name": "White & Case Upgrade",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773758289585
+  },
+  "1127841": {
+    "id": 1127841,
+    "name": "Country Financial- PS Subscription 2027/02/22 - 50 hrs",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773350094519
+  },
+  "1128924": {
+    "id": 1128924,
+    "name": "TD Bank - Smarsh IPP Connector & Asset Integration",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773415510116
+  },
+  "1130066": {
+    "id": 1130066,
+    "name": "Google - Implementation PS",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773686177052
+  },
+  "1131087": {
+    "id": 1131087,
+    "name": "Orange County CA - EDDM",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773789893508
+  },
+  "1132364": {
+    "id": 1132364,
+    "name": "Eli Lilly- PS - SCIM Integration",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773776678138
+  },
+  "874031": {
+    "id": 874031,
+    "name": "Al Maryah Community Bank - Subscription",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082302851
+  },
+  "874077": {
+    "id": 874077,
+    "name": "TAI_Imp_DI/DR",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12: No new update as customer is live.3/5: No new update as customer is live.&nbsp;2/26: No new update as customer is live.&nbsp;2/20: No new update. Customer is working to implement the schedule and I have mentioned to them to ensure they take a snapshot before and after cleanup to see if we can ",
+    "updated_at": 1773347384235
+  },
+  "874085": {
+    "id": 874085,
+    "name": "Trinity Industries_IMP_DI",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/12: No new update as customer is continuing the internal review/comparison of the revised draft schedule and the previous schedule with the legal team.&nbsp;3/5: Customer completed the updates within the publication options on the portal after getting my access resolved and are still working throu",
+    "updated_at": 1773347436532
+  },
+  "874096": {
+    "id": 874096,
+    "name": "Wyndham (T + L)_Imp_SDI, DD, DSD, DSAR",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/11: Working through our DD open items list while also tracking customer enhancements with the CSM and answering any additional privacy questions that come up.&nbsp;3/5: Working through our DD open items list while also tracking customer enhancements with the CSM and answering any additional privac",
+    "updated_at": 1773347456893
+  },
+  "874138": {
+    "id": 874138,
+    "name": "Hilltop - Subscription - 2027/01/31 - 80 Hrs Annually x3",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770223322237
+  },
+  "876220": {
+    "id": 876220,
+    "name": "Milestone Technologies | DD",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13: Awaiting client response on the Support transition of RoPA.02/27: Internal Support transition of RoPA is complete and client handoff scheduled for MOnday 2nd March.02/13: Transitioning RoPA to support",
+    "updated_at": 1773399000265
+  },
+  "876272": {
+    "id": 876272,
+    "name": "ESAG Group | DD",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "03/13: Next Meeting scheduled with Vinaya on April 3002/27: Jerry from ESAG replied about the agreement.02/20: Waiting for reply email from ESAG team02/13: Horizontal scaling documents shared to the clients. Apton replied back to vinaya on the license extension.&nbsp;02/06: Latest sensor update Comp",
+    "updated_at": 1773411789492
+  },
+  "876332": {
+    "id": 876332,
+    "name": "Al Maryah Community Bank (MBank)",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "3/13: Source failure evaluated and asked client to check their end.02/27 - Looking to transition RoPA and VRM to support. Awaiting client confirmation.02/20 - Tenant slowness is resolved; Removing Exterro banner enhancement in progress; ETA end of March02/13 - Troubleshooting site slowness issue; DD",
+    "updated_at": 1773398970211
+  },
+  "876708": {
+    "id": 876708,
+    "name": "Casey's General Stores | Impl - RoPA, DR, DD, Consent, DSR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770324363678
+  },
+  "876738": {
+    "id": 876738,
+    "name": "Palo Alto Networks | Impl - Data Retention",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "Updated health to yellow due to the customer's inactivity.",
+    "weekly_status": "2/12/26: Followed up on previous email to customer. Requesting updates on retention schedule approval and rollout.&nbsp;2/4/26: Reached out to customer for updates on retention schedule approval and rollout. No action items for Exterro. Waiting for the customer.&nbsp;",
+    "updated_at": 1770908138132
+  },
+  "876779": {
+    "id": 876779,
+    "name": "Great Day Improvements | Impl - Consent, DD, DSR",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "2/12/26: Followed up with the customer on the request for a DSAR meeting. Databricks scan is complete. Revisit DD/DSR integration.&nbsp;",
+    "updated_at": 1770909190203
+  },
+  "877038": {
+    "id": 877038,
+    "name": "Optima Tax Relief | Imp - RoPA, AM",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1767027748464
+  },
+  "877059": {
+    "id": 877059,
+    "name": "Business Wire | Imp - RoPA, AM",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1767026836521
+  },
+  "880054": {
+    "id": 880054,
+    "name": "Xeris | Imp - DI, DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1767027753655
+  },
+  "880058": {
+    "id": 880058,
+    "name": "TFI | Imp - RoPA, AM, DD, DR, DSAR, Consent",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1766169302874
+  },
+  "880072": {
+    "id": 880072,
+    "name": "Spectro Cloud | Imp - RoPA, AM, VM, DD, DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "Spectro is running with RoPA and AM. Vendor Management has a few issues to iron out with Product. Whitney has been patient as we iron out road blocks. We have kicked off Data Retention, only in as far as we plan to identify department stakeholders and invite them into the tool to add their Record Ty",
+    "weekly_status": "DD Part is complete with no update from client on the one source that needs to be connected.",
+    "updated_at": 1773398910804
+  },
+  "880141": {
+    "id": 880141,
+    "name": "PRA Group | Imp - RoPA, AM, DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1773144920690
+  },
+  "880234": {
+    "id": 880234,
+    "name": "Glen Raven | Imp - DI/DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1766168936228
+  },
+  "883012": {
+    "id": 883012,
+    "name": "Power Engineers/WSP | DR with Inventory",
+    "health": "green",
+    "status": "Hypercare",
+    "health_notes": "",
+    "weekly_status": "&nbsp;02/04/2026 - Meeting scheduled for Support Handoff for 2/11/26.",
+    "updated_at": 1773350176012
+  },
+  "883583": {
+    "id": 883583,
+    "name": "Hanover- Data Discovery",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770387557942
+  },
+  "883604": {
+    "id": 883604,
+    "name": "Thredd | DSAR",
+    "health": "yellow",
+    "status": "In progress",
+    "health_notes": "03/13: Ongoing support with open issues02/27: Monitoring the ongoing collections02/20: Monitoring on the latest collections that has been initiated2/4/26: &nbsp;Still in Yellow/Red until all items for their outstanding DSRs are resolved.",
+    "weekly_status": "02/13: Ongoing support issue has been resolved.02/06: Assisting Jean on the open issues",
+    "updated_at": 1773411844106
+  },
+  "883618": {
+    "id": 883618,
+    "name": "Spencer Stuart | Consent and Pref Management",
+    "health": "green",
+    "status": "Closeout",
+    "health_notes": "On the upcoming 11/18 call- we will confirm that SS has everything they need, and suggest we schedule the intro/handoff to CSM and Support.",
+    "weekly_status": "03/10/26 - We are still waiting for customer. He is still testing.02/13/2026 - Hari is working with the customer for Adoption Support.02/04/26 - Support welcome call completed on 1/8/26.",
+    "updated_at": 1773350231282
+  },
+  "883908": {
+    "id": 883908,
+    "name": "Day One | Imp - DI, DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1767023856891
+  },
+  "885306": {
+    "id": 885306,
+    "name": "Wings Financial | DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1767026431409
+  },
+  "885336": {
+    "id": 885336,
+    "name": "Textron | DSAR",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "Holding start date until DSR 2.0 is released in Jan/Feb.",
+    "weekly_status": "",
+    "updated_at": 1770164045834
+  },
+  "885375": {
+    "id": 885375,
+    "name": "Samsonite | Imp - RoPA, AM, DSAR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082132149
+  },
+  "885502": {
+    "id": 885502,
+    "name": "Russell Reynolds | DD, DSR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "13/3: Had a discussion internally on the development of AI approach for the name classifier and false positives.",
+    "updated_at": 1773398870280
+  },
+  "885654": {
+    "id": 885654,
+    "name": "Riviana Foods | RoPA, DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1767023727376
+  },
+  "887984": {
+    "id": 887984,
+    "name": "Fortra | DR, RoPA",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "10/9: &nbsp;Reached out to schedule a call for next week regarding RoPA and DR migrations..",
+    "updated_at": 1771885632372
+  },
+  "887989": {
+    "id": 887989,
+    "name": "Eversource | DR",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770909984646
+  },
+  "888009": {
+    "id": 888009,
+    "name": "Selective Insurance | DI Reprofile",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770228294573
+  },
+  "892801": {
+    "id": 892801,
+    "name": "INTERNAL - AWS Marketplace Launch for Assist",
+    "health": "",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1760031933574
+  },
+  "902344": {
+    "id": 902344,
+    "name": "Danone | DSAR Revamp",
+    "health": "green",
+    "status": "In progress",
+    "health_notes": "",
+    "weekly_status": "Trainings scheduled for 10/28.",
+    "updated_at": 1766094799859
+  },
+  "915983": {
+    "id": 915983,
+    "name": "Motorola Optix360",
+    "health": "",
+    "status": "On Hold",
+    "health_notes": "",
+    "weekly_status": "12/19/25: Project put on hold till end of Q112/17/25: Close date pushed to end of Q1. Still need to determine action plan since Matt V provided pricing based on On-Prem (Motorola-hosted in Azure) deployment, which is not yet certified.&nbsp;",
+    "updated_at": 1771829730974
+  },
+  "922309": {
+    "id": 922309,
+    "name": "Sumitomo Rubber - ROPA Manager (Removing DI, DR, DSAR) - Renewal",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770082308222
+  },
+  "922679": {
+    "id": 922679,
+    "name": "Test Project | Sonia & Emily",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770084103914
+  },
+  "1083654": {
+    "id": 1083654,
+    "name": "Altria POC",
+    "health": "",
+    "status": "New",
+    "health_notes": "",
+    "weekly_status": "",
+    "updated_at": 1770387426197
+  }
+}
