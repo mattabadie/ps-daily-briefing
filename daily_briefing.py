@@ -36,6 +36,11 @@ API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")
 WEBHOOK_URL = os.environ.get("GCHAT_WEBHOOK_URL", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+try:
+    from claude_utils import call_claude
+except ImportError:
+    call_claude = None
 BASE_URL = "https://services.api.exterro.com/api/1.0"
 RL_APP_BASE = "https://services.exterro.com/projects"
 
@@ -816,6 +821,53 @@ def build_email_recent(enriched_projects):
     return html
 
 
+_DAILY_INSIGHTS_PROMPT = """You are an operational analyst for Exterro's Professional Services VP.
+Given today's project data across eDiscovery, Data PSG, and Post Implementation teams, write 3-5 bullet points (HTML <br/> separated) highlighting:
+1. The most critical risk or blocker across the portfolio today
+2. Any patterns you see (multiple projects hitting same issue type)
+3. Positive momentum (go-lives, UAT completions, milestone achievements)
+4. One specific recommended action for the VP
+
+Keep it under 200 words. Use <strong> for emphasis. Be direct — no filler."""
+
+
+def _generate_daily_insights(all_enriched, enriched_by_team, zombies):
+    """Generate Claude-powered daily insights from project notes."""
+    if not ANTHROPIC_API_KEY or not call_claude:
+        return None
+
+    active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+    lines = []
+
+    # Health overview
+    for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
+        projs = enriched_by_team.get(team, [])
+        ta = [p for p in projs if p["status_val"] in ACTIVE_STATUS_VALUES]
+        red = sum(1 for p in ta if p["health"] == "red")
+        yellow = sum(1 for p in ta if p["health"] == "yellow")
+        lines.append(f"{team}: {len(ta)} active, {red} red, {yellow} yellow")
+
+    # Red/yellow project notes
+    lines.append("\n=== RED/YELLOW PROJECT NOTES ===")
+    ry = [p for p in active if p["health"] in ("red", "yellow") and (p.get("health_notes") or p.get("weekly_status"))]
+    for p in sorted(ry, key=lambda x: (0 if x["health"] == "red" else 1))[:20]:
+        lines.append(f"\n{p['customer']} | {p['name']} | {p['health'].upper()} | PM: {p['owner']}")
+        if p.get("health_notes"):
+            lines.append(f"  Notes: {p['health_notes'][:300]}")
+        if p.get("weekly_status"):
+            lines.append(f"  Status: {p['weekly_status'][:300]}")
+
+    # Zombie count
+    if zombies:
+        lines.append(f"\n{len(zombies)} zombie-flagged projects (stale/inactive signals)")
+
+    print("  Calling Claude for daily insights...")
+    result = call_claude(_DAILY_INSIGHTS_PROMPT, "\n".join(lines), max_tokens=512)
+    if result:
+        print(f"  Daily insights received ({len(result)} chars).")
+    return result
+
+
 def build_email_html(data):
     today_str = data["today_str"]
     enriched_by_team = data["enriched_by_team"]
@@ -842,6 +894,14 @@ def build_email_html(data):
 {_kpi(yellow_health, "Yellow Health", "#ca8a04")}
 </div>
 '''
+
+    # ── Claude AI Executive Insights ──
+    ai_insights = _generate_daily_insights(all_enriched, enriched_by_team, zombies)
+    if ai_insights:
+        html += f'''<div style="background:#f5f3ff;border-left:4px solid #7c3aed;padding:16px;margin:16px 0;border-radius:0 4px 4px 0;">
+<h3 style="margin:0 0 10px 0;font-size:14px;font-weight:700;color:#7c3aed;">AI Daily Insights</h3>
+<div style="font-size:13px;line-height:1.6;">{ai_insights}</div>
+</div>'''
 
     # eDiscovery section
     edisc = enriched_by_team.get("eDiscovery", [])

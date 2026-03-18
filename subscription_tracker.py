@@ -39,6 +39,11 @@ API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 GCHAT_WEBHOOK_URL = os.environ.get("GCHAT_SUB_WEBHOOK_URL", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+try:
+    from claude_utils import call_claude
+except ImportError:
+    call_claude = None
 BASE_URL = "https://services.api.exterro.com/api/1.0"
 RL_APP_BASE = "https://services.exterro.com/projects"
 
@@ -349,6 +354,55 @@ def find_sibling_projects(sub_data, all_projects):
     return siblings
 
 
+_RENEWAL_PROMPT = """You are a PS renewal strategist at an enterprise software company.
+Given subscription consumption data and account context, produce a short (150 words max) renewal strategy for the AE/CSM. Use HTML formatting.
+
+Include:
+1. **Consumption trajectory** — is burn accelerating, steady, or slowing? When will hours run out?
+2. **Engagement signal** — is the customer actively using hours or going dark?
+3. **Renewal talking points** — 2-3 specific points the AE should raise in the renewal conversation
+4. **Recommended timing** — when to initiate the renewal discussion
+
+Be specific to this customer's data. No generic advice."""
+
+
+def _generate_renewal_narrative(sub_data, consumption, siblings):
+    """Generate Claude-powered renewal strategy for the AE/CSM."""
+    if not ANTHROPIC_API_KEY or not call_claude:
+        return None
+
+    lines = [
+        f"Customer: {sub_data['customer']}",
+        f"Project: {sub_data['project_name']}",
+        f"PM: {sub_data['pm_name']}",
+        f"Hours used: {consumption['total_hours_used']}h of {consumption['total_budgeted_hours']}h ({consumption['pct_consumed']}%)",
+        f"Avg monthly burn: {consumption['avg_monthly_burn']}h",
+        f"Months remaining at current rate: {consumption.get('months_remaining', 'N/A')}",
+        f"Client segment: {sub_data.get('client_segment', 'N/A')}",
+    ]
+    if sub_data.get("health_notes"):
+        lines.append(f"Health notes: {sub_data['health_notes'][:300]}")
+    if sub_data.get("weekly_status"):
+        lines.append(f"Status: {sub_data['weekly_status'][:300]}")
+
+    # Monthly trend
+    monthly = consumption.get("monthly_hours", {})
+    if monthly:
+        recent = list(monthly.items())[-6:]
+        lines.append("Monthly usage (last 6 months):")
+        for m, h in recent:
+            lines.append(f"  {m}: {round(h, 1)}h")
+
+    if siblings:
+        lines.append(f"\nOther active projects for this customer: {len(siblings)}")
+        for s in siblings[:5]:
+            lines.append(f"  - {s['name']} ({s['type']}, {s['status']})")
+
+    print(f"    Generating renewal narrative for {sub_data['customer']}...")
+    result = call_claude(_RENEWAL_PROMPT, "\n".join(lines), max_tokens=512)
+    return result
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # HTML EMAIL BUILDER — RENEWAL PREP PACKAGE
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -560,6 +614,15 @@ a {{ color:#3b82f6; text-decoration:none; }}
         if sub_data["weekly_status"]:
             html += f'\n  <p style="font-size:13px; margin:4px 0;"><strong>Weekly Status:</strong> {sub_data["weekly_status"][:500]}</p>'
         html += '\n</div>'
+
+    # AI-generated renewal strategy
+    renewal_narrative = _generate_renewal_narrative(sub_data, consumption, siblings)
+    if renewal_narrative:
+        html += f'''
+<div class="section" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:16px;">
+  <h2 style="color:#7c3aed;">AI Renewal Strategy</h2>
+  <div style="font-size:13px;line-height:1.6;">{renewal_narrative}</div>
+</div>'''
 
     html += f'''
 </div>

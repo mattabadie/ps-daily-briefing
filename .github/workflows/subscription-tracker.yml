@@ -50,6 +50,7 @@ jobs:
         env:
           ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
           GCHAT_SUB_WEBHOOK_URL: ${{ secrets.GCHAT_SUB_WEBHOOK_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python subscription_tracker.py --mode chat
 
   # Manual run: configurable mode
@@ -72,6 +73,7 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           GCHAT_SUB_WEBHOOK_URL: ${{ secrets.GCHAT_SUB_WEBHOOK_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           ARGS="--mode ${{ inputs.mode || 'both' }} --threshold ${{ inputs.threshold || '75' }}"
           if [ "${{ inputs.dry_run }}" = "true" ]; then

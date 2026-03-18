@@ -40,6 +40,11 @@ API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")
 WEBHOOK_URL = os.environ.get("GCHAT_WEBHOOK_URL", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+try:
+    from claude_utils import call_claude
+except ImportError:
+    call_claude = None
 BASE_URL = "https://services.api.exterro.com/api/1.0"
 RL_APP_BASE = "https://services.exterro.com/projects"
 
@@ -698,6 +703,47 @@ def build_recent(enriched_projects):
     return html
 
 
+_FORENSICS_INSIGHTS_PROMPT = """You are an operational analyst for Exterro's Forensics PS team.
+Given today's forensics project data, write 3-4 bullet points (HTML <br/> separated) covering:
+1. Critical blockers or zombie projects needing intervention
+2. Patterns across the portfolio (common blockers, customer responsiveness)
+3. Positive momentum (completions, go-lives)
+4. One recommended action for the director
+
+Keep it under 150 words. Use <strong> for emphasis. Be direct."""
+
+
+def _generate_forensics_insights(all_enriched, zombies):
+    """Generate Claude-powered forensics daily insights."""
+    if not ANTHROPIC_API_KEY or not call_claude:
+        return None
+
+    active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+    lines = [f"Active forensics projects: {len(active)}"]
+
+    # Red/yellow notes
+    ry = [p for p in active if p["health"] in ("red", "yellow") and (p.get("health_notes") or p.get("weekly_status"))]
+    if ry:
+        lines.append(f"\n=== RED/YELLOW ({len(ry)}) ===")
+        for p in ry[:15]:
+            lines.append(f"{p['customer']} | {p['name']} | {p['health'].upper()} | PM: {p['owner']}")
+            if p.get("health_notes"):
+                lines.append(f"  Notes: {p['health_notes'][:250]}")
+
+    # Zombies
+    if zombies:
+        lines.append(f"\n=== ZOMBIE PROJECTS ({len(zombies)}) ===")
+        for r in sorted(zombies, key=lambda x: -x["score"])[:10]:
+            p = r["enriched"]
+            lines.append(f"Score {r['score']}: {p['customer']} | {p['name']} | {p['status']} | Last time entry: {r.get('last_time_entry','N/A')}")
+
+    print("  Calling Claude for forensics insights...")
+    result = call_claude(_FORENSICS_INSIGHTS_PROMPT, "\n".join(lines), max_tokens=512)
+    if result:
+        print(f"  Forensics insights received ({len(result)} chars).")
+    return result
+
+
 def build_email_html(data):
     today_str = data["today_str"]
     all_enriched = data["all_enriched"]
@@ -732,6 +778,14 @@ def build_email_html(data):
 {_kpi(yellow_health, "Yellow Health", "#ca8a04")}
 </div>
 '''
+
+    # ── Claude AI Insights ──
+    ai_insights = _generate_forensics_insights(all_enriched, zombies)
+    if ai_insights:
+        html += f'''<div style="background:#f5f3ff;border-left:4px solid #7c3aed;padding:16px;margin:16px 0;border-radius:0 4px 4px 0;">
+<h3 style="margin:0 0 10px 0;font-size:14px;font-weight:700;color:#7c3aed;">AI Forensics Insights</h3>
+<div style="font-size:13px;line-height:1.6;">{ai_insights}</div>
+</div>'''
 
     # Category breakdown box
     cat_counts = {cat: len([p for p in projs if p["status_val"] in ACTIVE_STATUS_VALUES]) for cat, projs in by_cat.items()}

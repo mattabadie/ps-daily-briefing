@@ -39,6 +39,11 @@ from pathlib import Path
 API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+try:
+    from claude_utils import call_claude
+except ImportError:
+    call_claude = None
 BASE_URL = "https://services.api.exterro.com/api/1.0"
 RL_APP_BASE = "https://services.exterro.com/projects"
 
@@ -688,20 +693,79 @@ def build_health_changes_section(changes):
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEEP ANALYSIS SECTIONS
 # ═══════════════════════════════════════════════════════════════════════════════
+ATTENTION_SYSTEM_PROMPT = """You are an operational intelligence analyst for a Professional Services VP. Given PM notes from red/yellow health projects, produce a concise VP-level triage.
+
+For each project that needs VP action, output ONE line in this exact format:
+PROJECT_NAME | CUSTOMER | ACTION_NEEDED | URGENCY(high/medium)
+
+Focus ONLY on projects where the VP should personally intervene:
+- Customer executive not responding despite PM outreach
+- Engineering blocker with no resolution timeline
+- High-value deal at risk of churn
+- Timeline slip on a strategic account
+- Cross-functional escalation needed
+
+Skip projects where the PM can handle it alone. Be selective — 5-8 items max.
+Output ONLY the formatted lines, no headers or explanations."""
+
+
+def _call_claude_attention(red_yellow_projects):
+    """Call Claude to intelligently triage red/yellow projects for VP attention.
+    Returns list of {project, customer, action, urgency} or None."""
+    if not ANTHROPIC_API_KEY or not call_claude:
+        return None
+
+    lines = []
+    for p in red_yellow_projects[:30]:
+        seg = f" [{p['client_segment']}]" if p["client_segment"] else ""
+        val = f" ${p['contract_value']:,.0f}" if p["contract_value"] else ""
+        lines.append(f"--- {p['customer']}{seg}{val} | {p['name']} | {p['health'].upper()} | PM: {p['owner']} ---")
+        if p["health_notes"]:
+            lines.append(f"Health: {p['health_notes'][:400]}")
+        if p["weekly_status"]:
+            lines.append(f"Status: {p['weekly_status'][:400]}")
+        lines.append("")
+
+    print("  Calling Claude for attention triage...")
+    text = call_claude(ATTENTION_SYSTEM_PROMPT, "\n".join(lines), max_tokens=1024)
+    if not text:
+        return None
+
+    try:
+        items = []
+        for line in text.strip().split("\n"):
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) >= 4:
+                items.append({
+                    "project": parts[0],
+                    "customer": parts[1],
+                    "action": parts[2],
+                    "urgency": parts[3].lower(),
+                })
+        print(f"  Claude attention triage: {len(items)} action items.")
+        return items if items else None
+    except Exception as e:
+        print(f"  Claude attention API error: {e}")
+        return None
+
+
 def build_attention_required_section(all_enriched):
-    """Build ATTENTION REQUIRED section with 3 subsections:
-    1. Escalation candidates — red/yellow + blocker language in notes
-    2. High-value at risk — Pinnacle/Strategic clients with red/yellow health
-    3. Stale commentary — active projects with no notes update in 14+ days
-    """
+    """Build ATTENTION REQUIRED section. Uses Claude for VP triage when available,
+    plus structured data for high-value and stale subsections."""
     now = datetime.now()
     active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
 
-    # --- 1. Escalation candidates ---
+    # --- 0. LLM-powered VP action items ---
+    red_yellow_with_notes = [p for p in active
+                             if p["health"] in ("red", "yellow")
+                             and (p["health_notes"] or p["weekly_status"])]
+    red_yellow_with_notes.sort(key=lambda x: (0 if x["health"] == "red" else 1, -x["contract_value"]))
+    llm_actions = _call_claude_attention(red_yellow_with_notes)
+
+    # --- 1. Escalation candidates (regex fallback) ---
     escalations = []
     for p in active:
         if p["health"] in ("red", "yellow") and p["escalation_flags"]:
-            # Extract the matching keyword snippet for context
             snippet = ""
             text = p["health_notes"] if "health_notes" in p["escalation_flags"] else p["weekly_status"]
             match = ESCALATION_KEYWORDS.search(text)
@@ -751,14 +815,28 @@ def build_attention_required_section(all_enriched):
     stale_notes.sort(key=lambda x: -(x[1] or 999))
 
     # --- Build HTML ---
-    total_items = len(escalations) + len(high_value) + len(stale_notes)
+    total_items = len(llm_actions or []) + len(escalations) + len(high_value) + len(stale_notes)
     if total_items == 0:
         return ""
 
     html = ""
 
-    # Escalation candidates
-    if escalations:
+    # LLM-powered VP action items (top of section)
+    if llm_actions:
+        html += f'<div style="margin-bottom:16px;">'
+        html += f'<div style="font-weight:700;font-size:12px;color:#7c3aed;margin-bottom:6px;">VP Action Items — AI Analysis ({len(llm_actions)})</div>'
+        html += f'<div style="{S_MUTED};margin-bottom:6px;">Claude analyzed PM notes across {len(red_yellow_with_notes)} red/yellow projects and identified these for your direct attention.</div>'
+        for item in llm_actions:
+            urgency_color = "#ef4444" if item["urgency"] == "high" else "#f59e0b"
+            urgency_badge = f'<span style="background:{urgency_color};color:white;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:6px;">{item["urgency"].upper()}</span>'
+            html += f'<div style="background:#f5f3ff;border-left:3px solid #7c3aed;padding:8px 12px;margin:4px 0;font-size:12px;">'
+            html += f'<div><strong>{item["project"]}</strong> — {item["customer"]}{urgency_badge}</div>'
+            html += f'<div style="margin-top:3px;color:#475569;">{item["action"]}</div>'
+            html += '</div>'
+        html += '</div>'
+
+    # Escalation candidates (regex-based, shown if LLM unavailable or as supplement)
+    if escalations and not llm_actions:
         html += f'<div style="margin-bottom:16px;">'
         html += f'<div style="font-weight:700;font-size:12px;color:#dc2626;margin-bottom:6px;">Escalation Candidates ({len(escalations)})</div>'
         html += f'<div style="{S_MUTED};margin-bottom:6px;">Red/yellow health with blocker language in PM notes — may need VP intervention.</div>'
@@ -1068,66 +1146,368 @@ def build_stale_projects_section(stale_projects):
     return build_section("STALE PROJECTS (No Time Logged — 7 Days)", len(stale_projects), html)
 
 
-def build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects):
-    """Build a written narrative summary for Friday weekly reports."""
-    # Count projects by team
-    team_counts = {team: len(projs) for team, projs in projects_by_team.items()}
+# ═══════════════════════════════════════════════════════════════════════════════
+# CLAUDE API — LLM-POWERED NARRATIVE
+# ═══════════════════════════════════════════════════════════════════════════════
+NARRATIVE_SYSTEM_PROMPT = """You are an operational intelligence analyst for a Professional Services organization at Exterro (enterprise software). You produce a weekly executive briefing for the VP of PS.
 
-    # Health summary
-    health_summary = {}
-    for team, projs in projects_by_team.items():
-        red = sum(1 for p in projs if p["health"] == "red" and p["status_val"] in ACTIVE_STATUS_VALUES)
-        yellow = sum(1 for p in projs if p["health"] == "yellow" and p["status_val"] in ACTIVE_STATUS_VALUES)
-        green = sum(1 for p in projs if p["health"] == "green" and p["status_val"] in ACTIVE_STATUS_VALUES)
-        unknown = sum(1 for p in projs if not p["health"] and p["status_val"] in ACTIVE_STATUS_VALUES)
-        health_summary[team] = {"red": red, "yellow": yellow, "green": green, "unknown": unknown}
+Your audience: Matt Abadie (VP) and his 3 directors — Vanessa Graham (eDiscovery), Maggie Ledbetter (Data PSG), Oronde Ward (Post Implementation).
 
-    # Narrative text
-    narrative = f'''<div style="{S_SECTION}">
-<h3 style="margin:0 0 12px 0;font-size:14px;font-weight:700;">Weekly Executive Summary</h3>
+Write style:
+- Executive-level: concise, direct, actionable
+- Lead with what matters most (risks, blockers, revenue exposure)
+- Name specific customers and PMs when relevant
+- End with 3-5 concrete recommended actions
+- No filler, no pleasantries, no "this week we observed..."
+- Use HTML formatting: <strong> for emphasis, <br/> for line breaks
+- Keep the entire response under 800 words
 
-<p style="margin:8px 0;line-height:1.6;">
-This week across our PS operations, we onboarded <strong>{len(new_projects)} new projects</strong> across
-the three service teams (eDiscovery, Data PSG, and Post Implementation).
-The portfolio remains active with <strong>{sum(team_counts.values())} total projects</strong> under active management.
-</p>
+The data you'll receive includes:
+- Portfolio health stats by team
+- PM notes from active projects (the most valuable signal — read these carefully)
+- Z2E migration progress
+- High-value clients at risk
+- Stale projects and commentary gaps
 
-<p style="margin:8px 0;line-height:1.6;">
-<strong>Health Snapshot:</strong>
-'''
+Synthesize the PM notes into themes. Look for:
+1. Systemic issues (multiple projects hitting same blocker type)
+2. Customer responsiveness patterns
+3. Engineering/product dependencies blocking delivery
+4. Go-live momentum vs. stalled projects
+5. Revenue at risk from project issues
+6. Resource or capacity signals"""
 
+
+def call_claude_narrative(prompt_data):
+    """Call Claude API to generate the weekly narrative."""
+    if not ANTHROPIC_API_KEY or not call_claude:
+        print("  Claude API unavailable, falling back to regex narrative.")
+        return None
+    print("  Calling Claude for narrative synthesis...")
+    result = call_claude(NARRATIVE_SYSTEM_PROMPT, prompt_data)
+    if result:
+        print(f"  Claude narrative received ({len(result)} chars).")
+    return result
+
+
+def _build_narrative_prompt(projects_by_team, all_enriched, stale_projects, changes):
+    """Build the structured data prompt for Claude to analyze."""
+    active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+    lines = []
+
+    # Portfolio stats
+    lines.append("=== PORTFOLIO OVERVIEW ===")
     for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
-        if team in health_summary:
-            h = health_summary[team]
-            narrative += f'''<br/>{DIRECTOR_NAMES[team]} ({team}):
-<span style="background:#ef4444;color:white;padding:1px 6px;border-radius:3px;font-size:11px;margin-right:4px;">{h["red"]} Red</span>
-<span style="background:#f59e0b;color:white;padding:1px 6px;border-radius:3px;font-size:11px;margin-right:4px;">{h["yellow"]} Yellow</span>
-<span style="background:#22c55e;color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{h["green"]} Green</span>'''
+        projs = projects_by_team.get(team, [])
+        team_active = [p for p in projs if p["status_val"] in ACTIVE_STATUS_VALUES]
+        red = sum(1 for p in team_active if p["health"] == "red")
+        yellow = sum(1 for p in team_active if p["health"] == "yellow")
+        green = sum(1 for p in team_active if p["health"] == "green")
+        lines.append(f"{DIRECTOR_NAMES[team]} ({team}): {len(team_active)} active — {red} red, {yellow} yellow, {green} green")
 
-    narrative += '</p>'
-
-    # Status changes
+    # Health changes this period
     if changes:
-        change_count = len([c for c in changes if c["type"] in ("health_change", "status_change")])
-        narrative += f'<p style="margin:8px 0;line-height:1.6;"><strong>Changes This Week:</strong> We detected <strong>{change_count} health or status transitions</strong> requiring attention or follow-up.</p>'
+        lines.append(f"\n=== HEALTH/STATUS CHANGES ({len(changes)}) ===")
+        for c in changes[:20]:
+            lines.append(f"- {c['project']} ({c['customer']}): {c['type']} {c.get('from','')} → {c.get('to','')}")
 
-    # PM notes coverage
-    with_notes = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES and (p["health_notes"] or p["weekly_status"])]
-    if with_notes:
-        total_active = sum(1 for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES)
-        narrative += f'<p style="margin:8px 0;line-height:1.6;"><strong>PM Commentary:</strong> <strong>{len(with_notes)} of {total_active}</strong> active projects have health notes or weekly status updates populated.</p>'
+    # Z2E migration
+    z2e_active = [p for p in all_enriched
+                  if "z2e" in p.get("sub_type", "").lower()
+                  and p.get("task_progress") is not None
+                  and p["status"] not in ("Completed", "Closeout")]
+    if z2e_active:
+        z2e_avg = int(sum(p["task_progress"] for p in z2e_active) / len(z2e_active))
+        lines.append(f"\n=== Z2E MIGRATION ({len(z2e_active)} active, avg {z2e_avg}% complete) ===")
+        low = sorted([p for p in z2e_active if p["task_progress"] < 30], key=lambda x: x["task_progress"])
+        if low:
+            lines.append(f"Below 30% progress ({len(low)}):")
+            for p in low[:8]:
+                lines.append(f"  - {p['customer']}: {p['task_progress']}% [{p['status']}] PM: {p['owner']}")
+
+    # High-value at risk
+    hv = [p for p in active
+          if p["health"] in ("red", "yellow")
+          and (p["client_segment"] in ("Pinnacle", "Strategic") or p["contract_value"] >= 100000)]
+    if hv:
+        total_val = sum(p["contract_value"] for p in hv)
+        lines.append(f"\n=== HIGH-VALUE AT RISK ({len(hv)} projects, ${total_val:,.0f} total) ===")
+        for p in sorted(hv, key=lambda x: -x["contract_value"])[:10]:
+            lines.append(f"  - {p['customer']} | {p['name']} | ${p['contract_value']:,.0f} | {p['health']} | {p['client_segment']} | PM: {p['owner']}")
 
     # Stale projects
     if stale_projects:
-        narrative += f'<p style="margin:8px 0;line-height:1.6;"><strong>Stale Projects:</strong> <strong>{len(stale_projects)} active projects</strong> had zero time logged in the past 7 days — may need PM follow-up to confirm status or identify blockers.</p>'
+        lines.append(f"\n=== STALE PROJECTS ({len(stale_projects)} with no time logged in 7 days) ===")
 
-    narrative += '''<p style="margin:8px 0;line-height:1.6;">
-The digest below provides detailed breakdown by section. Escalations and red flags
-are highlighted for immediate intervention where needed.
-</p>
+    # PM notes — the gold mine. Include red/yellow health projects first, then recent updates.
+    lines.append("\n=== PM NOTES (red/yellow health projects) ===")
+    red_yellow = [p for p in active if p["health"] in ("red", "yellow") and (p["health_notes"] or p["weekly_status"])]
+    for p in sorted(red_yellow, key=lambda x: (0 if x["health"] == "red" else 1, -x["contract_value"]))[:25]:
+        seg = f" [{p['client_segment']}]" if p["client_segment"] else ""
+        val = f" ${p['contract_value']:,.0f}" if p["contract_value"] else ""
+        lines.append(f"\n--- {p['customer']}{seg}{val} | {p['name']} | {p['health'].upper()} | PM: {p['owner']} ---")
+        if p["health_notes"]:
+            lines.append(f"Health notes: {p['health_notes'][:400]}")
+        if p["weekly_status"]:
+            lines.append(f"Status: {p['weekly_status'][:400]}")
+
+    # Also include some green projects with recent notes for momentum signals
+    lines.append("\n=== PM NOTES (recent green/active — momentum signals) ===")
+    green_with_notes = [p for p in active
+                        if p["health"] == "green"
+                        and (p["health_notes"] or p["weekly_status"])
+                        and p.get("latest_note_date")]
+    green_with_notes.sort(key=lambda x: x["latest_note_date"] or datetime.min, reverse=True)
+    for p in green_with_notes[:10]:
+        lines.append(f"\n--- {p['customer']} | {p['name']} | GREEN | PM: {p['owner']} ---")
+        if p["health_notes"]:
+            lines.append(f"Health notes: {p['health_notes'][:300]}")
+        if p["weekly_status"]:
+            lines.append(f"Status: {p['weekly_status'][:300]}")
+
+    # PM coverage stats
+    with_notes = [p for p in active if p["health_notes"] or p["weekly_status"]]
+    lines.append(f"\n=== PM COMMENTARY COVERAGE ===")
+    lines.append(f"{len(with_notes)} of {len(active)} active projects ({int(len(with_notes)/len(active)*100) if active else 0}%) have PM notes")
+
+    return "\n".join(lines)
+
+
+# ── Theme detection patterns for narrative extraction (regex fallback) ──
+_THEME_PATTERNS = {
+    "customer_blocking": re.compile(
+        r'waiting on (?:customer|client)|no response|customer.{0,20}(?:not respond|unresponsive|unavailable|no.?show)|'
+        r'pending.{0,15}(?:customer|client)|customer.{0,15}(?:delay|hold)',
+        re.IGNORECASE),
+    "engineering_dependency": re.compile(
+        r'escalat.{0,10}(?:to |)engineer|engineer.{0,15}(?:investigat|review|working|fix|resolv)|'
+        r'product.{0,10}(?:team|issue|bug|defect)|awaiting.{0,10}(?:fix|patch|release)',
+        re.IGNORECASE),
+    "go_live_milestone": re.compile(
+        r'go.?live|went live|now live|launched|go.?no.?go|cutover|production.?ready|'
+        r'hypercare|UAT.{0,15}(?:complete|pass|success)',
+        re.IGNORECASE),
+    "on_hold": re.compile(
+        r'on hold|paused|suspend|put on hold|project.{0,10}hold|no activity',
+        re.IGNORECASE),
+    "timeline_risk": re.compile(
+        r'timeline.{0,15}(?:impact|slip|delay|at risk|push)|behind schedule|'
+        r'missed.{0,10}(?:deadline|date|milestone)|overdue|延|pushed.{0,5}(?:back|out)',
+        re.IGNORECASE),
+    "resource_issue": re.compile(
+        r'resource.{0,10}(?:gap|short|constrain|unavail)|no.{0,5}(?:PM|TL|resource).{0,5}assign|'
+        r'staffing|capacity.{0,10}(?:issue|concern|limit)',
+        re.IGNORECASE),
+}
+
+
+def _extract_themes(all_enriched):
+    """Scan PM notes across portfolio and extract thematic patterns.
+    Returns dict of theme → list of (project, snippet) tuples."""
+    themes = {k: [] for k in _THEME_PATTERNS}
+    active = [p for p in all_enriched
+              if p["status_val"] in ACTIVE_STATUS_VALUES
+              and (p["health_notes"] or p["weekly_status"])]
+
+    for p in active:
+        combined = f'{p["health_notes"]} {p["weekly_status"]}'
+        for theme_name, pattern in _THEME_PATTERNS.items():
+            match = pattern.search(combined)
+            if match:
+                start = max(0, match.start() - 20)
+                end = min(len(combined), match.end() + 60)
+                snippet = ("..." if start > 0 else "") + combined[start:end].strip() + ("..." if end < len(combined) else "")
+                themes[theme_name].append((p, snippet))
+
+    return themes
+
+
+def build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects):
+    """Build weekly executive summary. Tries Claude API for LLM-powered synthesis,
+    falls back to regex-based analysis if API unavailable."""
+
+    # Try Claude-powered narrative first
+    if ANTHROPIC_API_KEY:
+        prompt_data = _build_narrative_prompt(projects_by_team, all_enriched, stale_projects, changes)
+        claude_html = call_claude_narrative(prompt_data)
+        if claude_html:
+            return f'''<div style="{S_SECTION}">
+<h3 style="margin:0 0 12px 0;font-size:14px;font-weight:700;">Weekly Executive Summary</h3>
+<div style="font-size:13px;line-height:1.6;">{claude_html}</div>
 </div>'''
 
-    return narrative
+    # Fallback to regex-based narrative
+    return _build_regex_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects)
+
+
+def _build_regex_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects):
+    """Regex-based fallback narrative when Claude API is unavailable."""
+
+    active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+    total_active = len(active)
+
+    # Health summary by team
+    health_summary = {}
+    for team, projs in projects_by_team.items():
+        team_active = [p for p in projs if p["status_val"] in ACTIVE_STATUS_VALUES]
+        red = sum(1 for p in team_active if p["health"] == "red")
+        yellow = sum(1 for p in team_active if p["health"] == "yellow")
+        green = sum(1 for p in team_active if p["health"] == "green")
+        health_summary[team] = {"red": red, "yellow": yellow, "green": green, "total": len(team_active)}
+
+    # Extract themes from PM notes
+    themes = _extract_themes(all_enriched)
+
+    # Z2E progress snapshot
+    z2e_active = [p for p in all_enriched
+                  if "z2e" in p.get("sub_type", "").lower()
+                  and p.get("task_progress") is not None
+                  and p["status"] not in ("Completed", "Closeout")]
+    z2e_avg = int(sum(p["task_progress"] for p in z2e_active) / len(z2e_active)) if z2e_active else 0
+    z2e_low = [p for p in z2e_active if p.get("task_progress", 0) < 30]
+
+    # High-value at risk
+    hv_at_risk = [p for p in active
+                  if p["health"] in ("red", "yellow")
+                  and (p["client_segment"] in ("Pinnacle", "Strategic") or p["contract_value"] >= 100000)]
+
+    # PM notes coverage
+    with_notes = [p for p in active if p["health_notes"] or p["weekly_status"]]
+    notes_pct = int(len(with_notes) / total_active * 100) if total_active else 0
+
+    # ── Build narrative HTML ──
+    P = 'style="margin:8px 0;line-height:1.6;font-size:13px;"'
+    BOLD = 'style="font-weight:700;"'
+    CALLOUT = 'style="background:#fef2f2;border-left:3px solid #ef4444;padding:8px 12px;margin:8px 0;font-size:12px;line-height:1.5;"'
+    INSIGHT = 'style="background:#eff6ff;border-left:3px solid #3b82f6;padding:8px 12px;margin:8px 0;font-size:12px;line-height:1.5;"'
+
+    html = f'<div style="{S_SECTION}">'
+    html += '<h3 style="margin:0 0 12px 0;font-size:14px;font-weight:700;">Weekly Executive Summary</h3>'
+
+    # ── Portfolio overview ──
+    html += f'<p {P}><span {BOLD}>Portfolio:</span> {total_active} active projects across 3 teams. '
+    total_red = sum(h["red"] for h in health_summary.values())
+    total_yellow = sum(h["yellow"] for h in health_summary.values())
+    if total_red or total_yellow:
+        html += f'<span style="color:#dc2626;">{total_red} red</span> and '
+        html += f'<span style="color:#b45309;">{total_yellow} yellow</span> health flags. '
+    html += f'{len(new_projects)} new projects onboarded this week.</p>'
+
+    # ── Health by team ──
+    html += f'<p {P}><span {BOLD}>Health by Team:</span></p>'
+    for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
+        if team in health_summary:
+            h = health_summary[team]
+            director = DIRECTOR_NAMES[team]
+            concern = ""
+            if h["red"] >= 3:
+                concern = f' — <span style="color:#dc2626;">elevated red count, director review recommended</span>'
+            elif h["red"] > 0 and h["red"] / max(h["total"], 1) > 0.15:
+                concern = f' — <span style="color:#b45309;">{int(h["red"]/h["total"]*100)}% of portfolio at red</span>'
+            html += f'''<div style="margin:2px 0 2px 12px;font-size:12px;">{director} ({team}):
+<span style="background:#ef4444;color:white;padding:1px 6px;border-radius:3px;font-size:11px;margin-right:4px;">{h["red"]} Red</span>
+<span style="background:#f59e0b;color:white;padding:1px 6px;border-radius:3px;font-size:11px;margin-right:4px;">{h["yellow"]} Yellow</span>
+<span style="background:#22c55e;color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{h["green"]} Green</span>{concern}</div>'''
+
+    # ── Key risks extracted from PM notes ──
+    risk_items = []
+
+    # Customer blocking
+    cust_blocking = themes["customer_blocking"]
+    if cust_blocking:
+        names = ", ".join(p["customer"] for p, _ in cust_blocking[:4])
+        trail = f" (+{len(cust_blocking)-4} more)" if len(cust_blocking) > 4 else ""
+        risk_items.append(
+            f'<span {BOLD}>Customer responsiveness:</span> {len(cust_blocking)} projects blocked waiting on customer action '
+            f'({names}{trail}). Consider exec-to-exec outreach on stalled accounts.')
+
+    # Engineering dependencies
+    eng_deps = themes["engineering_dependency"]
+    if eng_deps:
+        names = ", ".join(f'{p["customer"]}' for p, _ in eng_deps[:3])
+        trail = f" (+{len(eng_deps)-3} more)" if len(eng_deps) > 3 else ""
+        risk_items.append(
+            f'<span {BOLD}>Engineering dependencies:</span> {len(eng_deps)} projects waiting on engineering resolution '
+            f'({names}{trail}). Flag with product/engineering leadership if SLAs are slipping.')
+
+    # Timeline risks
+    timeline = themes["timeline_risk"]
+    if timeline:
+        names = ", ".join(p["customer"] for p, _ in timeline[:3])
+        risk_items.append(
+            f'<span {BOLD}>Timeline pressure:</span> {len(timeline)} projects reporting schedule impact '
+            f'({names}). Review scoping accuracy and resource allocation.')
+
+    # On hold
+    on_hold = themes["on_hold"]
+    if len(on_hold) >= 3:
+        risk_items.append(
+            f'<span {BOLD}>Stalled pipeline:</span> {len(on_hold)} projects currently on hold per PM notes. '
+            f'Aging holds tie up PM capacity and should be triaged for reactivation or closure.')
+
+    if risk_items:
+        html += f'<p {P}><span {BOLD}>Key Risks (from PM notes analysis):</span></p>'
+        for item in risk_items:
+            html += f'<div {CALLOUT}>{item}</div>'
+
+    # ── Positive momentum ──
+    go_lives = themes["go_live_milestone"]
+    if go_lives:
+        names = ", ".join(p["customer"] for p, _ in go_lives[:5])
+        trail = f" (+{len(go_lives)-5} more)" if len(go_lives) > 5 else ""
+        html += f'<div {INSIGHT}><span {BOLD}>Momentum:</span> {len(go_lives)} projects at or near go-live '
+        html += f'({names}{trail}). Strong execution pipeline this week.</div>'
+
+    # ── Z2E migration status ──
+    if z2e_active:
+        html += f'<p {P}><span {BOLD}>Z2E Migration:</span> {len(z2e_active)} active projects averaging '
+        html += f'<strong>{z2e_avg}%</strong> task completion. '
+        if z2e_low:
+            names = ", ".join(p["customer"] for p in z2e_low[:3])
+            html += f'<span style="color:#dc2626;">{len(z2e_low)} projects below 30% progress ({names})</span> — '
+            html += 'may need resource reallocation or scope review.'
+        else:
+            html += 'All projects tracking above 30% — on trajectory.'
+        html += '</p>'
+
+    # ── High-value at risk ──
+    if hv_at_risk:
+        total_val = sum(p["contract_value"] for p in hv_at_risk)
+        html += f'<p {P}><span {BOLD}>Revenue exposure:</span> {len(hv_at_risk)} Pinnacle/Strategic or $100K+ projects '
+        html += f'at red/yellow health, representing <strong>${total_val:,.0f}</strong> in contract value. '
+        top = sorted(hv_at_risk, key=lambda x: -x["contract_value"])[:3]
+        html += 'Top accounts: ' + ", ".join(f'{p["customer"]} (${p["contract_value"]:,.0f})' for p in top) + '.</p>'
+
+    # ── PM coverage + stale ──
+    html += f'<p {P}><span {BOLD}>PM Commentary:</span> {len(with_notes)} of {total_active} active projects ({notes_pct}%) '
+    html += 'have health notes or status updates. '
+    if notes_pct < 70:
+        html += '<span style="color:#b45309;">Coverage below 70% — push directors to ensure PMs update notes weekly.</span>'
+    if stale_projects:
+        html += f' Additionally, <strong>{len(stale_projects)}</strong> implementation projects had zero time logged in 7 days.'
+    html += '</p>'
+
+    # ── Recommended actions ──
+    actions = []
+    if cust_blocking and any(p["client_segment"] in ("Pinnacle", "Strategic") for p, _ in cust_blocking):
+        pinnacle_blocked = [(p, s) for p, s in cust_blocking if p["client_segment"] in ("Pinnacle", "Strategic")]
+        actions.append(f'Schedule exec outreach for {len(pinnacle_blocked)} blocked Pinnacle/Strategic customers')
+    if eng_deps and len(eng_deps) >= 3:
+        actions.append(f'Escalate {len(eng_deps)} engineering-dependent projects to product leadership')
+    if z2e_low and len(z2e_low) >= 2:
+        actions.append(f'Review resourcing on {len(z2e_low)} Z2E projects below 30% completion')
+    if stale_projects and len(stale_projects) >= 10:
+        actions.append(f'Directors to audit {len(stale_projects)} stale projects for status accuracy')
+
+    if actions:
+        html += f'<p {P}><span {BOLD}>Recommended Actions:</span></p>'
+        html += '<div style="margin:4px 0 0 12px;font-size:12px;">'
+        for i, action in enumerate(actions, 1):
+            html += f'<div style="margin:3px 0;">→ {action}</div>'
+        html += '</div>'
+
+    html += '</div>'
+    return html
 
 
 def build_email_html(digest_data, is_weekly=False):
