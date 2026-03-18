@@ -1209,7 +1209,7 @@ def call_claude_intelligence(prompt_data):
         print("  Claude API unavailable, falling back to regex analysis.")
         return None
     print("  Calling Claude for daily intelligence analysis...")
-    result = call_claude(DAILY_INTELLIGENCE_PROMPT, prompt_data, max_tokens=4000)
+    result = call_claude(DAILY_INTELLIGENCE_PROMPT, prompt_data, max_tokens=4000, model="claude-opus-4-6")
     if result:
         print(f"  Claude intelligence received ({len(result)} chars).")
     return result
