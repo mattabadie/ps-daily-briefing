@@ -558,6 +558,51 @@ def build_pm_updates_section(updates, projects_by_id):
     return build_section("PM-PUBLISHED UPDATES (24h)", len(updates), html)
 
 
+def build_pm_notes_section(all_enriched):
+    """Build section showing the most recently updated PM health notes and weekly status.
+
+    Shows projects that have non-empty health notes or weekly status,
+    sorted by updatedAt desc, capped to the most recent 15 projects.
+    """
+    # Filter to active projects with notes content
+    with_notes = [
+        p for p in all_enriched
+        if p["status_val"] in ACTIVE_STATUS_VALUES
+        and (p["health_notes"] or p["weekly_status"])
+    ]
+    if not with_notes:
+        return ""
+
+    # Sort by most recently updated, take top 15
+    with_notes.sort(key=lambda x: -x["updated_at"])
+    top = with_notes[:15]
+
+    html = f'<div style="{S_MUTED};margin-bottom:8px;">Most recently updated projects with PM commentary.</div>'
+
+    for p in top:
+        link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+
+        # Health color dot
+        hc = p.get("health", "")
+        dot_color = "#ef4444" if hc == "red" else "#f59e0b" if hc == "yellow" else "#22c55e" if hc == "green" else "#94a3b8"
+        dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
+
+        html += f'<div style="{S_ITEM}">'
+        html += f'<div>{dot}<strong>{link}</strong> <span style="{S_MUTED}">— {p["customer"]} • {p["owner"]}</span></div>'
+
+        if p["health_notes"]:
+            html += f'<div style="margin:4px 0 2px 12px;font-size:11px;"><strong style="color:#334155;">Health:</strong> <span style="color:#475569;">{p["health_notes"]}</span></div>'
+        if p["weekly_status"]:
+            html += f'<div style="margin:2px 0 0 12px;font-size:11px;"><strong style="color:#334155;">Status:</strong> <span style="color:#475569;">{p["weekly_status"]}</span></div>'
+
+        html += '</div>'
+
+    if len(with_notes) > 15:
+        html += f'<div style="{S_MUTED};margin-top:8px;font-style:italic;">{len(with_notes) - 15} more projects with notes not shown.</div>'
+
+    return build_section("PM STATUS NOTES (Most Recent)", len(top), html)
+
+
 def build_stale_projects_section(stale_projects):
     """Build section for active projects with no time entries in last 7 days.
 
@@ -598,7 +643,7 @@ def build_stale_projects_section(stale_projects):
     return build_section("STALE PROJECTS (No Time Logged — 7 Days)", len(stale_projects), html)
 
 
-def build_weekly_narrative(projects_by_team, new_projects, changes, updates, stale_projects):
+def build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects):
     """Build a written narrative summary for Friday weekly reports."""
     # Count projects by team
     team_counts = {team: len(projs) for team, projs in projects_by_team.items()}
@@ -641,9 +686,11 @@ The portfolio remains active with <strong>{sum(team_counts.values())} total proj
         change_count = len([c for c in changes if c["type"] in ("health_change", "status_change")])
         narrative += f'<p style="margin:8px 0;line-height:1.6;"><strong>Changes This Week:</strong> We detected <strong>{change_count} health or status transitions</strong> requiring attention or follow-up.</p>'
 
-    # PM updates
-    if updates:
-        narrative += f'<p style="margin:8px 0;line-height:1.6;"><strong>PM Published Updates:</strong> <strong>{len(updates)} status updates</strong> were published by PMs, reflecting ongoing project communication with stakeholders.</p>'
+    # PM notes coverage
+    with_notes = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES and (p["health_notes"] or p["weekly_status"])]
+    if with_notes:
+        total_active = sum(1 for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES)
+        narrative += f'<p style="margin:8px 0;line-height:1.6;"><strong>PM Commentary:</strong> <strong>{len(with_notes)} of {total_active}</strong> active projects have health notes or weekly status updates populated.</p>'
 
     # Stale projects
     if stale_projects:
@@ -663,8 +710,8 @@ def build_email_html(digest_data, is_weekly=False):
     today_str = digest_data["today_str"]
     new_projects = digest_data["new_projects"]
     changes = digest_data["changes"]
-    pm_updates = digest_data["pm_updates"]
     stale_projects = digest_data["stale_projects"]
+    all_enriched = digest_data["all_enriched"]
     projects_by_team = digest_data["projects_by_team"]
     projects_by_id = digest_data["projects_by_id"]
     has_prior_snapshot = digest_data["has_prior_snapshot"]
@@ -710,12 +757,12 @@ def build_email_html(digest_data, is_weekly=False):
     else:
         sections.append(f'<div style="{S_SECTION}"><div style="{S_MUTED}"><em>Health change detection available from next run (snapshot baseline being established today).</em></div></div>')
 
-    sections.append(build_pm_updates_section(pm_updates, projects_by_id))
-    sections.append(build_stale_projects_section(stale_projects))
-
-    # Weekly narrative on Friday or with --force-weekly
+    # Weekly narrative on Friday or with --force-weekly — top of email
     if is_weekly:
-        sections.append(build_weekly_narrative(projects_by_team, new_projects, changes, pm_updates, stale_projects))
+        sections.append(build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects))
+
+    sections.append(build_pm_notes_section(all_enriched))
+    sections.append(build_stale_projects_section(stale_projects))
 
     sections_html = "\n".join([s for s in sections if s])
 
@@ -817,11 +864,6 @@ def main():
     has_prior_snapshot = bool(old_snapshot)
     print(f"Found {len(changes)} health/status changes (prior snapshot: {has_prior_snapshot}).")
 
-    # Fetch PM-published updates
-    print("Fetching PM-published updates...")
-    pm_updates = fetch_project_updates(cutoff_ts)
-    print(f"Found {len(pm_updates)} PM updates in last 24h.")
-
     # Find stale projects (active but no time logged in 7 days)
     print("Detecting stale projects...")
     stale_projects = find_stale_projects(all_enriched)
@@ -836,8 +878,8 @@ def main():
         "today_str": NOW.strftime("%A, %B %d, %Y"),
         "new_projects": new_projects,
         "changes": changes,
-        "pm_updates": pm_updates,
         "stale_projects": stale_projects,
+        "all_enriched": all_enriched,
         "projects_by_team": projects_by_team,
         "projects_by_id": projects_by_id,
         "has_prior_snapshot": has_prior_snapshot,
