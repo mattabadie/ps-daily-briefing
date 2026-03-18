@@ -224,6 +224,32 @@ def assign_to_teams(projects):
 # ═══════════════════════════════════════════════════════════════════════════════
 # ENRICHMENT
 # ═══════════════════════════════════════════════════════════════════════════════
+def parse_latest_note_date(text):
+    """Try to extract the most recent date stamp from PM notes text.
+    PMs typically write dates like '3/12/26', '03/12/2026', '3/12/2026'."""
+    if not text:
+        return None
+    # Match patterns like M/D/YY, M/D/YYYY, MM/DD/YY, MM/DD/YYYY
+    dates = re.findall(r'(\d{1,2}/\d{1,2}/(?:\d{2}|\d{4}))', text)
+    parsed = []
+    for d in dates:
+        for fmt in ("%m/%d/%Y", "%m/%d/%y"):
+            try:
+                parsed.append(datetime.strptime(d, fmt))
+                break
+            except ValueError:
+                continue
+    return max(parsed) if parsed else None
+
+
+# Escalation keyword patterns in PM notes
+ESCALATION_KEYWORDS = re.compile(
+    r'block|waiting on|no response|escalat|delayed|risk|slipp|behind|'
+    r'concern|stuck|unresponsive|missed|overdue|hold.?up|stall',
+    re.IGNORECASE,
+)
+
+
 def enrich_project(p):
     """Extract key fields from project data."""
     sv = p.get("status", {}).get("value")
@@ -239,6 +265,31 @@ def enrich_project(p):
     created_at = p.get("createdAt", 0)
     updated_at = p.get("updatedAt", 0)
 
+    # New fields for deep analysis
+    sub_type = get_field(p, "eDisc: Project Sub-Type") or ""
+    client_segment = get_field(p, "Client Segmentation") or ""
+    contract_value = 0.0
+    try:
+        contract_value = float(get_field(p, "Opp: Total Contract Value") or 0)
+    except (ValueError, TypeError):
+        pass
+    ps_net_price = 0.0
+    try:
+        ps_net_price = float(get_field(p, "PSR: Total PS Net Price") or 0)
+    except (ValueError, TypeError):
+        pass
+
+    # Parse latest date from notes for staleness detection
+    combined_notes = f"{health_notes} {weekly_status}"
+    latest_note_date = parse_latest_note_date(combined_notes)
+
+    # Detect escalation keywords
+    escalation_flags = []
+    if ESCALATION_KEYWORDS.search(health_notes):
+        escalation_flags.append("health_notes")
+    if ESCALATION_KEYWORDS.search(weekly_status):
+        escalation_flags.append("weekly_status")
+
     return {
         "id": project_id,
         "name": p.get("projectName", "?"),
@@ -247,11 +298,17 @@ def enrich_project(p):
         "owner": owner_name,
         "customer": customer,
         "health": health.strip().lower() if health else "",
-        "health_notes": health_notes[:300],
-        "weekly_status": weekly_status[:300],
+        "health_notes": health_notes[:500],
+        "weekly_status": weekly_status[:500],
         "project_type": project_type,
         "created_at": created_at,
         "updated_at": updated_at,
+        "sub_type": sub_type,
+        "client_segment": client_segment,
+        "contract_value": contract_value,
+        "ps_net_price": ps_net_price,
+        "latest_note_date": latest_note_date,
+        "escalation_flags": escalation_flags,
     }
 
 
@@ -558,6 +615,270 @@ def build_pm_updates_section(updates, projects_by_id):
     return build_section("PM-PUBLISHED UPDATES (24h)", len(updates), html)
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# DEEP ANALYSIS SECTIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+def build_attention_required_section(all_enriched):
+    """Build ATTENTION REQUIRED section with 3 subsections:
+    1. Escalation candidates — red/yellow + blocker language in notes
+    2. High-value at risk — Pinnacle/Strategic clients with red/yellow health
+    3. Stale commentary — active projects with no notes update in 14+ days
+    """
+    now = datetime.now()
+    active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+
+    # --- 1. Escalation candidates ---
+    escalations = []
+    for p in active:
+        if p["health"] in ("red", "yellow") and p["escalation_flags"]:
+            # Extract the matching keyword snippet for context
+            snippet = ""
+            text = p["health_notes"] if "health_notes" in p["escalation_flags"] else p["weekly_status"]
+            match = ESCALATION_KEYWORDS.search(text)
+            if match:
+                start = max(0, match.start() - 30)
+                end = min(len(text), match.end() + 80)
+                snippet = ("..." if start > 0 else "") + text[start:end] + ("..." if end < len(text) else "")
+            escalations.append((p, snippet))
+
+    # Sort: red first, then by contract value desc
+    escalations.sort(key=lambda x: (0 if x[0]["health"] == "red" else 1, -x[0]["contract_value"]))
+
+    # --- 2. High-value at risk ---
+    high_value = []
+    for p in active:
+        if p["health"] in ("red", "yellow") and p["client_segment"] in ("Pinnacle", "Strategic"):
+            high_value.append(p)
+        elif p["health"] in ("red", "yellow") and p["contract_value"] >= 100000:
+            high_value.append(p)
+    # Dedupe (some may also be in escalations)
+    seen_ids = set()
+    high_value_deduped = []
+    for p in sorted(high_value, key=lambda x: -x["contract_value"]):
+        if p["id"] not in seen_ids:
+            high_value_deduped.append(p)
+            seen_ids.add(p["id"])
+    high_value = high_value_deduped[:10]
+
+    # --- 3. Stale commentary ---
+    stale_notes = []
+    fourteen_days_ago = now - timedelta(days=14)
+    for p in active:
+        if p["status_val"] in IDLE_STATUS_VALUES:
+            continue
+        if p.get("project_type", "").lower() != "implementation":
+            continue
+        if p["latest_note_date"]:
+            if p["latest_note_date"] < fourteen_days_ago:
+                days_stale = (now - p["latest_note_date"]).days
+                stale_notes.append((p, days_stale))
+        elif p["health_notes"] or p["weekly_status"]:
+            # Has notes but no parseable date — can't determine age
+            pass
+        else:
+            # No notes at all on an active implementation project
+            stale_notes.append((p, None))
+    stale_notes.sort(key=lambda x: -(x[1] or 999))
+
+    # --- Build HTML ---
+    total_items = len(escalations) + len(high_value) + len(stale_notes)
+    if total_items == 0:
+        return ""
+
+    html = ""
+
+    # Escalation candidates
+    if escalations:
+        html += f'<div style="margin-bottom:16px;">'
+        html += f'<div style="font-weight:700;font-size:12px;color:#dc2626;margin-bottom:6px;">Escalation Candidates ({len(escalations)})</div>'
+        html += f'<div style="{S_MUTED};margin-bottom:6px;">Red/yellow health with blocker language in PM notes — may need VP intervention.</div>'
+        for p, snippet in escalations[:10]:
+            link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+            hc = p["health"]
+            dot_color = "#ef4444" if hc == "red" else "#f59e0b"
+            dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
+            val_str = f' • ${p["contract_value"]:,.0f}' if p["contract_value"] else ""
+            seg_str = f' • {p["client_segment"]}' if p["client_segment"] else ""
+            style = S_PROBLEM if hc == "red" else S_WARNING
+            html += f'<div style="{style}">'
+            html += f'<div>{dot}<strong>{link}</strong> <span style="{S_MUTED}">— {p["customer"]} • {p["owner"]}{seg_str}{val_str}</span></div>'
+            if snippet:
+                html += f'<div style="margin:4px 0 0 12px;font-size:11px;color:#475569;font-style:italic;">"{snippet}"</div>'
+            html += '</div>'
+        html += '</div>'
+
+    # High-value at risk
+    if high_value:
+        html += f'<div style="margin-bottom:16px;">'
+        html += f'<div style="font-weight:700;font-size:12px;color:#dc2626;margin-bottom:6px;">High-Value Clients at Risk ({len(high_value)})</div>'
+        html += f'<div style="{S_MUTED};margin-bottom:6px;">Pinnacle/Strategic clients or contracts $100K+ with red/yellow health.</div>'
+        html += f'<table style="{S_TABLE}">'
+        html += f'<tr><th style="{S_TH}">Project</th><th style="{S_TH}">Customer</th><th style="{S_TH}">Segment</th><th style="{S_TH}">Value</th><th style="{S_TH}">Health</th><th style="{S_TH}">PM</th></tr>'
+        for p in high_value:
+            link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+            hc = p["health"]
+            health_badge = f'<span style="background:{"#ef4444" if hc=="red" else "#f59e0b"};color:white;padding:1px 6px;border-radius:3px;font-size:10px;">{hc.upper()}</span>'
+            val_str = f'${p["contract_value"]:,.0f}' if p["contract_value"] else "—"
+            html += f'<tr><td style="{S_TD}">{link}</td><td style="{S_TD}">{p["customer"]}</td>'
+            html += f'<td style="{S_TD}">{p["client_segment"] or "—"}</td><td style="{S_TD_NUM}">{val_str}</td>'
+            html += f'<td style="{S_TD}">{health_badge}</td><td style="{S_TD}">{p["owner"]}</td></tr>'
+        html += '</table></div>'
+
+    # Stale commentary
+    if stale_notes:
+        html += f'<div style="margin-bottom:8px;">'
+        html += f'<div style="font-weight:700;font-size:12px;color:#b45309;margin-bottom:6px;">Stale Commentary ({len(stale_notes)})</div>'
+        html += f'<div style="{S_MUTED};margin-bottom:6px;">Active implementation projects with no PM notes update in 14+ days.</div>'
+        for p, days in stale_notes[:10]:
+            link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+            age_str = f'{days} days' if days else "no notes"
+            html += f'<div style="{S_WARNING}">{link} <span style="{S_MUTED}">— {p["customer"]} • {p["owner"]} • <strong>{age_str}</strong></span></div>'
+        if len(stale_notes) > 10:
+            html += f'<div style="{S_MUTED};font-style:italic;margin-top:4px;">+ {len(stale_notes) - 10} more</div>'
+        html += '</div>'
+
+    return build_section("ATTENTION REQUIRED", total_items, html)
+
+
+def build_z2e_tracker_section(all_enriched):
+    """Build Z2E Migration Tracker showing Phase 1 and Phase 2 progress.
+    Phase 1 goal: complete ASAP. Phase 2 goal: complete by 12/31/26."""
+    # Categorize by sub-type
+    phase1 = []
+    phase2 = []
+    for p in all_enriched:
+        st = p.get("sub_type", "").lower()
+        if "z2e phase 1" in st:
+            phase1.append(p)
+        elif "z2e" in st and "z2e phase 1" not in st and "z2e - not started" not in st:
+            phase2.append(p)
+
+    if not phase1 and not phase2:
+        return ""
+
+    COMPLETED_STATUSES = {"Completed", "Closeout"}
+    IN_PROGRESS_STATUSES = {"In progress", "Hypercare", "Partially Live"}
+    BLOCKED_STATUSES = {"Blocked", "Delayed", "On Hold"}
+
+    def status_summary(projects):
+        completed = [p for p in projects if p["status"] in COMPLETED_STATUSES]
+        in_progress = [p for p in projects if p["status"] in IN_PROGRESS_STATUSES]
+        blocked = [p for p in projects if p["status"] in BLOCKED_STATUSES]
+        other = [p for p in projects if p["status"] not in COMPLETED_STATUSES | IN_PROGRESS_STATUSES | BLOCKED_STATUSES]
+        return completed, in_progress, blocked, other
+
+    html = ""
+
+    # Phase 1
+    if phase1:
+        comp, prog, blk, oth = status_summary(phase1)
+        pct = int(len(comp) / len(phase1) * 100) if phase1 else 0
+        bar_color = "#22c55e" if pct > 75 else "#f59e0b" if pct > 50 else "#ef4444"
+
+        html += f'<div style="margin-bottom:16px;">'
+        html += f'<div style="font-weight:700;font-size:12px;color:#334155;margin-bottom:4px;">Phase 1 (Z2E Phase 1) — Goal: Complete ASAP</div>'
+        # Progress bar
+        html += f'<div style="background:#e2e8f0;border-radius:4px;height:12px;margin:4px 0 8px 0;overflow:hidden;">'
+        html += f'<div style="background:{bar_color};height:100%;width:{pct}%;border-radius:4px;"></div></div>'
+        html += f'<div style="font-size:12px;margin-bottom:8px;">'
+        html += f'<strong>{len(comp)}</strong>/{len(phase1)} complete ({pct}%) • '
+        html += f'<span style="color:#0f766e;">{len(prog)} in progress</span> • '
+        html += f'<span style="color:#dc2626;">{len(blk)} blocked/on hold</span>'
+        if oth:
+            html += f' • {len(oth)} other'
+        html += '</div>'
+
+        # Show blocked/red projects — these are the ones needing attention
+        needs_attention = [p for p in blk + prog if p["health"] in ("red", "yellow")]
+        if needs_attention:
+            html += f'<div style="font-size:11px;font-weight:600;color:#b45309;margin:4px 0;">Needs attention:</div>'
+            for p in needs_attention:
+                link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+                hc = p["health"]
+                dot_color = "#ef4444" if hc == "red" else "#f59e0b"
+                dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
+                html += f'<div style="font-size:11px;padding:2px 0 2px 12px;">{dot}{link} — {p["customer"]} • {p["owner"]} • {p["status"]}</div>'
+        html += '</div>'
+
+    # Phase 2
+    if phase2:
+        comp, prog, blk, oth = status_summary(phase2)
+        pct = int(len(comp) / len(phase2) * 100) if phase2 else 0
+        bar_color = "#22c55e" if pct > 50 else "#f59e0b" if pct > 25 else "#ef4444"
+
+        # Days until deadline
+        from datetime import date
+        deadline = date(2026, 12, 31)
+        days_left = (deadline - date.today()).days
+
+        html += f'<div style="margin-bottom:8px;">'
+        html += f'<div style="font-weight:700;font-size:12px;color:#334155;margin-bottom:4px;">Phase 2 (Z2E) — Deadline: 12/31/2026 ({days_left} days)</div>'
+        # Progress bar
+        html += f'<div style="background:#e2e8f0;border-radius:4px;height:12px;margin:4px 0 8px 0;overflow:hidden;">'
+        html += f'<div style="background:{bar_color};height:100%;width:{pct}%;border-radius:4px;"></div></div>'
+        html += f'<div style="font-size:12px;margin-bottom:8px;">'
+        html += f'<strong>{len(comp)}</strong>/{len(phase2)} complete ({pct}%) • '
+        html += f'<span style="color:#0f766e;">{len(prog)} in progress</span> • '
+        html += f'<span style="color:#dc2626;">{len(blk)} blocked/on hold</span>'
+        if oth:
+            html += f' • {len(oth)} other'
+        html += '</div>'
+
+        # Show blocked/red
+        needs_attention = [p for p in blk + prog if p["health"] in ("red", "yellow")]
+        if needs_attention:
+            html += f'<div style="font-size:11px;font-weight:600;color:#b45309;margin:4px 0;">Needs attention:</div>'
+            for p in needs_attention:
+                link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+                hc = p["health"]
+                dot_color = "#ef4444" if hc == "red" else "#f59e0b"
+                dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
+                html += f'<div style="font-size:11px;padding:2px 0 2px 12px;">{dot}{link} — {p["customer"]} • {p["owner"]} • {p["status"]}</div>'
+        html += '</div>'
+
+    total = len(phase1) + len(phase2)
+    return build_section("Z2E MIGRATION TRACKER", total, html)
+
+
+def build_post_impl_watch_section(projects_by_team):
+    """Build Post-Implementation Watch section for Oronde's team.
+    Tracks subscription engagement and highlights projects needing attention."""
+    post_impl = projects_by_team.get("Post Implementation", [])
+    if not post_impl:
+        return ""
+
+    active = [p for p in post_impl if p["status_val"] in ACTIVE_STATUS_VALUES]
+    subscriptions = [p for p in active if p.get("project_type", "").lower() == "subscription"]
+    implementations = [p for p in active if p.get("project_type", "").lower() == "implementation"]
+
+    html = f'<div style="font-size:12px;margin-bottom:12px;">'
+    html += f'<strong>{len(active)}</strong> active projects: '
+    html += f'<strong>{len(subscriptions)}</strong> subscriptions, '
+    html += f'<strong>{len(implementations)}</strong> implementations'
+    html += '</div>'
+
+    # Red/yellow subscription projects
+    at_risk_subs = [p for p in subscriptions if p["health"] in ("red", "yellow")]
+    if at_risk_subs:
+        html += f'<div style="font-weight:700;font-size:12px;color:#b45309;margin:8px 0 4px 0;">At-Risk Subscriptions ({len(at_risk_subs)})</div>'
+        for p in sorted(at_risk_subs, key=lambda x: (0 if x["health"] == "red" else 1)):
+            link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+            hc = p["health"]
+            dot_color = "#ef4444" if hc == "red" else "#f59e0b"
+            dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
+            html += f'<div style="{S_WARNING}">{dot}{link} <span style="{S_MUTED}">— {p["customer"]} • {p["owner"]}</span></div>'
+
+    # Subscriptions with no notes (low engagement signal)
+    no_notes_subs = [p for p in subscriptions if not p["health_notes"] and not p["weekly_status"]]
+    if no_notes_subs:
+        html += f'<div style="font-weight:700;font-size:12px;color:{MUTED_COLOR};margin:12px 0 4px 0;">Subscriptions with No PM Commentary ({len(no_notes_subs)})</div>'
+        for p in no_notes_subs:
+            link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
+            html += f'<div style="font-size:11px;padding:2px 0 2px 12px;color:{MUTED_COLOR};">{link} — {p["customer"]} • {p["status"]}</div>'
+
+    return build_section("POST-IMPLEMENTATION WATCH (Oronde)", len(active), html)
+
+
 def build_pm_notes_section(all_enriched):
     """Build section showing the most recently updated PM health notes and weekly status.
 
@@ -746,22 +1067,35 @@ def build_email_html(digest_data, is_weekly=False):
 </div>
 </div>'''
 
-    # Build sections
-    sections = [
-        build_new_projects_section(new_projects),
-    ]
+    # Build sections — ordered by priority
+    sections = []
 
-    # Health changes section (only if we have prior snapshot)
+    # Weekly narrative first on Fridays
+    if is_weekly:
+        sections.append(build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects))
+
+    # Attention required — escalations, high-value at risk, stale notes
+    sections.append(build_attention_required_section(all_enriched))
+
+    # Z2E migration progress
+    sections.append(build_z2e_tracker_section(all_enriched))
+
+    # Health changes (only if we have prior snapshot)
     if has_prior_snapshot:
         sections.append(build_health_changes_section(changes))
     else:
         sections.append(f'<div style="{S_SECTION}"><div style="{S_MUTED}"><em>Health change detection available from next run (snapshot baseline being established today).</em></div></div>')
 
-    # Weekly narrative on Friday or with --force-weekly — top of email
-    if is_weekly:
-        sections.append(build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects))
+    # Post-Implementation watch (Oronde)
+    sections.append(build_post_impl_watch_section(projects_by_team))
 
+    # New projects
+    sections.append(build_new_projects_section(new_projects))
+
+    # PM status notes
     sections.append(build_pm_notes_section(all_enriched))
+
+    # Stale implementation projects
     sections.append(build_stale_projects_section(stale_projects))
 
     sections_html = "\n".join([s for s in sections if s])
