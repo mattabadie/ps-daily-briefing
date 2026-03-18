@@ -17,6 +17,7 @@ Env vars:
 """
 
 import argparse
+import html as html_mod
 import json
 import os
 import re
@@ -27,7 +28,7 @@ import threading
 import urllib.error
 import urllib.request
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -64,6 +65,10 @@ EXTRA_RECIPIENTS = ["matt.abadie@exterro.com"]
 
 SNAPSHOT_DIR = Path(__file__).parent / ".snapshots"
 
+# Task status values (Rocketlane)
+TASK_COMPLETED = 3
+TASK_CANCELLED = 9
+
 # Email styles (inline only)
 S_BODY = "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:900px;margin:0 auto;color:#1a1a1a;font-size:13px;line-height:1.6;background:#ffffff;"
 S_HEADER = f"background:linear-gradient(135deg,{ACCENT_COLOR},#0d9488);color:white;padding:24px;border-radius:8px 8px 0 0;margin-bottom:20px;"
@@ -92,7 +97,7 @@ S_TD_NUM = "padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;"
 # ═══════════════════════════════════════════════════════════════════════════════
 _rate_lock = threading.Lock()
 _request_times = []  # timestamps of recent requests
-RATE_LIMIT = 45  # stay well under 60/min to avoid timeouts
+RATE_LIMIT = 55  # stay under 60/min; retry logic handles occasional 429s
 RATE_WINDOW = 60  # seconds
 
 
@@ -155,7 +160,9 @@ def fetch_all_projects():
     """Fetch all projects with pagination."""
     all_projects, page_token = [], None
     while True:
-        url = "projects" + (f"?pageToken={page_token}" if page_token else "")
+        url = "projects?pageSize=100"
+        if page_token:
+            url += f"&pageToken={page_token}"
         resp = api_get(url)
         all_projects.extend(resp.get("data", []))
         pag = resp.get("pagination", {})
@@ -165,22 +172,6 @@ def fetch_all_projects():
             break
     return all_projects
 
-
-def fetch_project_updates(created_after_ms):
-    """Fetch PM-published project updates after given timestamp (epoch millis)."""
-    updates, page_token = [], None
-    while True:
-        url = f"project-updates?createdAt.gt={created_after_ms}"
-        if page_token:
-            url += f"&pageToken={page_token}"
-        resp = api_get(url)
-        updates.extend(resp.get("data", []))
-        pag = resp.get("pagination", {})
-        if pag.get("hasMore") and pag.get("nextPageToken"):
-            page_token = pag["nextPageToken"]
-        else:
-            break
-    return updates
 
 
 def fetch_task_progress(project_id):
@@ -197,9 +188,9 @@ def fetch_task_progress(project_id):
     cancelled = 0
     for t in data:
         sv = t.get("status", {}).get("value")
-        if sv == 9:
+        if sv == TASK_CANCELLED:
             cancelled += 1
-        elif sv == 3:
+        elif sv == TASK_COMPLETED:
             completed += 1
 
     # If all tasks fit in one page, exact count
@@ -220,41 +211,68 @@ def fetch_task_progress(project_id):
     return completed, total_record_count - cancelled
 
 
-def fetch_z2e_progress(project_ids):
-    """Fetch task progress for Z2E projects sequentially.
-    Returns dict of {project_id: (completed, total)}."""
+Z2E_PROGRESS_CACHE = SNAPSHOT_DIR / "z2e_progress.json"
+
+
+def _load_z2e_cache():
+    """Load cached Z2E task progress from prior run."""
+    if Z2E_PROGRESS_CACHE.exists():
+        try:
+            with open(Z2E_PROGRESS_CACHE) as f:
+                raw = json.load(f)
+            # Convert string keys back to int
+            return {int(k): tuple(v) for k, v in raw.items()}
+        except Exception:
+            return {}
+    return {}
+
+
+def _save_z2e_cache(progress):
+    """Persist Z2E task progress for next run."""
+    SNAPSHOT_DIR.mkdir(exist_ok=True)
+    with open(Z2E_PROGRESS_CACHE, "w") as f:
+        json.dump({str(k): list(v) for k, v in progress.items()}, f)
+
+
+def fetch_z2e_progress(project_ids, project_statuses=None):
+    """Fetch task progress for Z2E projects with caching.
+
+    Uses cached values for projects already at 100%. Only re-fetches
+    projects that are still in progress or had errors last time.
+    Returns dict of {project_id: (completed, total)}.
+    """
+    cached = _load_z2e_cache()
     progress = {}
-    print(f"  Fetching task progress for {len(project_ids)} Z2E projects (1 API call each)...")
-    for i, pid in enumerate(project_ids):
+    to_fetch = []
+
+    for pid in project_ids:
+        if pid in cached:
+            comp, total = cached[pid]
+            # If 100% complete last time, trust the cache
+            if total > 0 and comp >= total:
+                progress[pid] = (comp, total)
+                continue
+        to_fetch.append(pid)
+
+    print(f"  Z2E progress: {len(progress)} cached, {len(to_fetch)} to fetch...")
+    for i, pid in enumerate(to_fetch):
         try:
             completed, total = fetch_task_progress(pid)
             progress[pid] = (completed, total)
         except Exception as e:
             print(f"    Error fetching tasks for {pid}: {e}")
-            progress[pid] = (0, 0)
+            # Fall back to cached value if available
+            if pid in cached:
+                progress[pid] = cached[pid]
+            else:
+                progress[pid] = (0, 0)
         if (i + 1) % 25 == 0:
-            print(f"    Progress: {i + 1}/{len(project_ids)} projects...")
-    print(f"  Task progress fetched for {len(progress)} projects.")
+            print(f"    Progress: {i + 1}/{len(to_fetch)} projects...")
+
+    print(f"  Task progress complete: {len(progress)} projects.")
+    _save_z2e_cache(progress)
     return progress
 
-
-def fetch_time_entries_for_project(pid, date_str=None):
-    """Fetch time entries for a project, optionally filtered to a specific date."""
-    entries, page_token = [], None
-    while True:
-        url = f"time-entries?projectId.eq={pid}"
-        if date_str:
-            url += f"&date.eq={date_str}"
-        if page_token:
-            url += f"&pageToken={page_token}"
-        resp = api_get(url)
-        entries.extend(resp.get("data", []))
-        pag = resp.get("pagination", {})
-        if pag.get("hasMore") and pag.get("nextPageToken"):
-            page_token = pag["nextPageToken"]
-        else:
-            break
-    return entries
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -266,6 +284,16 @@ def get_field(project, label):
         if f.get("fieldLabel") == label:
             return f.get("fieldValueLabel", f.get("fieldValue", ""))
     return None
+
+
+def build_field_index(project):
+    """Build a dict index of field labels → values for O(1) lookups."""
+    idx = {}
+    for f in project.get("fields", []):
+        label = f.get("fieldLabel", "")
+        if label:
+            idx[label] = f.get("fieldValueLabel", f.get("fieldValue", ""))
+    return idx
 
 
 def strip_html(text):
@@ -325,25 +353,29 @@ def enrich_project(p):
     owner = p.get("owner", {})
     owner_name = f'{owner.get("firstName","")} {owner.get("lastName","")}'.strip()
     customer = p.get("customer", {}).get("companyName", "N/A")
-    health = get_field(p, "Red/Yellow/Green Health") or ""
-    health_notes = strip_html(get_field(p, "Internal Project Health Notes") or "")
-    weekly_status = strip_html(get_field(p, "Internal Weekly Status") or "")
-    project_type = get_field(p, "Project Type") or ""
+
+    # Build field index for O(1) lookups (replaces 10× linear scans)
+    fi = build_field_index(p)
+
+    health = fi.get("Red/Yellow/Green Health", "")
+    health_notes = strip_html(fi.get("Internal Project Health Notes", "") or "")
+    weekly_status = strip_html(fi.get("Internal Weekly Status", "") or "")
+    project_type = fi.get("Project Type", "")
     project_id = p.get("projectId", "")
     created_at = p.get("createdAt", 0)
     updated_at = p.get("updatedAt", 0)
 
-    # New fields for deep analysis
-    sub_type = get_field(p, "eDisc: Project Sub-Type") or ""
-    client_segment = get_field(p, "Client Segmentation") or ""
+    # Fields for deep analysis
+    sub_type = fi.get("eDisc: Project Sub-Type", "")
+    client_segment = fi.get("Client Segmentation", "")
     contract_value = 0.0
     try:
-        contract_value = float(get_field(p, "Opp: Total Contract Value") or 0)
+        contract_value = float(fi.get("Opp: Total Contract Value", 0) or 0)
     except (ValueError, TypeError):
         pass
     ps_net_price = 0.0
     try:
-        ps_net_price = float(get_field(p, "PSR: Total PS Net Price") or 0)
+        ps_net_price = float(fi.get("PSR: Total PS Net Price", 0) or 0)
     except (ValueError, TypeError):
         pass
 
@@ -400,7 +432,7 @@ def save_snapshot(projects_by_id):
     SNAPSHOT_DIR.mkdir(exist_ok=True)
     snapshot = {}
     for pid, p in projects_by_id.items():
-        snapshot[pid] = {
+        snapshot[str(pid)] = {
             "id": p["id"],
             "name": p["name"],
             "health": p["health"],
@@ -418,9 +450,10 @@ def detect_changes(old_snapshot, new_projects_by_id):
     """Diff old snapshot against current state. Returns list of changes."""
     changes = []
     for pid, new_p in new_projects_by_id.items():
-        if pid not in old_snapshot:
+        spid = str(pid)  # JSON keys are always strings
+        if spid not in old_snapshot:
             continue  # skip new projects here
-        old_p = old_snapshot[pid]
+        old_p = old_snapshot[spid]
 
         # Health color change
         if old_p.get("health") != new_p["health"]:
@@ -526,7 +559,7 @@ def find_stale_projects(active_projects):
     print(f"  Fetching 7-day time entries to detect stale projects ({len(projects_by_id)} active)...")
     entries, page_token = [], None
     while True:
-        url = f"time-entries?date.ge={seven_days_ago.isoformat()}&date.le={today.isoformat()}"
+        url = f"time-entries?pageSize=100&date.ge={seven_days_ago.isoformat()}&date.le={today.isoformat()}"
         if page_token:
             url += f"&pageToken={page_token}"
         try:
@@ -650,37 +683,6 @@ def build_health_changes_section(changes):
 
     return build_section("HEALTH & STATUS CHANGES", len(changes), html)
 
-
-def build_pm_updates_section(updates, projects_by_id):
-    """Build section for PM-published updates."""
-    if not updates:
-        return ""
-
-    html = ""
-    for u in sorted(updates, key=lambda x: -x.get("createdAt", 0)):
-        project_id = u.get("project", {}).get("projectId", "")
-        p = projects_by_id.get(project_id, {})
-
-        title = u.get("title", "")
-        pm_name = u.get("createdBy", {}).get("displayName", "Unknown")
-        status_val = u.get("statusValue", "")
-        created_at = u.get("createdAt", 0)
-
-        # Convert epoch ms to readable date
-        try:
-            created_date = datetime.fromtimestamp(created_at / 1000).strftime("%b %d, %I:%M %p")
-        except Exception:
-            created_date = "N/A"
-
-        link = f'<a href="{RL_APP_BASE}/{project_id}" style="{S_LINK}">{p.get("name", project_id)}</a>'
-        status_label = f'<span style="{S_MUTED}"> • {status_val}</span>' if status_val else ""
-
-        html += f'''<div style="{S_ITEM}">
-<div><strong>{title}</strong></div>
-<div style="{S_MUTED}">{link} • {p.get("customer", "N/A")} • PM: {pm_name}{status_label} • {created_date}</div>
-</div>'''
-
-    return build_section("PM-PUBLISHED UPDATES (24h)", len(updates), html)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -904,7 +906,6 @@ def build_z2e_tracker_section(all_enriched):
         bar_color = "#22c55e" if phase_pct > 50 else "#f59e0b" if phase_pct > 25 else "#ef4444"
 
         # Days until deadline
-        from datetime import date
         deadline = date(2026, 12, 31)
         days_left = (deadline - date.today()).days
 
