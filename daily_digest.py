@@ -1162,45 +1162,56 @@ ANALYTICAL APPROACH — READ EVERY PM NOTE CAREFULLY:
 - Look for what PMs are NOT saying: no update in 2+ weeks on an active project is a signal.
 - $500K+ contracts at risk deserve specific attention with the dollar amount called out.
 
-YOUR OUTPUT MUST HAVE THESE SECTIONS (use the exact HTML headers shown):
+YOUR OUTPUT MUST HAVE THESE SECTIONS using the exact HTML shown. CRITICAL FORMATTING RULES:
+- Wrap each critical item in a styled div for visual separation
+- Use <p> tags between paragraphs, NOT raw text runs
+- Each numbered item in Critical Items MUST be a separate visual block
 
-<h4 style="color:#dc2626;margin:12px 0 6px 0;">Critical Items Requiring VP Action</h4>
-Only items where Matt must personally intervene. For each:
-- Name the customer, the specific problem, the dollar exposure if applicable
-- State what Matt should do (call the customer exec, escalate to engineering VP, reassign PM, etc.)
-- Explain WHY this needs VP vs. director-level attention
-Max 5-7 items. Be selective — if a director can handle it, don't list it here.
+<h4 style="color:#dc2626;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #fecaca;padding-bottom:4px;">Critical Items Requiring VP Action</h4>
+Only items where Matt must personally intervene. Max 5-7 items.
+FORMAT EACH ITEM AS:
+<div style="background:#fef2f2;border-left:3px solid #ef4444;padding:10px 12px;margin:8px 0;border-radius:0 4px 4px 0;">
+<div style="font-weight:700;font-size:13px;margin-bottom:4px;">[NUMBER]. [CUSTOMER] — $[VALUE] — [ONE-LINE HEADLINE]</div>
+<p style="margin:4px 0;font-size:12px;">[2-3 sentences: what's wrong, how long, why it matters]</p>
+<p style="margin:4px 0;font-size:12px;"><strong>Action:</strong> [What Matt should do specifically]</p>
+</div>
 
-<h4 style="color:#b45309;margin:12px 0 6px 0;">Cross-Portfolio Patterns</h4>
-This is your highest-value analysis. Identify:
-- Engineering/product issues blocking multiple customers (name the specific issue and affected customers)
-- Customer responsiveness patterns (are certain segments or regions going dark?)
-- PM workload signals (one PM with 3+ red/yellow projects = capacity problem)
-- Common root causes appearing across unrelated projects
-- Trends that are getting worse vs. improving
-Be specific. "Several projects have engineering dependencies" is worthless. "IPP collection performance issues are blocking Travelers, CN Rail, and AmeriLife — all waiting on the same engineering fix" is valuable.
+<h4 style="color:#b45309;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #fde68a;padding-bottom:4px;">Cross-Portfolio Patterns</h4>
+This is your highest-value analysis. FORMAT AS:
+<div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:10px 12px;margin:8px 0;border-radius:0 4px 4px 0;">
+<p style="margin:4px 0;font-size:12px;"><strong>[Pattern name]:</strong> [Details with specific customer names and what connects them]</p>
+</div>
+Identify: engineering/product issues blocking multiple customers, customer responsiveness patterns, PM workload signals, common root causes, trends worsening vs. improving. Be specific — name customers, PMs, specific issues.
 
-<h4 style="color:#0f766e;margin:12px 0 6px 0;">Momentum &amp; Wins</h4>
-Projects going live, completing UAT, exiting hypercare. Name the customers. This matters for team morale and for knowing what capacity is freeing up.
+<h4 style="color:#0f766e;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #a7f3d0;padding-bottom:4px;">Momentum &amp; Wins</h4>
+<div style="background:#f0fdf4;border-left:3px solid #22c55e;padding:10px 12px;margin:8px 0;border-radius:0 4px 4px 0;">
+Go-lives, UAT completions, hypercare exits. Name customers. Note PM capacity freeing up.
+</div>
 
-<h4 style="color:#7c3aed;margin:12px 0 6px 0;">Director Priorities</h4>
-Write ONE targeted paragraph for each director. Don't repeat what's in Critical Items — focus on what each director should be doing with their specific team TODAY:
-- <strong>Vanessa (eDiscovery):</strong> Her team's specific situation — Z2E progress, which PMs need support, which customers she should check in with
-- <strong>Maggie (Data PSG):</strong> Her team's specific situation — smaller team, different dynamics
-- <strong>Oronde (Post Implementation):</strong> Subscription engagement, hours consumption, renewals approaching
+<h4 style="color:#7c3aed;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #c4b5fd;padding-bottom:4px;">Director Priorities</h4>
+Write ONE targeted paragraph for each director in separate styled blocks:
+<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">
+<strong>Vanessa (eDiscovery):</strong> [specific to her team]
+</div>
+<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">
+<strong>Maggie (Data PSG):</strong> [specific to her team]
+</div>
+<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">
+<strong>Oronde (Post Implementation):</strong> [specific to his team]
+</div>
 
-<h4 style="color:#334155;margin:12px 0 6px 0;">Recommended Actions</h4>
-5-7 specific, actionable items ranked by urgency. Each should be:
-- Assignable to a specific person (Matt, Vanessa, Maggie, Oronde, or a specific PM)
-- Time-bound (today, this week, by Friday)
-- Measurable (you'll know if it was done)
+<h4 style="color:#334155;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Recommended Actions</h4>
+5-7 items, each as:
+<div style="padding:4px 0 4px 16px;font-size:12px;border-bottom:1px solid #f1f5f9;">
+<strong>[#].</strong> [Action] → <em>[Assigned to] by [when]</em>
+</div>
 
 RULES:
-- Be direct and analytical. No corporate filler. No "it's worth noting" or "moving forward."
-- Use <strong> for emphasis. Use <br/> for line breaks within sections.
+- Use the exact HTML div/p structures shown above. Do NOT output raw unformatted text.
+- Be direct and analytical. No corporate filler.
 - Always name specific customers, PMs, dollar amounts, and percentages.
-- If you see a risk that isn't flagged by the health color, call it out — PMs sometimes lag on updating health.
-- Total response 1000-1500 words. Depth over brevity."""
+- If you see a risk not flagged by health color, call it out.
+- Total response 1000-1500 words."""
 
 
 def call_claude_intelligence(prompt_data):
