@@ -92,7 +92,7 @@ S_TD_NUM = "padding:8px;border-bottom:1px solid #e2e8f0;text-align:right;"
 # ═══════════════════════════════════════════════════════════════════════════════
 _rate_lock = threading.Lock()
 _request_times = []  # timestamps of recent requests
-RATE_LIMIT = 55  # stay under 60/min with margin
+RATE_LIMIT = 45  # stay well under 60/min to avoid timeouts
 RATE_WINDOW = 60  # seconds
 
 
@@ -111,28 +111,41 @@ def _rate_wait():
         _request_times.append(time.time())
 
 
-def api_get(path, retries=3):
-    """Fetch from Rocketlane API with rate limiting and exponential backoff on 429s."""
+def api_get(path, retries=4):
+    """Fetch from Rocketlane API with rate limiting and retry on 429s and timeouts."""
     url = f"{BASE_URL}/{path}"
-    req = urllib.request.Request(url, headers={"api-key": API_KEY, "accept": "application/json"})
     for attempt in range(retries):
+        req = urllib.request.Request(url, headers={"api-key": API_KEY, "accept": "application/json"})
         _rate_wait()
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=45) as resp:
                 return json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < retries - 1:
-                # Use X-Retry-After header if available, else exponential backoff
                 retry_after = e.headers.get("X-Retry-After")
                 if retry_after:
                     try:
-                        wait_until = int(retry_after) / 1000  # epoch millis → seconds
+                        wait_until = int(retry_after) / 1000
                         wait = max(0, wait_until - time.time()) + 0.5
                     except ValueError:
                         wait = 2 ** (attempt + 1)
                 else:
                     wait = 2 ** (attempt + 1)
                 print(f"    429 on {path[:60]}... retry in {wait:.1f}s")
+                time.sleep(wait)
+            elif e.code == 400:
+                # Bad request — don't retry
+                raise
+            elif attempt < retries - 1:
+                wait = 2 ** (attempt + 1)
+                print(f"    HTTP {e.code} on {path[:60]}... retry in {wait:.1f}s")
+                time.sleep(wait)
+            else:
+                raise
+        except (TimeoutError, OSError) as e:
+            if attempt < retries - 1:
+                wait = 3 * (attempt + 1)
+                print(f"    Timeout on {path[:60]}... retry in {wait:.1f}s")
                 time.sleep(wait)
             else:
                 raise
@@ -172,52 +185,55 @@ def fetch_project_updates(created_after_ms):
 
 def fetch_task_progress(project_id):
     """Fetch task completion progress for a project.
-    Returns (completed, total_active) excluding cancelled tasks."""
+    Returns (completed, total_active) excluding cancelled tasks.
+    Only fetches first page (100 tasks) and uses totalRecordCount for estimate."""
+    url = f"tasks?projectId.eq={project_id}&pageSize=100"
+    resp = api_get(url)
+    data = resp.get("data", [])
+    pag = resp.get("pagination", {})
+    total_record_count = pag.get("totalRecordCount", len(data))
+
     completed = 0
-    total = 0
     cancelled = 0
-    page_token = None
-    while True:
-        url = f"tasks?projectId.eq={project_id}&pageSize=100"
-        if page_token:
-            url += f"&pageToken={page_token}"
-        resp = api_get(url)
-        for t in resp.get("data", []):
-            sv = t.get("status", {}).get("value")
-            if sv == 9:  # Cancelled
-                cancelled += 1
-            else:
-                total += 1
-                if sv == 3:  # Completed
-                    completed += 1
-        pag = resp.get("pagination", {})
-        if pag.get("hasMore") and pag.get("nextPageToken"):
-            page_token = pag["nextPageToken"]
-        else:
-            break
-    return completed, total
+    for t in data:
+        sv = t.get("status", {}).get("value")
+        if sv == 9:
+            cancelled += 1
+        elif sv == 3:
+            completed += 1
+
+    # If all tasks fit in one page, exact count
+    if not pag.get("hasMore"):
+        active_total = len(data) - cancelled
+        return completed, active_total
+
+    # Multi-page: extrapolate from first page ratio
+    # completed_ratio on first page, apply to total
+    page_active = len(data) - cancelled
+    if page_active > 0:
+        ratio = completed / page_active
+        est_cancelled = int(cancelled / len(data) * total_record_count) if data else 0
+        est_active = total_record_count - est_cancelled
+        est_completed = int(ratio * est_active)
+        return est_completed, est_active
+
+    return completed, total_record_count - cancelled
 
 
 def fetch_z2e_progress(project_ids):
-    """Fetch task progress for Z2E projects using thread pool.
+    """Fetch task progress for Z2E projects sequentially.
     Returns dict of {project_id: (completed, total)}."""
-    from concurrent.futures import ThreadPoolExecutor, as_completed
     progress = {}
-    print(f"  Fetching task progress for {len(project_ids)} Z2E projects...")
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        futures = {pool.submit(fetch_task_progress, pid): pid for pid in project_ids}
-        done = 0
-        for future in as_completed(futures):
-            pid = futures[future]
-            try:
-                completed, total = future.result()
-                progress[pid] = (completed, total)
-            except Exception as e:
-                print(f"    Error fetching tasks for {pid}: {e}")
-                progress[pid] = (0, 0)
-            done += 1
-            if done % 25 == 0:
-                print(f"    Progress: {done}/{len(project_ids)} projects...")
+    print(f"  Fetching task progress for {len(project_ids)} Z2E projects (1 API call each)...")
+    for i, pid in enumerate(project_ids):
+        try:
+            completed, total = fetch_task_progress(pid)
+            progress[pid] = (completed, total)
+        except Exception as e:
+            print(f"    Error fetching tasks for {pid}: {e}")
+            progress[pid] = (0, 0)
+        if (i + 1) % 25 == 0:
+            print(f"    Progress: {i + 1}/{len(project_ids)} projects...")
     print(f"  Task progress fetched for {len(progress)} projects.")
     return progress
 
