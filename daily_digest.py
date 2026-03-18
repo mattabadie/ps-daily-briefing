@@ -403,8 +403,8 @@ def enrich_project(p):
         "owner": owner_name,
         "customer": customer,
         "health": health.strip().lower() if health else "",
-        "health_notes": health_notes[:500],
-        "weekly_status": weekly_status[:500],
+        "health_notes": health_notes[:1500],
+        "weekly_status": weekly_status[:1500],
         "project_type": project_type,
         "created_at": created_at,
         "updated_at": updated_at,
@@ -1149,36 +1149,58 @@ def build_stale_projects_section(stale_projects):
 # ═══════════════════════════════════════════════════════════════════════════════
 # CLAUDE API — LLM-POWERED ANALYSIS ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-DAILY_INTELLIGENCE_PROMPT = """You are the operational intelligence engine for Exterro's Professional Services VP, Matt Abadie. You produce a DAILY executive briefing by analyzing PM notes, project health data, and operational metrics.
+DAILY_INTELLIGENCE_PROMPT = """You are the operational intelligence engine for Exterro's Professional Services VP, Matt Abadie. You have 30+ years of enterprise PS experience in your analytical approach. You produce a DAILY executive briefing by deeply analyzing PM notes, project health data, and operational metrics.
 
 Matt's 3 directors: Vanessa Graham (eDiscovery), Maggie Ledbetter (Data PSG), Oronde Ward (Post Implementation).
+
+ANALYTICAL APPROACH — READ EVERY PM NOTE CAREFULLY:
+- Don't just summarize. Interpret. What does a PM's note *imply* about where this project is headed?
+- A PM writing "waiting on customer" for 3 consecutive updates = the customer has disengaged. Say that.
+- A PM writing "escalated to engineering" with no resolution date = an open-ended dependency. Flag the risk.
+- Multiple PMs reporting similar blockers = a systemic issue. Name the pattern.
+- A project at 90% task completion with red health = something broke late. That's worse than a project that's been red from the start.
+- Look for what PMs are NOT saying: no update in 2+ weeks on an active project is a signal.
+- $500K+ contracts at risk deserve specific attention with the dollar amount called out.
 
 YOUR OUTPUT MUST HAVE THESE SECTIONS (use the exact HTML headers shown):
 
 <h4 style="color:#dc2626;margin:12px 0 6px 0;">Critical Items Requiring VP Action</h4>
-For each item needing Matt's direct involvement, write one line: customer name, what's wrong, what he should do. Max 5-7 items. Only include things a VP needs to act on — skip anything a PM or director can handle alone.
+Only items where Matt must personally intervene. For each:
+- Name the customer, the specific problem, the dollar exposure if applicable
+- State what Matt should do (call the customer exec, escalate to engineering VP, reassign PM, etc.)
+- Explain WHY this needs VP vs. director-level attention
+Max 5-7 items. Be selective — if a director can handle it, don't list it here.
 
 <h4 style="color:#b45309;margin:12px 0 6px 0;">Cross-Portfolio Patterns</h4>
-Identify systemic themes across multiple projects: engineering dependencies blocking multiple customers, customer responsiveness patterns, common blocker types, resource bottlenecks. This is where your analytical value is highest — connect dots that individual PMs can't see.
+This is your highest-value analysis. Identify:
+- Engineering/product issues blocking multiple customers (name the specific issue and affected customers)
+- Customer responsiveness patterns (are certain segments or regions going dark?)
+- PM workload signals (one PM with 3+ red/yellow projects = capacity problem)
+- Common root causes appearing across unrelated projects
+- Trends that are getting worse vs. improving
+Be specific. "Several projects have engineering dependencies" is worthless. "IPP collection performance issues are blocking Travelers, CN Rail, and AmeriLife — all waiting on the same engineering fix" is valuable.
 
 <h4 style="color:#0f766e;margin:12px 0 6px 0;">Momentum &amp; Wins</h4>
-Go-lives, UAT completions, hypercare exits, milestone achievements. Keep it brief — 2-3 sentences.
+Projects going live, completing UAT, exiting hypercare. Name the customers. This matters for team morale and for knowing what capacity is freeing up.
 
 <h4 style="color:#7c3aed;margin:12px 0 6px 0;">Director Priorities</h4>
-Write ONE targeted paragraph for each director based on their team's data:
-- <strong>Vanessa (eDiscovery):</strong> [specific to her projects]
-- <strong>Maggie (Data PSG):</strong> [specific to her projects]
-- <strong>Oronde (Post Implementation):</strong> [specific to his projects]
+Write ONE targeted paragraph for each director. Don't repeat what's in Critical Items — focus on what each director should be doing with their specific team TODAY:
+- <strong>Vanessa (eDiscovery):</strong> Her team's specific situation — Z2E progress, which PMs need support, which customers she should check in with
+- <strong>Maggie (Data PSG):</strong> Her team's specific situation — smaller team, different dynamics
+- <strong>Oronde (Post Implementation):</strong> Subscription engagement, hours consumption, renewals approaching
 
 <h4 style="color:#334155;margin:12px 0 6px 0;">Recommended Actions</h4>
-3-5 specific, actionable items. Name names, cite customers, be concrete.
+5-7 specific, actionable items ranked by urgency. Each should be:
+- Assignable to a specific person (Matt, Vanessa, Maggie, Oronde, or a specific PM)
+- Time-bound (today, this week, by Friday)
+- Measurable (you'll know if it was done)
 
 RULES:
-- Be direct. No filler. No "this week we observed" or "it's worth noting".
+- Be direct and analytical. No corporate filler. No "it's worth noting" or "moving forward."
 - Use <strong> for emphasis. Use <br/> for line breaks within sections.
-- Name specific customers, PMs, and dollar amounts.
-- Total response under 1000 words.
-- Read the PM notes carefully — they contain the real intelligence."""
+- Always name specific customers, PMs, dollar amounts, and percentages.
+- If you see a risk that isn't flagged by the health color, call it out — PMs sometimes lag on updating health.
+- Total response 1000-1500 words. Depth over brevity."""
 
 
 def call_claude_intelligence(prompt_data):
@@ -1187,7 +1209,7 @@ def call_claude_intelligence(prompt_data):
         print("  Claude API unavailable, falling back to regex analysis.")
         return None
     print("  Calling Claude for daily intelligence analysis...")
-    result = call_claude(DAILY_INTELLIGENCE_PROMPT, prompt_data, max_tokens=2500)
+    result = call_claude(DAILY_INTELLIGENCE_PROMPT, prompt_data, max_tokens=4000)
     if result:
         print(f"  Claude intelligence received ({len(result)} chars).")
     return result
@@ -1250,9 +1272,9 @@ def _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, c
         val = f" ${p['contract_value']:,.0f}" if p["contract_value"] else ""
         lines.append(f"\n--- {p['customer']}{seg}{val} | {p['name']} | {p['health'].upper()} | PM: {p['owner']} ---")
         if p["health_notes"]:
-            lines.append(f"Health notes: {p['health_notes'][:400]}")
+            lines.append(f"Health notes: {p['health_notes'][:800]}")
         if p["weekly_status"]:
-            lines.append(f"Status: {p['weekly_status'][:400]}")
+            lines.append(f"Status: {p['weekly_status'][:800]}")
 
     # Also include some green projects with recent notes for momentum signals
     lines.append("\n=== PM NOTES (recent green/active — momentum signals) ===")
@@ -1261,12 +1283,12 @@ def _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, c
                         and (p["health_notes"] or p["weekly_status"])
                         and p.get("latest_note_date")]
     green_with_notes.sort(key=lambda x: x["latest_note_date"] or datetime.min, reverse=True)
-    for p in green_with_notes[:10]:
+    for p in green_with_notes[:15]:
         lines.append(f"\n--- {p['customer']} | {p['name']} | GREEN | PM: {p['owner']} ---")
         if p["health_notes"]:
-            lines.append(f"Health notes: {p['health_notes'][:300]}")
+            lines.append(f"Health notes: {p['health_notes'][:600]}")
         if p["weekly_status"]:
-            lines.append(f"Status: {p['weekly_status'][:300]}")
+            lines.append(f"Status: {p['weekly_status'][:600]}")
 
     # PM coverage stats
     with_notes = [p for p in active if p["health_notes"] or p["weekly_status"]]
@@ -1285,9 +1307,9 @@ def _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, c
                 val = f" ${p['contract_value']:,.0f}" if p["contract_value"] else ""
                 lines.append(f"\n{p['customer']}{seg}{val} | {p['name']} | {p['health'].upper()} | PM: {p['owner']}")
                 if p["health_notes"]:
-                    lines.append(f"  Notes: {p['health_notes'][:350]}")
+                    lines.append(f"  Notes: {p['health_notes'][:800]}")
                 if p["weekly_status"]:
-                    lines.append(f"  Status: {p['weekly_status'][:350]}")
+                    lines.append(f"  Status: {p['weekly_status'][:800]}")
         # Team stale count
         team_stale = [p for p in (stale_projects or [])
                       if any(tp["id"] == p["id"] for tp in team_projs)]

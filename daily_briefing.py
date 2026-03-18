@@ -821,14 +821,19 @@ def build_email_recent(enriched_projects):
     return html
 
 
-_DAILY_INSIGHTS_PROMPT = """You are an operational analyst for Exterro's Professional Services VP.
-Given today's project data across eDiscovery, Data PSG, and Post Implementation teams, write 3-5 bullet points (HTML <br/> separated) highlighting:
-1. The most critical risk or blocker across the portfolio today
-2. Any patterns you see (multiple projects hitting same issue type)
-3. Positive momentum (go-lives, UAT completions, milestone achievements)
-4. One specific recommended action for the VP
+_DAILY_INSIGHTS_PROMPT = """You are a senior PS operations analyst for Exterro's VP of Professional Services. Read every PM note carefully and produce an analytical daily briefing.
 
-Keep it under 200 words. Use <strong> for emphasis. Be direct — no filler."""
+Your output should be 300-500 words of HTML-formatted analysis covering:
+
+1. <strong>Top risks today</strong> — What projects are in the most danger and why? Read between the lines of PM notes. A PM writing "waiting on customer" for multiple updates means the customer has disengaged. Name the customers and dollar amounts.
+
+2. <strong>Systemic patterns</strong> — Are multiple projects blocked on the same engineering issue? Are customers in a particular segment going dark? Is one PM overloaded with too many red/yellow projects? Connect dots across the portfolio.
+
+3. <strong>Positive momentum</strong> — Go-lives, UAT completions, hypercare exits. Name customers. Note what PM capacity is freeing up.
+
+4. <strong>Actions for today</strong> — 2-3 specific things the VP or directors should do today. Assign to specific people. Be concrete.
+
+Use <strong> for emphasis, <br/> for line breaks. No corporate filler. Name specific customers, PMs, dollar amounts."""
 
 
 def _generate_daily_insights(all_enriched, enriched_by_team, zombies):
@@ -850,19 +855,31 @@ def _generate_daily_insights(all_enriched, enriched_by_team, zombies):
     # Red/yellow project notes
     lines.append("\n=== RED/YELLOW PROJECT NOTES ===")
     ry = [p for p in active if p["health"] in ("red", "yellow") and (p.get("health_notes") or p.get("weekly_status"))]
-    for p in sorted(ry, key=lambda x: (0 if x["health"] == "red" else 1))[:20]:
+    for p in sorted(ry, key=lambda x: (0 if x["health"] == "red" else 1))[:25]:
         lines.append(f"\n{p['customer']} | {p['name']} | {p['health'].upper()} | PM: {p['owner']}")
         if p.get("health_notes"):
-            lines.append(f"  Notes: {p['health_notes'][:300]}")
+            lines.append(f"  Notes: {p['health_notes'][:800]}")
         if p.get("weekly_status"):
-            lines.append(f"  Status: {p['weekly_status'][:300]}")
+            lines.append(f"  Status: {p['weekly_status'][:800]}")
 
-    # Zombie count
+    # Green projects with recent notes for momentum signals
+    green_notes = [p for p in active if p["health"] == "green" and (p.get("health_notes") or p.get("weekly_status"))]
+    if green_notes:
+        lines.append("\n=== GREEN/ACTIVE PROJECT NOTES (momentum signals) ===")
+        for p in green_notes[:10]:
+            lines.append(f"\n{p['customer']} | {p['name']} | GREEN | PM: {p['owner']}")
+            if p.get("weekly_status"):
+                lines.append(f"  Status: {p['weekly_status'][:500]}")
+
+    # Zombie details
     if zombies:
-        lines.append(f"\n{len(zombies)} zombie-flagged projects (stale/inactive signals)")
+        lines.append(f"\n=== ZOMBIE PROJECTS ({len(zombies)} flagged) ===")
+        for r in sorted(zombies, key=lambda x: -x["score"])[:10]:
+            p = r["enriched"]
+            lines.append(f"Score {r['score']}: {p['customer']} | {p['name']} | {p['status']} | PM: {p['owner']} | Last time entry: {r.get('last_time_entry','N/A')}")
 
     print("  Calling Claude for daily insights...")
-    result = call_claude(_DAILY_INSIGHTS_PROMPT, "\n".join(lines), max_tokens=512)
+    result = call_claude(_DAILY_INSIGHTS_PROMPT, "\n".join(lines), max_tokens=1500)
     if result:
         print(f"  Daily insights received ({len(result)} chars).")
     return result

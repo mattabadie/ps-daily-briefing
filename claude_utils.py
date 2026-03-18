@@ -6,7 +6,7 @@ import urllib.request
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
-DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+DEFAULT_MODEL = "claude-sonnet-4-6"
 
 
 def call_claude(system_prompt, user_prompt, max_tokens=2048, model=None):
@@ -43,7 +43,7 @@ def call_claude(system_prompt, user_prompt, max_tokens=2048, model=None):
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=45) as resp:
+        with urllib.request.urlopen(req, timeout=90) as resp:
             result = json.loads(resp.read().decode())
         text = result.get("content", [{}])[0].get("text", "")
         return text if text else None
