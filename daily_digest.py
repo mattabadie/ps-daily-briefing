@@ -170,6 +170,58 @@ def fetch_project_updates(created_after_ms):
     return updates
 
 
+def fetch_task_progress(project_id):
+    """Fetch task completion progress for a project.
+    Returns (completed, total_active) excluding cancelled tasks."""
+    completed = 0
+    total = 0
+    cancelled = 0
+    page_token = None
+    while True:
+        url = f"tasks?projectId.eq={project_id}&pageSize=100"
+        if page_token:
+            url += f"&pageToken={page_token}"
+        resp = api_get(url)
+        for t in resp.get("data", []):
+            sv = t.get("status", {}).get("value")
+            if sv == 9:  # Cancelled
+                cancelled += 1
+            else:
+                total += 1
+                if sv == 3:  # Completed
+                    completed += 1
+        pag = resp.get("pagination", {})
+        if pag.get("hasMore") and pag.get("nextPageToken"):
+            page_token = pag["nextPageToken"]
+        else:
+            break
+    return completed, total
+
+
+def fetch_z2e_progress(project_ids):
+    """Fetch task progress for Z2E projects using thread pool.
+    Returns dict of {project_id: (completed, total)}."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    progress = {}
+    print(f"  Fetching task progress for {len(project_ids)} Z2E projects...")
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        futures = {pool.submit(fetch_task_progress, pid): pid for pid in project_ids}
+        done = 0
+        for future in as_completed(futures):
+            pid = futures[future]
+            try:
+                completed, total = future.result()
+                progress[pid] = (completed, total)
+            except Exception as e:
+                print(f"    Error fetching tasks for {pid}: {e}")
+                progress[pid] = (0, 0)
+            done += 1
+            if done % 25 == 0:
+                print(f"    Progress: {done}/{len(project_ids)} projects...")
+    print(f"  Task progress fetched for {len(progress)} projects.")
+    return progress
+
+
 def fetch_time_entries_for_project(pid, date_str=None):
     """Fetch time entries for a project, optionally filtered to a specific date."""
     entries, page_token = [], None
@@ -742,7 +794,8 @@ def build_attention_required_section(all_enriched):
 
 def build_z2e_tracker_section(all_enriched):
     """Build Z2E Migration Tracker showing Phase 1 and Phase 2 progress.
-    Phase 1 goal: complete ASAP. Phase 2 goal: complete by 12/31/26."""
+    Phase 1 goal: complete ASAP. Phase 2 goal: complete by 12/31/26.
+    Uses per-project task progress from the tasks API."""
     # Categorize by sub-type
     phase1 = []
     phase2 = []
@@ -767,44 +820,72 @@ def build_z2e_tracker_section(all_enriched):
         other = [p for p in projects if p["status"] not in COMPLETED_STATUSES | IN_PROGRESS_STATUSES | BLOCKED_STATUSES]
         return completed, in_progress, blocked, other
 
+    def avg_progress(projects):
+        """Calculate average task progress across projects."""
+        vals = [p.get("task_progress", 0) for p in projects if p.get("task_progress") is not None]
+        return int(sum(vals) / len(vals)) if vals else 0
+
+    def progress_badge(p):
+        """Return HTML badge showing task progress %."""
+        pct = p.get("task_progress")
+        if pct is None:
+            return '<span style="font-size:10px;color:#94a3b8;">—</span>'
+        if pct >= 75:
+            color = "#16a34a"
+        elif pct >= 50:
+            color = "#ca8a04"
+        else:
+            color = "#dc2626"
+        return f'<span style="font-size:10px;font-weight:600;color:{color};">{pct}%</span>'
+
     html = ""
 
     # Phase 1
     if phase1:
         comp, prog, blk, oth = status_summary(phase1)
-        pct = int(len(comp) / len(phase1) * 100) if phase1 else 0
-        bar_color = "#22c55e" if pct > 75 else "#f59e0b" if pct > 50 else "#ef4444"
+        # Overall phase progress = avg task progress across all projects
+        phase_pct = avg_progress(phase1)
+        projects_complete_pct = int(len(comp) / len(phase1) * 100) if phase1 else 0
+        bar_color = "#22c55e" if phase_pct > 75 else "#f59e0b" if phase_pct > 50 else "#ef4444"
 
         html += f'<div style="margin-bottom:16px;">'
         html += f'<div style="font-weight:700;font-size:12px;color:#334155;margin-bottom:4px;">Phase 1 (Z2E Phase 1) — Goal: Complete ASAP</div>'
-        # Progress bar
+        # Progress bar based on avg task completion
         html += f'<div style="background:#e2e8f0;border-radius:4px;height:12px;margin:4px 0 8px 0;overflow:hidden;">'
-        html += f'<div style="background:{bar_color};height:100%;width:{pct}%;border-radius:4px;"></div></div>'
+        html += f'<div style="background:{bar_color};height:100%;width:{phase_pct}%;border-radius:4px;"></div></div>'
         html += f'<div style="font-size:12px;margin-bottom:8px;">'
-        html += f'<strong>{len(comp)}</strong>/{len(phase1)} complete ({pct}%) • '
+        html += f'Avg task progress: <strong>{phase_pct}%</strong> • '
+        html += f'<strong>{len(comp)}</strong>/{len(phase1)} projects complete ({projects_complete_pct}%) • '
         html += f'<span style="color:#0f766e;">{len(prog)} in progress</span> • '
         html += f'<span style="color:#dc2626;">{len(blk)} blocked/on hold</span>'
         if oth:
             html += f' • {len(oth)} other'
         html += '</div>'
 
-        # Show blocked/red projects — these are the ones needing attention
-        needs_attention = [p for p in blk + prog if p["health"] in ("red", "yellow")]
-        if needs_attention:
-            html += f'<div style="font-size:11px;font-weight:600;color:#b45309;margin:4px 0;">Needs attention:</div>'
-            for p in needs_attention:
+        # Show in-progress + blocked projects with progress %
+        active_projects = sorted(prog + blk + oth, key=lambda p: p.get("task_progress", 0))
+        if active_projects:
+            html += f'<div style="font-size:11px;font-weight:600;color:#475569;margin:8px 0 4px 0;">Active projects ({len(active_projects)}):</div>'
+            html += '<table style="font-size:11px;border-collapse:collapse;width:100%;">'
+            html += '<tr style="background:#f1f5f9;"><th style="padding:3px 6px;text-align:left;">Project</th><th style="padding:3px 6px;text-align:left;">Customer</th><th style="padding:3px 6px;text-align:left;">PM</th><th style="padding:3px 6px;text-align:left;">Status</th><th style="padding:3px 6px;text-align:right;">Progress</th></tr>'
+            for p in active_projects:
                 link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
-                hc = p["health"]
-                dot_color = "#ef4444" if hc == "red" else "#f59e0b"
-                dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
-                html += f'<div style="font-size:11px;padding:2px 0 2px 12px;">{dot}{link} — {p["customer"]} • {p["owner"]} • {p["status"]}</div>'
+                hc = p.get("health", "")
+                dot = ""
+                if hc in ("red", "yellow"):
+                    dot_color = "#ef4444" if hc == "red" else "#f59e0b"
+                    dot = f'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:{dot_color};margin-right:3px;vertical-align:middle;"></span>'
+                badge = progress_badge(p)
+                html += f'<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:3px 6px;">{dot}{link}</td><td style="padding:3px 6px;">{p["customer"]}</td><td style="padding:3px 6px;">{p["owner"]}</td><td style="padding:3px 6px;">{p["status"]}</td><td style="padding:3px 6px;text-align:right;">{badge}</td></tr>'
+            html += '</table>'
         html += '</div>'
 
     # Phase 2
     if phase2:
         comp, prog, blk, oth = status_summary(phase2)
-        pct = int(len(comp) / len(phase2) * 100) if phase2 else 0
-        bar_color = "#22c55e" if pct > 50 else "#f59e0b" if pct > 25 else "#ef4444"
+        phase_pct = avg_progress(phase2)
+        projects_complete_pct = int(len(comp) / len(phase2) * 100) if phase2 else 0
+        bar_color = "#22c55e" if phase_pct > 50 else "#f59e0b" if phase_pct > 25 else "#ef4444"
 
         # Days until deadline
         from datetime import date
@@ -813,27 +894,33 @@ def build_z2e_tracker_section(all_enriched):
 
         html += f'<div style="margin-bottom:8px;">'
         html += f'<div style="font-weight:700;font-size:12px;color:#334155;margin-bottom:4px;">Phase 2 (Z2E) — Deadline: 12/31/2026 ({days_left} days)</div>'
-        # Progress bar
+        # Progress bar based on avg task completion
         html += f'<div style="background:#e2e8f0;border-radius:4px;height:12px;margin:4px 0 8px 0;overflow:hidden;">'
-        html += f'<div style="background:{bar_color};height:100%;width:{pct}%;border-radius:4px;"></div></div>'
+        html += f'<div style="background:{bar_color};height:100%;width:{phase_pct}%;border-radius:4px;"></div></div>'
         html += f'<div style="font-size:12px;margin-bottom:8px;">'
-        html += f'<strong>{len(comp)}</strong>/{len(phase2)} complete ({pct}%) • '
+        html += f'Avg task progress: <strong>{phase_pct}%</strong> • '
+        html += f'<strong>{len(comp)}</strong>/{len(phase2)} projects complete ({projects_complete_pct}%) • '
         html += f'<span style="color:#0f766e;">{len(prog)} in progress</span> • '
         html += f'<span style="color:#dc2626;">{len(blk)} blocked/on hold</span>'
         if oth:
             html += f' • {len(oth)} other'
         html += '</div>'
 
-        # Show blocked/red
+        # Show blocked/red projects with progress
         needs_attention = [p for p in blk + prog if p["health"] in ("red", "yellow")]
         if needs_attention:
-            html += f'<div style="font-size:11px;font-weight:600;color:#b45309;margin:4px 0;">Needs attention:</div>'
+            needs_attention.sort(key=lambda p: p.get("task_progress", 0))
+            html += f'<div style="font-size:11px;font-weight:600;color:#b45309;margin:8px 0 4px 0;">Needs attention ({len(needs_attention)}):</div>'
+            html += '<table style="font-size:11px;border-collapse:collapse;width:100%;">'
+            html += '<tr style="background:#f1f5f9;"><th style="padding:3px 6px;text-align:left;">Project</th><th style="padding:3px 6px;text-align:left;">Customer</th><th style="padding:3px 6px;text-align:left;">PM</th><th style="padding:3px 6px;text-align:left;">Status</th><th style="padding:3px 6px;text-align:right;">Progress</th></tr>'
             for p in needs_attention:
                 link = f'<a href="{RL_APP_BASE}/{p["id"]}" style="{S_LINK}">{p["name"]}</a>'
                 hc = p["health"]
                 dot_color = "#ef4444" if hc == "red" else "#f59e0b"
-                dot = f'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{dot_color};margin-right:4px;vertical-align:middle;"></span>'
-                html += f'<div style="font-size:11px;padding:2px 0 2px 12px;">{dot}{link} — {p["customer"]} • {p["owner"]} • {p["status"]}</div>'
+                dot = f'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:{dot_color};margin-right:3px;vertical-align:middle;"></span>'
+                badge = progress_badge(p)
+                html += f'<tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:3px 6px;">{dot}{link}</td><td style="padding:3px 6px;">{p["customer"]}</td><td style="padding:3px 6px;">{p["owner"]}</td><td style="padding:3px 6px;">{p["status"]}</td><td style="padding:3px 6px;text-align:right;">{badge}</td></tr>'
+            html += '</table>'
         html += '</div>'
 
     total = len(phase1) + len(phase2)
@@ -1197,6 +1284,26 @@ def main():
     changes = detect_changes(old_snapshot, projects_by_id) if old_snapshot else []
     has_prior_snapshot = bool(old_snapshot)
     print(f"Found {len(changes)} health/status changes (prior snapshot: {has_prior_snapshot}).")
+
+    # Fetch Z2E task progress
+    print("Fetching Z2E project task progress...")
+    z2e_ids = []
+    for p in all_enriched:
+        st = p.get("sub_type", "").lower()
+        if "z2e" in st and "z2e - not started" not in st and p["status"] not in ("Completed", "Closeout"):
+            z2e_ids.append(p["id"])
+    z2e_progress = fetch_z2e_progress(z2e_ids) if z2e_ids else {}
+    # Inject progress into enriched projects
+    for p in all_enriched:
+        pid = p["id"]
+        if pid in z2e_progress:
+            comp, total = z2e_progress[pid]
+            p["task_progress"] = int(comp / total * 100) if total > 0 else 0
+            p["task_completed"] = comp
+            p["task_total"] = total
+        elif p["status"] in ("Completed", "Closeout"):
+            p["task_progress"] = 100
+    print(f"Z2E progress: {len(z2e_progress)} projects with task data.")
 
     # Find stale projects (active but no time logged in 7 days)
     print("Detecting stale projects...")
