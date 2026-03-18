@@ -1147,50 +1147,53 @@ def build_stale_projects_section(stale_projects):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CLAUDE API — LLM-POWERED NARRATIVE
+# CLAUDE API — LLM-POWERED ANALYSIS ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-NARRATIVE_SYSTEM_PROMPT = """You are an operational intelligence analyst for a Professional Services organization at Exterro (enterprise software). You produce a weekly executive briefing for the VP of PS.
+DAILY_INTELLIGENCE_PROMPT = """You are the operational intelligence engine for Exterro's Professional Services VP, Matt Abadie. You produce a DAILY executive briefing by analyzing PM notes, project health data, and operational metrics.
 
-Your audience: Matt Abadie (VP) and his 3 directors — Vanessa Graham (eDiscovery), Maggie Ledbetter (Data PSG), Oronde Ward (Post Implementation).
+Matt's 3 directors: Vanessa Graham (eDiscovery), Maggie Ledbetter (Data PSG), Oronde Ward (Post Implementation).
 
-Write style:
-- Executive-level: concise, direct, actionable
-- Lead with what matters most (risks, blockers, revenue exposure)
-- Name specific customers and PMs when relevant
-- End with 3-5 concrete recommended actions
-- No filler, no pleasantries, no "this week we observed..."
-- Use HTML formatting: <strong> for emphasis, <br/> for line breaks
-- Keep the entire response under 800 words
+YOUR OUTPUT MUST HAVE THESE SECTIONS (use the exact HTML headers shown):
 
-The data you'll receive includes:
-- Portfolio health stats by team
-- PM notes from active projects (the most valuable signal — read these carefully)
-- Z2E migration progress
-- High-value clients at risk
-- Stale projects and commentary gaps
+<h4 style="color:#dc2626;margin:12px 0 6px 0;">Critical Items Requiring VP Action</h4>
+For each item needing Matt's direct involvement, write one line: customer name, what's wrong, what he should do. Max 5-7 items. Only include things a VP needs to act on — skip anything a PM or director can handle alone.
 
-Synthesize the PM notes into themes. Look for:
-1. Systemic issues (multiple projects hitting same blocker type)
-2. Customer responsiveness patterns
-3. Engineering/product dependencies blocking delivery
-4. Go-live momentum vs. stalled projects
-5. Revenue at risk from project issues
-6. Resource or capacity signals"""
+<h4 style="color:#b45309;margin:12px 0 6px 0;">Cross-Portfolio Patterns</h4>
+Identify systemic themes across multiple projects: engineering dependencies blocking multiple customers, customer responsiveness patterns, common blocker types, resource bottlenecks. This is where your analytical value is highest — connect dots that individual PMs can't see.
+
+<h4 style="color:#0f766e;margin:12px 0 6px 0;">Momentum &amp; Wins</h4>
+Go-lives, UAT completions, hypercare exits, milestone achievements. Keep it brief — 2-3 sentences.
+
+<h4 style="color:#7c3aed;margin:12px 0 6px 0;">Director Priorities</h4>
+Write ONE targeted paragraph for each director based on their team's data:
+- <strong>Vanessa (eDiscovery):</strong> [specific to her projects]
+- <strong>Maggie (Data PSG):</strong> [specific to her projects]
+- <strong>Oronde (Post Implementation):</strong> [specific to his projects]
+
+<h4 style="color:#334155;margin:12px 0 6px 0;">Recommended Actions</h4>
+3-5 specific, actionable items. Name names, cite customers, be concrete.
+
+RULES:
+- Be direct. No filler. No "this week we observed" or "it's worth noting".
+- Use <strong> for emphasis. Use <br/> for line breaks within sections.
+- Name specific customers, PMs, and dollar amounts.
+- Total response under 1000 words.
+- Read the PM notes carefully — they contain the real intelligence."""
 
 
-def call_claude_narrative(prompt_data):
-    """Call Claude API to generate the weekly narrative."""
+def call_claude_intelligence(prompt_data):
+    """Call Claude API to generate the daily intelligence brief."""
     if not ANTHROPIC_API_KEY or not call_claude:
-        print("  Claude API unavailable, falling back to regex narrative.")
+        print("  Claude API unavailable, falling back to regex analysis.")
         return None
-    print("  Calling Claude for narrative synthesis...")
-    result = call_claude(NARRATIVE_SYSTEM_PROMPT, prompt_data)
+    print("  Calling Claude for daily intelligence analysis...")
+    result = call_claude(DAILY_INTELLIGENCE_PROMPT, prompt_data, max_tokens=2500)
     if result:
-        print(f"  Claude narrative received ({len(result)} chars).")
+        print(f"  Claude intelligence received ({len(result)} chars).")
     return result
 
 
-def _build_narrative_prompt(projects_by_team, all_enriched, stale_projects, changes):
+def _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, changes):
     """Build the structured data prompt for Claude to analyze."""
     active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
     lines = []
@@ -1270,6 +1273,27 @@ def _build_narrative_prompt(projects_by_team, all_enriched, stale_projects, chan
     lines.append(f"\n=== PM COMMENTARY COVERAGE ===")
     lines.append(f"{len(with_notes)} of {len(active)} active projects ({int(len(with_notes)/len(active)*100) if active else 0}%) have PM notes")
 
+    # Per-team PM notes for director briefings
+    for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
+        team_projs = projects_by_team.get(team, [])
+        team_active = [p for p in team_projs if p["status_val"] in ACTIVE_STATUS_VALUES]
+        team_ry = [p for p in team_active if p["health"] in ("red", "yellow") and (p["health_notes"] or p["weekly_status"])]
+        if team_ry:
+            lines.append(f"\n=== {team.upper()} — {DIRECTOR_NAMES[team]} — RED/YELLOW NOTES ===")
+            for p in sorted(team_ry, key=lambda x: (0 if x["health"] == "red" else 1))[:10]:
+                seg = f" [{p['client_segment']}]" if p["client_segment"] else ""
+                val = f" ${p['contract_value']:,.0f}" if p["contract_value"] else ""
+                lines.append(f"\n{p['customer']}{seg}{val} | {p['name']} | {p['health'].upper()} | PM: {p['owner']}")
+                if p["health_notes"]:
+                    lines.append(f"  Notes: {p['health_notes'][:350]}")
+                if p["weekly_status"]:
+                    lines.append(f"  Status: {p['weekly_status'][:350]}")
+        # Team stale count
+        team_stale = [p for p in (stale_projects or [])
+                      if any(tp["id"] == p["id"] for tp in team_projs)]
+        if team_stale:
+            lines.append(f"{team}: {len(team_stale)} stale projects (no time logged 7 days)")
+
     return "\n".join(lines)
 
 
@@ -1322,21 +1346,24 @@ def _extract_themes(all_enriched):
     return themes
 
 
-def build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects):
-    """Build weekly executive summary. Tries Claude API for LLM-powered synthesis,
-    falls back to regex-based analysis if API unavailable."""
+def build_daily_intelligence(projects_by_team, new_projects, changes, all_enriched, stale_projects):
+    """Build the AI-powered daily intelligence brief. Runs every day.
+    Falls back to regex-based analysis if Claude API unavailable."""
 
-    # Try Claude-powered narrative first
-    if ANTHROPIC_API_KEY:
-        prompt_data = _build_narrative_prompt(projects_by_team, all_enriched, stale_projects, changes)
-        claude_html = call_claude_narrative(prompt_data)
+    # Try Claude-powered intelligence
+    if ANTHROPIC_API_KEY and call_claude:
+        prompt_data = _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, changes)
+        claude_html = call_claude_intelligence(prompt_data)
         if claude_html:
-            return f'''<div style="{S_SECTION}">
-<h3 style="margin:0 0 12px 0;font-size:14px;font-weight:700;">Weekly Executive Summary</h3>
-<div style="font-size:13px;line-height:1.6;">{claude_html}</div>
+            return f'''<div style="background:#faf5ff;border-left:4px solid #7c3aed;padding:20px;margin:16px 0;border-radius:0 6px 6px 0;">
+<div style="display:flex;align-items:center;gap:8px;margin:0 0 14px 0;">
+<div style="font-size:16px;font-weight:700;color:#7c3aed;">Daily Intelligence Brief</div>
+<span style="background:#7c3aed;color:white;font-size:10px;font-weight:600;padding:2px 8px;border-radius:3px;">AI ANALYSIS</span>
+</div>
+<div style="font-size:13px;line-height:1.6;color:#1e293b;">{claude_html}</div>
 </div>'''
 
-    # Fallback to regex-based narrative
+    # Fallback to regex-based analysis
     return _build_regex_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects)
 
 
@@ -1554,9 +1581,8 @@ def build_email_html(digest_data, is_weekly=False):
     # Build sections — ordered by priority
     sections = []
 
-    # Weekly narrative first on Fridays
-    if is_weekly:
-        sections.append(build_weekly_narrative(projects_by_team, new_projects, changes, all_enriched, stale_projects))
+    # Daily Intelligence Brief — AI-powered, runs every day
+    sections.append(build_daily_intelligence(projects_by_team, new_projects, changes, all_enriched, stale_projects))
 
     # Attention required — escalations, high-value at risk, stale notes
     sections.append(build_attention_required_section(all_enriched))
