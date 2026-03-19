@@ -344,16 +344,52 @@ def strip_html(text):
 # ═══════════════════════════════════════════════════════════════════════════════
 # TEAM ASSIGNMENT
 # ═══════════════════════════════════════════════════════════════════════════════
+FORENSICS_NAME_RE = re.compile(
+    r'\b(glam|ftk|forensic|ad\s+enterprise|ad\s+lab)\b', re.IGNORECASE
+)
+
+
+def _is_forensics_project(p):
+    """Check if a project is forensics via content signals (name keywords or service domain).
+    Used as a fallback when director IDs don't match."""
+    domain = get_field(p, "Opp: Service Hours Domain(s)") or ""
+    if "forensic" in domain.lower():
+        return True
+    name = p.get("projectName", "")
+    if FORENSICS_NAME_RE.search(name):
+        return True
+    return False
+
+
 def assign_to_teams(projects):
-    """Assign projects to director teams."""
+    """Assign projects to director teams.
+
+    For PS scope: matches by director user IDs on team members/owner.
+    For forensics scope: matches by director IDs, Responsible Director field,
+    OR content-based keywords (name/domain) as fallback.
+    """
     team_projects = defaultdict(list)
     for p in projects:
         member_ids = {m.get("userId") for m in p.get("teamMembers", {}).get("members", [])}
         owner_id = p.get("owner", {}).get("userId")
+
+        matched = False
         for did, team_name in DIRECTORS.items():
             if did in member_ids or did == owner_id:
                 team_projects[team_name].append(p)
+                matched = True
                 break
+
+        # Forensics scope: also check Responsible Director field and content-based matching
+        if not matched and SCOPE == "forensics":
+            resp_dir = get_field(p, "Responsible Director") or ""
+            forensics_dir_emails = {"ewelina.gramala@exterro.com", "jon.cook@exterro.com",
+                                    "sarah.hargreaves@exterro.com"}
+            if resp_dir.lower().strip() in forensics_dir_emails:
+                team_projects["Forensics Impl"].append(p)
+            elif _is_forensics_project(p):
+                team_projects["Forensics Impl"].append(p)
+
     return team_projects
 
 
