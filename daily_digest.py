@@ -58,7 +58,7 @@ MUTED_COLOR = "#64748b"
 # ── Scope configurations ──
 SCOPE_CONFIG = {
     "ps": {
-        "label": "PS Operations",
+        "label": "eDiscovery & Privacy",
         "vp": "Matt Abadie",
         "directors": {
             393610: "eDiscovery",
@@ -71,7 +71,7 @@ SCOPE_CONFIG = {
             "Post Implementation": "Oronde Ward",
         },
         "extra_recipients": ["matt.abadie@exterro.com"],
-        "email_subject_prefix": "PS Operations Daily Intelligence",
+        "email_subject_prefix": "eDiscovery & Privacy Daily Intelligence",
         "email_subtitle": "eDiscovery | Data PSG | Post Implementation",
         "snapshot_suffix": "",
     },
