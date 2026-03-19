@@ -1,0 +1,46 @@
+name: Forensics Daily Intelligence Digest
+
+on:
+  schedule:
+    # Weekdays at 7:30 AM EST (12:30 UTC) — same cadence as PS digest
+    - cron: '30 12 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no email sent)'
+        type: boolean
+        default: false
+
+jobs:
+  forensics-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
+      GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Restore snapshot from prior run (separate cache for forensics)
+      - name: Restore snapshot cache
+        uses: actions/cache@v4
+        with:
+          path: .snapshots_forensics
+          key: forensics-snapshot-${{ github.run_number }}
+          restore-keys: |
+            forensics-snapshot-
+
+      - name: Run Forensics Intelligence Digest
+        run: |
+          ARGS="--scope forensics"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python daily_digest.py $ARGS

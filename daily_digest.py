@@ -55,18 +55,51 @@ YELLOW_HEALTH = "#f59e0b"
 GREEN_HEALTH = "#22c55e"
 MUTED_COLOR = "#64748b"
 
-DIRECTORS = {
-    393610: "eDiscovery",
-    393604: "Data PSG",
-    393607: "Post Implementation",
+# ── Scope configurations ──
+SCOPE_CONFIG = {
+    "ps": {
+        "label": "PS Operations",
+        "vp": "Matt Abadie",
+        "directors": {
+            393610: "eDiscovery",
+            393604: "Data PSG",
+            393607: "Post Implementation",
+        },
+        "director_names": {
+            "eDiscovery": "Vanessa Graham",
+            "Data PSG": "Maggie Ledbetter",
+            "Post Implementation": "Oronde Ward",
+        },
+        "extra_recipients": ["matt.abadie@exterro.com"],
+        "email_subject_prefix": "PS Operations Daily Intelligence",
+        "email_subtitle": "eDiscovery | Data PSG | Post Implementation",
+        "snapshot_suffix": "",
+    },
+    "forensics": {
+        "label": "Forensics",
+        "vp": "Sarah Hargreaves",
+        "directors": {
+            393598: "Forensics Impl",
+            650747: "Forensics Post-Impl",
+        },
+        "director_names": {
+            "Forensics Impl": "Ewelina Gramala",
+            "Forensics Post-Impl": "Jon Cook",
+        },
+        "extra_recipients": ["matt.abadie@exterro.com", "sarah.hargreaves@exterro.com"],
+        "email_subject_prefix": "Forensics Daily Intelligence",
+        "email_subtitle": "FTK | GLAM | Forensics",
+        "snapshot_suffix": "_forensics",
+    },
 }
-DIRECTOR_NAMES = {
-    "eDiscovery": "Vanessa Graham",
-    "Data PSG": "Maggie Ledbetter",
-    "Post Implementation": "Oronde Ward",
-}
+
+# Active scope — set in main() based on --scope arg
+SCOPE = "ps"
+
+DIRECTORS = SCOPE_CONFIG["ps"]["directors"]
+DIRECTOR_NAMES = SCOPE_CONFIG["ps"]["director_names"]
 ACTIVE_STATUS_VALUES = {2, 4, 5, 6, 9, 12, 14, 15}
-EXTRA_RECIPIENTS = ["matt.abadie@exterro.com"]
+EXTRA_RECIPIENTS = SCOPE_CONFIG["ps"]["extra_recipients"]
 
 SNAPSHOT_DIR = Path(__file__).parent / ".snapshots"
 
@@ -1149,9 +1182,23 @@ def build_stale_projects_section(stale_projects):
 # ═══════════════════════════════════════════════════════════════════════════════
 # CLAUDE API — LLM-POWERED ANALYSIS ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-DAILY_INTELLIGENCE_PROMPT = """You are the operational intelligence engine for Exterro's Professional Services VP, Matt Abadie. You have 30+ years of enterprise PS experience in your analytical approach. You produce a DAILY executive briefing by deeply analyzing PM notes, project health data, and operational metrics.
+def _build_intelligence_system_prompt():
+    """Build scope-aware system prompt for Claude intelligence analysis."""
+    cfg = SCOPE_CONFIG[SCOPE]
+    vp = cfg["vp"]
+    director_list = ", ".join(f"{name} ({team})" for team, name in cfg["director_names"].items())
+    director_blocks = "\n".join(
+        f'<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">\n<strong>{name} ({team}):</strong> [specific to their team]\n</div>'
+        for team, name in cfg["director_names"].items()
+    )
+    director_bullet_points = "\n".join(
+        f'- <strong>{name} ({team}):</strong> Their team\'s specific situation'
+        for team, name in cfg["director_names"].items()
+    )
 
-Matt's 3 directors: Vanessa Graham (eDiscovery), Maggie Ledbetter (Data PSG), Oronde Ward (Post Implementation).
+    return f"""You are the operational intelligence engine for Exterro's {cfg['label']} VP, {vp}. You have 30+ years of enterprise PS experience in your analytical approach. You produce a DAILY executive briefing by deeply analyzing PM notes, project health data, and operational metrics.
+
+{vp}'s directors: {director_list}.
 
 ANALYTICAL APPROACH — READ EVERY PM NOTE CAREFULLY:
 - Don't just summarize. Interpret. What does a PM's note *imply* about where this project is headed?
@@ -1168,12 +1215,12 @@ YOUR OUTPUT MUST HAVE THESE SECTIONS using the exact HTML shown. CRITICAL FORMAT
 - Each numbered item in Critical Items MUST be a separate visual block
 
 <h4 style="color:#dc2626;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #fecaca;padding-bottom:4px;">Critical Items Requiring VP Action</h4>
-Only items where Matt must personally intervene. Max 5-7 items.
+Only items where {vp} must personally intervene. Max 5-7 items.
 FORMAT EACH ITEM AS:
 <div style="background:#fef2f2;border-left:3px solid #ef4444;padding:10px 12px;margin:8px 0;border-radius:0 4px 4px 0;">
 <div style="font-weight:700;font-size:13px;margin-bottom:4px;">[NUMBER]. [CUSTOMER] — $[VALUE] — [ONE-LINE HEADLINE]</div>
 <p style="margin:4px 0;font-size:12px;">[2-3 sentences: what's wrong, how long, why it matters]</p>
-<p style="margin:4px 0;font-size:12px;"><strong>Action:</strong> [What Matt should do specifically]</p>
+<p style="margin:4px 0;font-size:12px;"><strong>Action:</strong> [What {vp} should do specifically]</p>
 </div>
 
 <h4 style="color:#b45309;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #fde68a;padding-bottom:4px;">Cross-Portfolio Patterns</h4>
@@ -1190,15 +1237,7 @@ Go-lives, UAT completions, hypercare exits. Name customers. Note PM capacity fre
 
 <h4 style="color:#7c3aed;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #c4b5fd;padding-bottom:4px;">Director Priorities</h4>
 Write ONE targeted paragraph for each director in separate styled blocks:
-<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">
-<strong>Vanessa (eDiscovery):</strong> [specific to her team]
-</div>
-<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">
-<strong>Maggie (Data PSG):</strong> [specific to her team]
-</div>
-<div style="background:#f5f3ff;padding:10px 12px;margin:6px 0;border-radius:4px;">
-<strong>Oronde (Post Implementation):</strong> [specific to his team]
-</div>
+{director_blocks}
 
 <h4 style="color:#334155;margin:16px 0 8px 0;font-size:13px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Recommended Actions</h4>
 5-7 items, each as:
@@ -1220,7 +1259,8 @@ def call_claude_intelligence(prompt_data):
         print("  Claude API unavailable, falling back to regex analysis.")
         return None
     print("  Calling Claude for daily intelligence analysis...")
-    result = call_claude(DAILY_INTELLIGENCE_PROMPT, prompt_data, max_tokens=4000, model="claude-opus-4-6")
+    system_prompt = _build_intelligence_system_prompt()
+    result = call_claude(system_prompt, prompt_data, max_tokens=4000, model="claude-opus-4-6")
     if result:
         print(f"  Claude intelligence received ({len(result)} chars).")
     return result
@@ -1582,9 +1622,10 @@ def build_email_html(digest_data):
     has_prior_snapshot = digest_data["has_prior_snapshot"]
 
     # Build sections
+    cfg = SCOPE_CONFIG[SCOPE]
     header = f'''<div style="{S_HEADER}">
-<div style="{S_HEADER_TITLE}">PS Operations Daily Intelligence</div>
-<div style="{S_HEADER_SUBTITLE}">{today_str} • eDiscovery | Data PSG | Post Implementation</div>
+<div style="{S_HEADER_TITLE}">{cfg["email_subject_prefix"]}</div>
+<div style="{S_HEADER_SUBTITLE}">{today_str} • {cfg["email_subtitle"]}</div>
 </div>'''
 
     # KPI row
@@ -1620,8 +1661,9 @@ def build_email_html(digest_data):
     # Attention required — escalations, high-value at risk, stale notes
     sections.append(build_attention_required_section(all_enriched))
 
-    # Z2E migration progress
-    sections.append(build_z2e_tracker_section(all_enriched))
+    # Z2E migration progress (PS scope only)
+    if SCOPE == "ps":
+        sections.append(build_z2e_tracker_section(all_enriched))
 
     # Health changes (only if we have prior snapshot)
     if has_prior_snapshot:
@@ -1629,8 +1671,9 @@ def build_email_html(digest_data):
     else:
         sections.append(f'<div style="{S_SECTION}"><div style="{S_MUTED}"><em>Health change detection available from next run (snapshot baseline being established today).</em></div></div>')
 
-    # Post-Implementation watch (Oronde)
-    sections.append(build_post_impl_watch_section(projects_by_team))
+    # Post-Implementation watch (PS scope only — Oronde)
+    if SCOPE == "ps":
+        sections.append(build_post_impl_watch_section(projects_by_team))
 
     # New projects
     sections.append(build_new_projects_section(new_projects))
@@ -1693,7 +1736,19 @@ def main():
     parser = argparse.ArgumentParser(description="PS Operations Daily Intelligence Digest")
     parser.add_argument("--dry-run", action="store_true", help="Preview without sending email")
     parser.add_argument("--mode", choices=["email"], default="email", help="Output mode (email only)")
+    parser.add_argument("--scope", choices=list(SCOPE_CONFIG.keys()), default="ps",
+                        help="Scope: ps (eDiscovery/Data PSG/Post Impl) or forensics")
     args = parser.parse_args()
+
+    # Apply scope configuration to module-level globals
+    global SCOPE, DIRECTORS, DIRECTOR_NAMES, EXTRA_RECIPIENTS, SNAPSHOT_DIR
+    SCOPE = args.scope
+    cfg = SCOPE_CONFIG[SCOPE]
+    DIRECTORS = cfg["directors"]
+    DIRECTOR_NAMES = cfg["director_names"]
+    EXTRA_RECIPIENTS = cfg["extra_recipients"]
+    if cfg["snapshot_suffix"]:
+        SNAPSHOT_DIR = Path(__file__).parent / f".snapshots{cfg['snapshot_suffix']}"
 
     if not API_KEY:
         print("ERROR: ROCKETLANE_API_KEY not set")
@@ -1740,14 +1795,16 @@ def main():
     has_prior_snapshot = bool(old_snapshot)
     print(f"Found {len(changes)} health/status changes (prior snapshot: {has_prior_snapshot}).")
 
-    # Fetch Z2E task progress
-    print("Fetching Z2E project task progress...")
-    z2e_ids = []
-    for p in all_enriched:
-        st = p.get("sub_type", "").lower()
-        if "z2e" in st and "z2e - not started" not in st and p["status"] not in ("Completed", "Closeout"):
-            z2e_ids.append(p["id"])
-    z2e_progress = fetch_z2e_progress(z2e_ids) if z2e_ids else {}
+    # Fetch Z2E task progress (PS scope only — Z2E is eDiscovery-specific)
+    z2e_progress = {}
+    if SCOPE == "ps":
+        print("Fetching Z2E project task progress...")
+        z2e_ids = []
+        for p in all_enriched:
+            st = p.get("sub_type", "").lower()
+            if "z2e" in st and "z2e - not started" not in st and p["status"] not in ("Completed", "Closeout"):
+                z2e_ids.append(p["id"])
+        z2e_progress = fetch_z2e_progress(z2e_ids) if z2e_ids else {}
     # Inject progress into enriched projects
     for p in all_enriched:
         pid = p["id"]
@@ -1782,7 +1839,7 @@ def main():
     html = build_email_html(digest_data)
 
     # Send email
-    subject = f"PS Operations Daily Intelligence — {NOW.strftime('%b %d, %Y')}"
+    subject = f"{cfg['email_subject_prefix']} — {NOW.strftime('%b %d, %Y')}"
 
     print(f"Subject: {subject}")
     send_email(subject, html, dry_run=args.dry_run)
