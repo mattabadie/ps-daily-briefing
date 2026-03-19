@@ -81,10 +81,12 @@ SCOPE_CONFIG = {
         "directors": {
             393598: "Forensics Impl",
             650747: "Forensics Post-Impl",
+            393608: "Forensics Leadership",  # Sarah — VP, included for project filtering
         },
         "director_names": {
             "Forensics Impl": "Ewelina Gramala",
             "Forensics Post-Impl": "Jon Cook",
+            # "Forensics Leadership" intentionally excluded — Sarah is the VP/audience, not a director
         },
         "extra_recipients": ["matt.abadie@exterro.com"],  # TODO: add sarah.hargreaves@exterro.com when ready
         "email_subject_prefix": "Forensics Daily Intelligence",
