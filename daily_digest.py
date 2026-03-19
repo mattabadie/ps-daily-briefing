@@ -1311,7 +1311,7 @@ def _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, c
 
     # Portfolio stats
     lines.append("=== PORTFOLIO OVERVIEW ===")
-    for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
+    for team in DIRECTOR_NAMES:
         projs = projects_by_team.get(team, [])
         team_active = [p for p in projs if p["status_val"] in ACTIVE_STATUS_VALUES]
         red = sum(1 for p in team_active if p["health"] == "red")
@@ -1385,7 +1385,7 @@ def _build_intelligence_prompt(projects_by_team, all_enriched, stale_projects, c
     lines.append(f"{len(with_notes)} of {len(active)} active projects ({int(len(with_notes)/len(active)*100) if active else 0}%) have PM notes")
 
     # Per-team PM notes for director briefings
-    for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
+    for team in DIRECTOR_NAMES:
         team_projs = projects_by_team.get(team, [])
         team_active = [p for p in team_projs if p["status_val"] in ACTIVE_STATUS_VALUES]
         team_ry = [p for p in team_active if p["health"] in ("red", "yellow") and (p["health_notes"] or p["weekly_status"])]
@@ -1533,7 +1533,7 @@ def _build_regex_narrative(projects_by_team, new_projects, changes, all_enriched
 
     # ── Health by team ──
     html += f'<p {P}><span {BOLD}>Health by Team:</span></p>'
-    for team in ["eDiscovery", "Data PSG", "Post Implementation"]:
+    for team in DIRECTOR_NAMES:
         if team in health_summary:
             h = health_summary[team]
             director = DIRECTOR_NAMES[team]
