@@ -10,10 +10,6 @@ on:
         description: 'Dry run (no email sent)'
         type: boolean
         default: false
-      force_weekly:
-        description: 'Force weekly narrative section'
-        type: boolean
-        default: false
 
 jobs:
   daily-digest:
@@ -46,8 +42,5 @@ jobs:
           ARGS=""
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
-          fi
-          if [ "${{ github.event.inputs.force_weekly }}" = "true" ]; then
-            ARGS="$ARGS --force-weekly"
           fi
           python daily_digest.py $ARGS

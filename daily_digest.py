@@ -8,7 +8,7 @@ Usage:
   python daily_digest.py                              # Default: email mode
   python daily_digest.py --mode email                 # Email only
   python daily_digest.py --dry-run                    # Preview without sending
-  python daily_digest.py --force-weekly               # Include weekly narrative
+  python daily_digest.py --scope forensics             # Forensics-only version
 
 Env vars:
   ROCKETLANE_API_KEY    — Rocketlane API key (required)
@@ -1570,7 +1570,7 @@ def _build_regex_narrative(projects_by_team, new_projects, changes, all_enriched
     return html
 
 
-def build_email_html(digest_data, is_weekly=False):
+def build_email_html(digest_data):
     """Build complete HTML email."""
     today_str = digest_data["today_str"]
     new_projects = digest_data["new_projects"]
@@ -1693,7 +1693,6 @@ def main():
     parser = argparse.ArgumentParser(description="PS Operations Daily Intelligence Digest")
     parser.add_argument("--dry-run", action="store_true", help="Preview without sending email")
     parser.add_argument("--mode", choices=["email"], default="email", help="Output mode (email only)")
-    parser.add_argument("--force-weekly", action="store_true", help="Include weekly narrative regardless of day")
     args = parser.parse_args()
 
     if not API_KEY:
@@ -1766,10 +1765,6 @@ def main():
     stale_projects = find_stale_projects(all_enriched)
     print(f"Found {len(stale_projects)} stale projects (no time entries in 7 days).")
 
-    # Check if today is Friday or --force-weekly
-    is_friday = NOW.weekday() == 4
-    is_weekly = is_friday or args.force_weekly
-
     # Build digest data
     digest_data = {
         "today_str": NOW.strftime("%A, %B %d, %Y"),
@@ -1784,12 +1779,10 @@ def main():
 
     # Build email
     print("\nBuilding email...")
-    html = build_email_html(digest_data, is_weekly=is_weekly)
+    html = build_email_html(digest_data)
 
     # Send email
     subject = f"PS Operations Daily Intelligence — {NOW.strftime('%b %d, %Y')}"
-    if is_weekly:
-        subject = f"[WEEKLY] {subject}"
 
     print(f"Subject: {subject}")
     send_email(subject, html, dry_run=args.dry_run)
