@@ -86,7 +86,7 @@ SCOPE_CONFIG = {
             "Forensics Impl": "Ewelina Gramala",
             "Forensics Post-Impl": "Jon Cook",
         },
-        "extra_recipients": ["matt.abadie@exterro.com", "sarah.hargreaves@exterro.com"],
+        "extra_recipients": ["matt.abadie@exterro.com"],  # TODO: add sarah.hargreaves@exterro.com when ready
         "email_subject_prefix": "Forensics Daily Intelligence",
         "email_subtitle": "FTK | GLAM | Forensics",
         "snapshot_suffix": "_forensics",
