@@ -1,0 +1,106 @@
+================================================================================
+PS OPERATIONS DAILY INTELLIGENCE DIGEST
+================================================================================
+
+COMPLETED: daily_digest.py — A comprehensive daily activity digest script for
+Rocketlane PS operations. Self-contained, no external dependencies.
+
+KEY FEATURES:
+─────────────
+
+1. NEW PROJECTS (24h)
+   • Projects created in last 24 hours across 3 service teams
+   • Shows: customer, name, PM, type, status, Rocketlane link
+   • Sorted by creation date (newest first)
+
+2. HEALTH & STATUS CHANGES
+   • Snapshot-based diff against prior run's state
+   • Detects:
+     - Health color changes (red ↔ yellow ↔ green)
+     - Status label changes (e.g., "In Progress" → "On Hold")
+     - New/updated Internal Project Health Notes
+     - New/updated Internal Weekly Status
+   • Shows from→to with full project context
+   • Unavailable on first run (baseline snapshot being established)
+
+3. PM-PUBLISHED UPDATES (24h)
+   • Fetches from project-updates endpoint
+   • Shows: title, PM, project, customer, status, timestamp, link
+
+4. BURN RATE ANOMALIES
+   • Analyzes time entries for active projects
+   • Compares last 7 days vs. 30-day average weekly burn
+   • Flags projects where:
+     - Last week > 2x average (accelerating/over-utilization)
+     - Last week < 0.3x average (decelerating/stalled)
+   • Shows hours, average, ratio, and risk flag
+
+5. WEEKLY NARRATIVE (Fridays only)
+   • Executive memo-style summary section
+   • New projects this week, health trends, PM activity, burn patterns
+   • Auto-triggers on Fridays; use --force-weekly for testing
+
+EMAIL FORMAT:
+─────────────
+
+• Dark teal header with date and team names
+• KPI badges: active projects, red/yellow health, new (24h)
+• Organized sections with count badges
+• Inline styles throughout (Gmail-compatible)
+• Professional executive briefing tone
+• Rocketlane project links for navigation
+• Timestamp footer
+
+SNAPSHOT MECHANISM:
+────────────────────
+
+• Maintains .snapshots/project_state.json
+• First run: establishes baseline, health changes unavailable
+• Subsequent runs: loads snapshot, diffs, detects changes, saves new state
+• Lightweight (only fields needed for diffing)
+• Automatic management, no manual intervention
+
+USAGE:
+──────
+
+python daily_digest.py                  # Generate and send
+python daily_digest.py --dry-run        # Preview without sending
+python daily_digest.py --force-weekly   # Include weekly narrative
+python daily_digest.py --dry-run --force-weekly
+
+ENVIRONMENT VARIABLES:
+──────────────────────
+
+ROCKETLANE_API_KEY        — Rocketlane API key (required)
+GMAIL_ADDRESS             — Gmail sender address (required)
+GMAIL_APP_PASSWORD        — Gmail app password (required)
+
+TEAM FILTERING:
+────────────────
+
+Projects assigned by director membership or ownership:
+  • eDiscovery: Vanessa Graham (393610)
+  • Data PSG: Maggie Ledbetter (393604)
+  • Post Implementation: Oronde Ward (393607)
+
+IMPLEMENTATION DETAILS:
+───────────────────────
+
+• ThreadPoolExecutor(max_workers=4) for parallel time entry fetches
+• Exponential backoff (2s, 4s) on API 429 errors
+• Uses Rocketlane fields API: get_field() extracts by fieldLabel
+• Recognizes ACTIVE_STATUS_VALUES: {2,4,5,6,9,12,14,15}
+• Snapshot file: .snapshots/project_state.json (auto-created)
+• Typical runtime: 30-60 seconds depending on project count
+
+INTEGRATION:
+─────────────
+
+Cron example (daily at 8 AM):
+  0 8 * * * cd /path && ROCKETLANE_API_KEY=... \
+    GMAIL_ADDRESS=... GMAIL_APP_PASSWORD=... python daily_digest.py
+
+File location:
+  /sessions/blissful-sharp-faraday/mnt/Rocketlane/ps-daily-briefing/daily_digest.py
+
+Status: ✓ Syntax validated, executable, ready for deployment

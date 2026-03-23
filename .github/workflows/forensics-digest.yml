@@ -2,12 +2,23 @@ name: Forensics Daily Intelligence Digest
 
 on:
   schedule:
-    # Weekdays at 7:30 AM EST (12:30 UTC) — same cadence as PS digest
-    - cron: '30 12 * * 1-5'
+    # Email report: 6 AM EST = 11:00 UTC
+    - cron: '0 11 * * 1-5'
+    # Chat card: 8 AM EST = 13:00 UTC
+    - cron: '0 13 * * 1-5'
   workflow_dispatch:
     inputs:
+      mode:
+        description: 'Output mode'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - chat
+          - email
       dry_run:
-        description: 'Dry run (no email sent)'
+        description: 'Dry run (no sends)'
         type: boolean
         default: false
 
@@ -19,6 +30,7 @@ jobs:
       ROCKETLANE_API_KEY: ${{ secrets.ROCKETLANE_API_KEY }}
       GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
       GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      GCHAT_WEBHOOK_URL: ${{ secrets.GCHAT_WEBHOOK_URL }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
       - uses: actions/checkout@v4
@@ -37,9 +49,22 @@ jobs:
           restore-keys: |
             forensics-snapshot-
 
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 11 * * 1-5" ]; then
+            echo "mode=email" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "0 13 * * 1-5" ]; then
+            echo "mode=chat" >> $GITHUB_OUTPUT
+          else
+            echo "mode=both" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run Forensics Intelligence Digest
         run: |
-          ARGS="--scope forensics"
+          ARGS="--scope forensics --mode ${{ steps.mode.outputs.mode }}"
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ps-briefing.sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/matthew.abadie/repos/ps-daily-briefing/sync-to-repo.sh</string>
+    </array>
+
+    <!-- Fire whenever a file changes in the iCloud source -->
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/matthew.abadie/Library/Mobile Documents/com~apple~CloudDocs/iCloud Storage/Exterro/Rocketlane/ps-daily-briefing</string>
+    </array>
+
+    <!-- Also run every 5 minutes as a safety net -->
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/ps-briefing-sync.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/ps-briefing-sync.log</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>

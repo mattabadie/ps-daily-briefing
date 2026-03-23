@@ -895,8 +895,8 @@ def build_attention_required_section(all_enriched):
     # LLM-powered VP action items (top of section)
     if llm_actions:
         html += f'<div style="margin-bottom:16px;">'
-        html += f'<div style="font-weight:700;font-size:12px;color:#7c3aed;margin-bottom:6px;">VP Action Items — AI Analysis ({len(llm_actions)})</div>'
-        html += f'<div style="{S_MUTED};margin-bottom:6px;">Claude analyzed PM notes across {len(red_yellow_with_notes)} red/yellow projects and identified these for your direct attention.</div>'
+        html += f'<div style="font-weight:700;font-size:12px;color:#7c3aed;margin-bottom:6px;">VP Action Items ({len(llm_actions)})</div>'
+        html += f'<div style="{S_MUTED};margin-bottom:6px;">Analyzed PM notes across {len(red_yellow_with_notes)} red/yellow projects and identified these for your direct attention.</div>'
         for item in llm_actions:
             urgency_color = "#ef4444" if item["urgency"] == "high" else "#f59e0b"
             urgency_badge = f'<span style="background:{urgency_color};color:white;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:6px;">{item["urgency"].upper()}</span>'
@@ -1469,7 +1469,6 @@ def build_daily_intelligence(projects_by_team, new_projects, changes, all_enrich
             return f'''<div style="background:#faf5ff;border-left:4px solid #7c3aed;padding:20px;margin:16px 0;border-radius:0 6px 6px 0;">
 <div style="display:flex;align-items:center;gap:8px;margin:0 0 14px 0;">
 <div style="font-size:16px;font-weight:700;color:#7c3aed;">Daily Intelligence Brief</div>
-<span style="background:#7c3aed;color:white;font-size:10px;font-weight:600;padding:2px 8px;border-radius:3px;">AI ANALYSIS</span>
 </div>
 <div style="font-size:13px;line-height:1.6;color:#1e293b;">{claude_html}</div>
 </div>'''
@@ -1742,6 +1741,179 @@ Rocketlane PS Operations Dashboard
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# GOOGLE CHAT CARD
+# ═══════════════════════════════════════════════════════════════════════════════
+GCHAT_WEBHOOK_URL = os.environ.get("GCHAT_WEBHOOK_URL", "")
+
+
+def _chat_link(name, pid):
+    return f'<a href="{RL_APP_BASE}/{pid}">{name}</a>'
+
+
+def build_chat_card(digest_data):
+    """Build a condensed Google Chat card from digest data."""
+    today_str = digest_data["today_str"]
+    all_enriched = digest_data["all_enriched"]
+    projects_by_team = digest_data["projects_by_team"]
+    new_projects = digest_data["new_projects"]
+    changes = digest_data["changes"]
+    stale_projects = digest_data["stale_projects"]
+
+    cfg = SCOPE_CONFIG[SCOPE]
+    active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+
+    # Counts
+    blocked = [p for p in active if p["status_val"] == 4]
+    delayed = [p for p in active if p["status_val"] == 12]
+    red_all = [p for p in active if p["health"] == "red"]
+    yellow_all = [p for p in active if p["health"] == "yellow"]
+    no_health = [p for p in active if not p["health"]]
+    escalation_projects = [p for p in active if p.get("escalation_flags") and p["health"] in ("red", "yellow")]
+
+    sections = []
+
+    # ── KPI row ──
+    kpi = (
+        f"<b>{len(active)}</b> Active  \u2022  "
+        f"<font color=\"#dc2626\"><b>{len(blocked)}</b> Blocked</font>  \u2022  "
+        f"<font color=\"#dc2626\"><b>{len(delayed)}</b> Delayed</font>  \u2022  "
+        f"<font color=\"#dc2626\"><b>{len(red_all)}</b> Red</font>  \u2022  "
+        f"<font color=\"#ca8a04\"><b>{len(yellow_all)}</b> Yellow</font>"
+    )
+    if no_health:
+        kpi += f"  \u2022  <font color=\"#f97316\">\u26a0\ufe0f <b>{len(no_health)}</b> No Health</font>"
+    if new_projects:
+        kpi += f"  \u2022  <b>{len(new_projects)}</b> New (24h)"
+    sections.append({"widgets": [{"textParagraph": {"text": kpi}}]})
+
+    # ── Attention items ──
+    action_lines = []
+    if blocked:
+        action_lines.append(f"\ud83d\udeab <b>{len(blocked)} blocked projects</b> need unblocking")
+    if no_health:
+        action_lines.append(f"\u26a0\ufe0f <b>{len(no_health)} projects</b> have no health status set")
+    if escalation_projects:
+        top = sorted(escalation_projects, key=lambda x: x["name"])[:3]
+        for p in top:
+            snippet = p["health_notes"][:80] if p["health_notes"] else p["weekly_status"][:80]
+            action_lines.append(f"\ud83d\udd34 {_chat_link(p['name'], p['id'])} {DASH} <i>{snippet}</i>")
+        if len(escalation_projects) > 3:
+            action_lines.append(f"<i>...{len(escalation_projects) - 3} more with escalation keywords</i>")
+    if stale_projects:
+        action_lines.append(f"\ud83d\udc4b <b>{len(stale_projects)} stale projects</b> {DASH} no time logged in 7+ days")
+
+    # Health changes from snapshot diff
+    health_changes = [c for c in changes if c["type"] == "health_change"]
+    downgrades = [c for c in health_changes if _health_rank(c["to"]) < _health_rank(c["from"])]
+    if downgrades:
+        for c in downgrades[:3]:
+            action_lines.append(
+                f"\u2b07\ufe0f <b>{c['project']}</b> {DASH} {c['from']} \u2192 {c['to']} ({c['pm']})"
+            )
+        if len(downgrades) > 3:
+            action_lines.append(f"<i>...{len(downgrades) - 3} more health downgrades</i>")
+
+    if action_lines:
+        sections.append({
+            "header": "\u26a1 Needs Your Attention",
+            "widgets": [{"textParagraph": {"text": "\n".join(action_lines)}}]
+        })
+
+    # ── Team sections ──
+    for team_name in DIRECTOR_NAMES.keys():
+        projs = projects_by_team.get(team_name, [])
+        t_active = [p for p in projs if p["status_val"] in ACTIVE_STATUS_VALUES]
+        t_red = [p for p in t_active if p["health"] == "red"]
+        t_yellow = [p for p in t_active if p["health"] == "yellow"]
+        t_green = [p for p in t_active if p["health"] == "green"]
+        t_blocked = [p for p in t_active if p["status_val"] == 4]
+        t_no_health = [p for p in t_active if not p["health"]]
+
+        summary_parts = [f"{len(t_active)} active"]
+        if t_blocked:
+            summary_parts.append(f"<font color=\"#dc2626\">{len(t_blocked)} blocked</font>")
+        summary_parts.append(f"\ud83d\udd34{len(t_red)} \ud83d\udfe1{len(t_yellow)} \ud83d\udfe2{len(t_green)}")
+        if t_no_health:
+            summary_parts.append(f"<font color=\"#f97316\">\u26a0\ufe0f{len(t_no_health)} unset</font>")
+        summary = "  \u2022  ".join(summary_parts)
+
+        # Z2E breakdown for eDiscovery (PS scope)
+        if SCOPE == "ps" and team_name == "eDiscovery":
+            z2e = [p for p in t_active if "z2e" in p.get("sub_type", "").lower() and "not started" not in p.get("sub_type", "").lower()]
+            z2e_p1 = sum(1 for p in t_active if "z2e phase 1" in p.get("sub_type", "").lower())
+            z2e_p2 = len(z2e) - z2e_p1
+            non_z2e = len(t_active) - len(z2e)
+            summary += f"\n<b>Z2E:</b> {len(z2e)} ({z2e_p1} P1 \u2022 {z2e_p2} P2)  |  <b>Non-Z2E:</b> {non_z2e}"
+
+        widgets = [{"decoratedText": {"topLabel": f"{team_name} {DASH} {DIRECTOR_NAMES[team_name]}", "text": summary}}]
+
+        # Red project details (collapsible)
+        if t_red:
+            by_pm = defaultdict(list)
+            for p in t_red:
+                by_pm[p["owner"] or "Unassigned"].append(p)
+            red_lines = []
+            for pm in sorted(by_pm.keys()):
+                pm_projs = sorted(by_pm[pm], key=lambda x: x["name"])
+                red_lines.append(f"\n<b>{pm}</b>")
+                for p in pm_projs[:4]:
+                    line = f"  \ud83d\udd34 {_chat_link(p['name'], p['id'])} {DASH} {p['customer']}"
+                    if p["health_notes"]:
+                        line += f"\n       <i>{p['health_notes'][:70]}</i>"
+                    red_lines.append(line)
+                if len(pm_projs) > 4:
+                    red_lines.append(f"  <i>...+{len(pm_projs) - 4} more</i>")
+            widgets.append({"textParagraph": {"text": "\n".join(red_lines)}})
+
+        sections.append({
+            "header": team_name,
+            "collapsible": True,
+            "uncollapsibleWidgetsCount": 1,
+            "widgets": widgets,
+        })
+
+    # ── Footer ──
+    sections.append({
+        "widgets": [{"textParagraph": {"text": f"<i>Rocketlane PS Ops {DASH} {NOW.strftime('%H:%M')} {DASH} {today_str}</i>"}}]
+    })
+
+    return {
+        "cardsV2": [{
+            "cardId": "ps-daily-digest",
+            "card": {
+                "header": {
+                    "title": cfg["label"] + " Daily Update",
+                    "subtitle": today_str,
+                    "imageUrl": "https://fonts.gstatic.com/s/i/short-term/release/googlesymbols/monitoring/default/48px.svg",
+                    "imageType": "CIRCLE"
+                },
+                "sections": sections
+            }
+        }]
+    }
+
+
+def _health_rank(h):
+    """Numeric rank for health values (higher = better)."""
+    return {"green": 3, "yellow": 2, "red": 1}.get((h or "").lower(), 0)
+
+
+def post_chat_card(card, dry_run=False):
+    """Post a card to Google Chat via webhook."""
+    if dry_run:
+        print(f"\n[DRY RUN] Chat card: {len(json.dumps(card))} bytes")
+        return
+
+    data = json.dumps(card).encode("utf-8")
+    req = urllib.request.Request(
+        GCHAT_WEBHOOK_URL, data=data,
+        headers={"Content-Type": "application/json; charset=UTF-8"}
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        print(f"Chat card posted: HTTP {resp.status}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # EMAIL SENDING
 # ═══════════════════════════════════════════════════════════════════════════════
 def send_email(subject, html_body, dry_run=False):
@@ -1772,8 +1944,9 @@ def send_email(subject, html_body, dry_run=False):
 # ═══════════════════════════════════════════════════════════════════════════════
 def main():
     parser = argparse.ArgumentParser(description="PS Operations Daily Intelligence Digest")
-    parser.add_argument("--dry-run", action="store_true", help="Preview without sending email")
-    parser.add_argument("--mode", choices=["email"], default="email", help="Output mode (email only)")
+    parser.add_argument("--dry-run", action="store_true", help="Preview without sending")
+    parser.add_argument("--mode", choices=["email", "chat", "both"], default="email",
+                        help="Output mode: email, chat (Google Chat card), or both")
     parser.add_argument("--scope", choices=list(SCOPE_CONFIG.keys()), default="ps",
                         help="Scope: ps (eDiscovery/Data PSG/Post Impl) or forensics")
     args = parser.parse_args()
@@ -1791,9 +1964,13 @@ def main():
     if not API_KEY:
         print("ERROR: ROCKETLANE_API_KEY not set")
         sys.exit(1)
-    if not args.dry_run and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
-        print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required for email mode")
-        sys.exit(1)
+    if not args.dry_run:
+        if args.mode in ("email", "both") and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
+            print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required for email mode")
+            sys.exit(1)
+        if args.mode in ("chat", "both") and not GCHAT_WEBHOOK_URL:
+            print("ERROR: GCHAT_WEBHOOK_URL required for chat mode")
+            sys.exit(1)
 
     print("=" * 70)
     print("PS Operations Daily Intelligence Digest")
@@ -1872,15 +2049,20 @@ def main():
         "has_prior_snapshot": has_prior_snapshot,
     }
 
-    # Build email
-    print("\nBuilding email...")
-    html = build_email_html(digest_data)
+    # Build and send outputs
+    mode = args.mode
 
-    # Send email
-    subject = f"{cfg['email_subject_prefix']} — {NOW.strftime('%b %d, %Y')}"
+    if mode in ("email", "both"):
+        print("\nBuilding email...")
+        html = build_email_html(digest_data)
+        subject = f"{cfg['email_subject_prefix']} {DASH} {NOW.strftime('%b %d, %Y')}"
+        print(f"Subject: {subject}")
+        send_email(subject, html, dry_run=args.dry_run)
 
-    print(f"Subject: {subject}")
-    send_email(subject, html, dry_run=args.dry_run)
+    if mode in ("chat", "both"):
+        print("\nBuilding Google Chat card...")
+        card = build_chat_card(digest_data)
+        post_chat_card(card, dry_run=args.dry_run)
 
     # Save snapshot
     print("Saving project state snapshot...")
