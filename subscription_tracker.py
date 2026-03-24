@@ -400,6 +400,10 @@ def _generate_renewal_narrative(sub_data, consumption, siblings):
 
     print(f"    Generating renewal narrative for {sub_data['customer']}...")
     result = call_claude(_RENEWAL_PROMPT, "\n".join(lines), max_tokens=512)
+    if result:
+        # Strip markdown code fences if LLM wraps response in ```html ... ```
+        result = re.sub(r'^```\w*\s*\n?', '', result.strip())
+        result = re.sub(r'\n?```\s*$', '', result.strip())
     return result
 
 
