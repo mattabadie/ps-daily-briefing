@@ -641,7 +641,7 @@ a {{ color:#3b82f6; text-decoration:none; }}
 # ═══════════════════════════════════════════════════════════════════════════════
 def send_renewal_email(sub_data, html_body, dry_run=False):
     """Send the renewal package to VP only."""
-    recipients = {GMAIL_ADDRESS}
+    recipients = {"matt.abadie@exterro.com"}
 
     to_list = ", ".join(sorted(recipients))
     subject = f"Subscription Renewal Alert: {sub_data['customer']} {DASH} {sub_data['pct_consumed']}% consumed"

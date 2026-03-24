@@ -1918,7 +1918,7 @@ def post_chat_card(card, dry_run=False):
 # ═══════════════════════════════════════════════════════════════════════════════
 def send_email(subject, html_body, dry_run=False):
     """Send HTML email via Gmail."""
-    all_recipients = [GMAIL_ADDRESS] + EXTRA_RECIPIENTS
+    all_recipients = list(dict.fromkeys(EXTRA_RECIPIENTS + [GMAIL_ADDRESS]))
 
     if dry_run:
         print(f"\n[DRY RUN] Email subject: {subject}")
