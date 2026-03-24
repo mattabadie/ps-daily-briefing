@@ -300,11 +300,7 @@ def send_audit_email(wb, rows, dry_run=False):
 <p style="font-size: 11px; color: #94a3b8; margin-top: 24px;">Auto-generated Subscription Audit &middot; Rocketlane API</p>
 </body></html>"""
 
-    recipients = set()
-    recipients.add(GMAIL_ADDRESS)
-    for r in EXTRA_RECIPIENTS:
-        if r.strip():
-            recipients.add(r.strip())
+    recipients = set(EXTRA_RECIPIENTS)
     to_list = ", ".join(sorted(recipients))
 
     if dry_run:
