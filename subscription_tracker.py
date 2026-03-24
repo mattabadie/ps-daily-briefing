@@ -640,20 +640,8 @@ a {{ color:#3b82f6; text-decoration:none; }}
 # EMAIL SENDER
 # ═══════════════════════════════════════════════════════════════════════════════
 def send_renewal_email(sub_data, html_body, dry_run=False):
-    """Send the renewal package to AE, CSM, and VP."""
-    recipients = set()
-
-    # AE (Opportunity Owner)
-    ae_email = sub_data.get("opp_owner_email", "").strip()
-    if ae_email and "@" in ae_email:
-        recipients.add(ae_email)
-
-    # Primary customer contact email (CSM proxy if available)
-    # NOTE: We CC the VP (GMAIL_ADDRESS) always
-    # For now, we send to AE + CC VP. CSM field may need to be added in RL.
-
-    # Always include VP
-    recipients.add(GMAIL_ADDRESS)
+    """Send the renewal package to VP only."""
+    recipients = {GMAIL_ADDRESS}
 
     to_list = ", ".join(sorted(recipients))
     subject = f"Subscription Renewal Alert: {sub_data['customer']} {DASH} {sub_data['pct_consumed']}% consumed"
