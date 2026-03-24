@@ -620,7 +620,7 @@ a {{ color:#3b82f6; text-decoration:none; }}
     if renewal_narrative:
         html += f'''
 <div class="section" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:16px;">
-  <h2 style="color:#7c3aed;">AI Renewal Strategy</h2>
+  <h2 style="color:#7c3aed;">Renewal Strategy</h2>
   <div style="font-size:13px;line-height:1.6;">{renewal_narrative}</div>
 </div>'''
 
