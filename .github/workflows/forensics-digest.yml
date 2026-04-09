@@ -40,6 +40,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install WeasyPrint and system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libcairo2
+          pip install weasyprint
+
       # Restore snapshot from prior run (separate cache for forensics)
       - name: Restore snapshot cache
         uses: actions/cache@v4

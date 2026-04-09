@@ -29,9 +29,17 @@ import urllib.error
 import urllib.request
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+from email import encoders
+from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
+
+try:
+    from weasyprint import HTML as WeasyHTML
+    HAS_WEASYPRINT = True
+except ImportError:
+    HAS_WEASYPRINT = False
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIG
@@ -1914,23 +1922,84 @@ def post_chat_card(card, dry_run=False):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# PDF GENERATION
+# ═══════════════════════════════════════════════════════════════════════════════
+def generate_pdf(html_body):
+    """Convert HTML email body to PDF bytes using WeasyPrint.
+    Returns PDF bytes or None if WeasyPrint unavailable/fails."""
+    if not HAS_WEASYPRINT:
+        print("  WeasyPrint not installed — skipping PDF generation.")
+        return None
+
+    try:
+        # Add print-friendly CSS overrides for PDF rendering
+        pdf_css = """
+        <style>
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+        body {
+            font-size: 12px !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+        /* Prevent sections from breaking across pages */
+        div[style*="background:#f8fafc"] {
+            page-break-inside: avoid;
+        }
+        /* Ensure tables don't break mid-row */
+        tr {
+            page-break-inside: avoid;
+        }
+        </style>
+        """
+        # Inject print CSS into the HTML head
+        pdf_html = html_body.replace("</head>", f"{pdf_css}</head>")
+
+        print("  Generating PDF from HTML...")
+        pdf_bytes = WeasyHTML(string=pdf_html).write_pdf()
+        print(f"  PDF generated: {len(pdf_bytes):,} bytes ({len(pdf_bytes)/1024:.0f} KB)")
+        return pdf_bytes
+    except Exception as e:
+        print(f"  PDF generation failed: {e}")
+        return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # EMAIL SENDING
 # ═══════════════════════════════════════════════════════════════════════════════
-def send_email(subject, html_body, dry_run=False):
-    """Send HTML email via Gmail."""
+def send_email(subject, html_body, dry_run=False, pdf_bytes=None, pdf_filename=None):
+    """Send HTML email via Gmail, optionally with a PDF attachment."""
     all_recipients = list(dict.fromkeys(EXTRA_RECIPIENTS + [GMAIL_ADDRESS]))
 
     if dry_run:
         print(f"\n[DRY RUN] Email subject: {subject}")
         print(f"[DRY RUN] To: {', '.join(all_recipients)}")
         print(f"[DRY RUN] Body length: {len(html_body)} chars")
+        if pdf_bytes:
+            print(f"[DRY RUN] PDF attachment: {pdf_filename} ({len(pdf_bytes):,} bytes)")
         return
 
-    msg = MIMEMultipart("alternative")
+    # Use mixed multipart so we can have HTML body + attachment
+    msg = MIMEMultipart("mixed")
     msg["From"] = GMAIL_ADDRESS
     msg["To"] = ", ".join(all_recipients)
     msg["Subject"] = subject
-    msg.attach(MIMEText(html_body, "html"))
+
+    # HTML body as an alternative part
+    body_part = MIMEMultipart("alternative")
+    body_part.attach(MIMEText(html_body, "html"))
+    msg.attach(body_part)
+
+    # Attach PDF if provided
+    if pdf_bytes and pdf_filename:
+        pdf_part = MIMEBase("application", "pdf")
+        pdf_part.set_payload(pdf_bytes)
+        encoders.encode_base64(pdf_part)
+        pdf_part.add_header("Content-Disposition", f'attachment; filename="{pdf_filename}"')
+        msg.attach(pdf_part)
+        print(f"  PDF attached: {pdf_filename}")
 
     print("Connecting to Gmail SMTP...")
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
@@ -2057,7 +2126,13 @@ def main():
         html = build_email_html(digest_data)
         subject = f"{cfg['email_subject_prefix']} {DASH} {NOW.strftime('%b %d, %Y')}"
         print(f"Subject: {subject}")
-        send_email(subject, html, dry_run=args.dry_run)
+
+        # Generate PDF attachment
+        pdf_bytes = generate_pdf(html)
+        pdf_filename = f"{cfg['email_subject_prefix'].replace(' ', '_')}_{NOW.strftime('%Y-%m-%d')}.pdf"
+
+        send_email(subject, html, dry_run=args.dry_run,
+                   pdf_bytes=pdf_bytes, pdf_filename=pdf_filename)
 
     if mode in ("chat", "both"):
         print("\nBuilding Google Chat card...")
