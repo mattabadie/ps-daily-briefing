@@ -5,3 +5,4 @@ __pycache__/
 sample_*.html
 com.ps-briefing.sync.plist
 sync-to-repo.sh
+.claude/
