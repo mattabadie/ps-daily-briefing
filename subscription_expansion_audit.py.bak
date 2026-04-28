@@ -1,0 +1,775 @@
+#!/usr/bin/env python3
+"""
+Subscription Expansion Audit
+
+All active subscription projects across all teams (eDiscovery, Data PSG, Forensics,
+Post Implementation), enriched for customer-success / expansion-opportunity analysis:
+  - Modules licensed (Opp: Product Names + Product Families)
+  - ARR (annualizedRecurringRevenue + Opp: Opportunity ARR)
+  - % of subscription hours consumed (from project-level rollup — no time-entry calls)
+  - Expansion-opportunity flags (OVER budget / Renewal window / Underutilized / etc.)
+
+Uses native Rocketlane API server-side filtering and project-level consumption rollup.
+~2 API calls total, <10 seconds runtime for ~200 projects.
+
+Key design points:
+  - ONE server-side filtered call replaces fetch-all-then-filter:
+      ?project.field.1902713.value=3 (Project Type = Subscription)
+      &status.oneOf=2,4,5,6,9,12,14,15 (active statuses)
+      &sortBy=annualizedRecurringRevenue&sortOrder=DESC
+  - Consumption uses project-level rollup (trackedHours, percentageBudgetedHoursConsumed)
+    already present in the list response. No per-project time-entry calls.
+  - Per-project detail calls only when financials missing from list response.
+  - Optional --since flag for incremental refresh (skill-friendly).
+  - Optional --with-entries flag pulls time entries only when last_entry_date
+    or detailed burn analysis is needed (rarely).
+
+Usage:
+  python3 subscription_expansion_audit.py
+  python3 subscription_expansion_audit.py --since 2026-01-01     # incremental
+  python3 subscription_expansion_audit.py --with-entries         # also fetch time entries
+  python3 subscription_expansion_audit.py --bench                # legacy comparison
+"""
+
+import argparse
+import os
+import re
+import sys
+import time
+import urllib.error
+from datetime import datetime, timedelta
+
+# Shared infrastructure — HTTP, fetchers, enrichment, helpers
+from rocketlane_client import (
+    API_KEY,
+    SFDC_LIGHTNING_BASE,
+    fetch_subscription_projects,
+    fetch_bulk_time_entries,
+    fetch_time_entries_per_project,
+    group_entries_by_project,
+    fetch_project_detail,
+    enrich_psr_links_parallel,
+    enrich_company_account_links_bulk,
+    get_field,
+)
+
+# Audit-specific row builder + workbook builder
+from subscription_audit import extract_project_row
+from subscription_expansion_audit_legacy import build_expansion_workbook
+
+NOW = datetime.now()
+
+
+# ─── HTTP ──────────────────────────────────────────────────────────────────────
+def api_get(path, retries=3, timeout=120, base=None):
+    """GET against Rocketlane API. `base` overrides BASE_URL — use V1_BASE_URL for the
+    internal v1 endpoints (which expose linkedResources for SF integration)."""
+    base = base or BASE_URL
+    url = f"{base}/{path}"
+    req = urllib.request.Request(
+        url,
+        headers={"api-key": API_KEY, "accept": "application/json"},
+    )
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < retries - 1:
+                time.sleep(2 ** (attempt + 1))
+            elif e.code >= 500 and attempt < retries - 1:
+                time.sleep(2 ** (attempt + 1))
+            else:
+                body = ""
+                try:
+                    body = e.read().decode()[:300]
+                except Exception:
+                    pass
+                raise RuntimeError(f"HTTP {e.code} on {path[:80]}: {body}") from e
+
+
+# ─── Fetch: filtered subscription projects (server-side) ───────────────────────
+def fetch_subscription_projects(since_date=None):
+    """One server-side filtered, sorted call. Returns active subscription projects
+    sorted by ARR DESC. Pagination via pageToken."""
+    params = {
+        f"project.field.{PROJECT_TYPE_FIELD_ID}.value": str(SUBSCRIPTION_VALUE),
+        "status.oneOf": ",".join(str(v) for v in ACTIVE_STATUS_VALUES),
+        "sortBy": "annualizedRecurringRevenue",
+        "sortOrder": "DESC",
+        "includeAllFields": "true",
+        "pageSize": "100",
+    }
+    if since_date:
+        # Convert YYYY-MM-DD → epoch millis at start of day UTC
+        try:
+            dt = datetime.strptime(since_date, "%Y-%m-%d")
+            params["updatedAt.ge"] = str(int(dt.timestamp() * 1000))
+        except ValueError:
+            print(f"WARNING: invalid --since date '{since_date}', ignored")
+
+    qs = urllib.parse.urlencode(params)
+
+    all_projects, page_token = [], None
+    api_calls = 0
+    while True:
+        url = f"projects?{qs}"
+        if page_token:
+            url += f"&pageToken={urllib.parse.quote(page_token)}"
+        resp = api_get(url)
+        api_calls += 1
+        all_projects.extend(resp.get("data", []))
+        pag = resp.get("pagination", {})
+        if pag.get("hasMore") and pag.get("nextPageToken"):
+            page_token = pag["nextPageToken"]
+        else:
+            break
+    return all_projects, api_calls
+
+
+# ─── Fetch: bulk time entries with single paginated call ───────────────────────
+def fetch_bulk_time_entries(since_date, timeout=90):
+    """One paginated call for all time entries since date. Returns list."""
+    params = {"date.ge": since_date, "pageSize": "100"}
+    qs = urllib.parse.urlencode(params)
+
+    all_entries, page_token = [], None
+    api_calls = 0
+    while True:
+        url = f"time-entries?{qs}"
+        if page_token:
+            url += f"&pageToken={urllib.parse.quote(page_token)}"
+        resp = api_get(url, timeout=timeout)
+        api_calls += 1
+        all_entries.extend(resp.get("data", []))
+        pag = resp.get("pagination", {})
+        if pag.get("hasMore") and pag.get("nextPageToken"):
+            page_token = pag["nextPageToken"]
+        else:
+            break
+    return all_entries, api_calls
+
+
+def fetch_time_entries_per_project(project_ids, since_date, max_workers=8):
+    """Fallback: parallel per-project time-entry fetches. Used when bulk call times out."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    by_project = defaultdict(list)
+    api_calls = 0
+
+    def fetch_one(pid):
+        params = {"projectId.eq": str(pid), "date.ge": since_date, "pageSize": "100"}
+        qs = urllib.parse.urlencode(params)
+        local_entries, page_token, calls = [], None, 0
+        while True:
+            url = f"time-entries?{qs}"
+            if page_token:
+                url += f"&pageToken={urllib.parse.quote(page_token)}"
+            resp = api_get(url, timeout=60)
+            calls += 1
+            local_entries.extend(resp.get("data", []))
+            pag = resp.get("pagination", {})
+            if pag.get("hasMore") and pag.get("nextPageToken"):
+                page_token = pag["nextPageToken"]
+            else:
+                break
+        return pid, local_entries, calls
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(fetch_one, pid): pid for pid in project_ids}
+        done = 0
+        for f in as_completed(futures):
+            try:
+                pid, entries, calls = f.result()
+                by_project[int(pid)].extend(entries)
+                api_calls += calls
+            except Exception as e:
+                pid = futures[f]
+                print(f"  WARN: time entries for {pid}: {str(e)[:80]}")
+            done += 1
+            if done % 25 == 0 or done == len(project_ids):
+                print(f"  {done}/{len(project_ids)} projects fetched")
+
+    return by_project, api_calls
+
+
+def group_entries_by_project(entries):
+    """Build {projectId: [entries...]} from a flat list."""
+    by_project = defaultdict(list)
+    for e in entries:
+        proj = e.get("project")
+        pid = None
+        if isinstance(proj, dict):
+            pid = proj.get("projectId") or proj.get("id")
+        elif isinstance(proj, int):
+            pid = proj
+        pid = pid or e.get("projectId")
+        if pid:
+            by_project[int(pid)].append(e)
+    return by_project
+
+
+def fetch_project_detail(pid):
+    return api_get(f"projects/{pid}")
+
+
+# ─── Fetch: PSR linkedResources via v1 endpoint ───────────────────────────────
+def fetch_linked_resources(pid):
+    """Hit the v1 (NOT v1.0) project endpoint to grab linkedResources, which holds
+    Salesforce PSR links the public API strips out."""
+    try:
+        resp = api_get(f"projects/{pid}", timeout=60, base=V1_BASE_URL)
+        return resp.get("linkedResources", []) or []
+    except Exception:
+        return []
+
+
+def find_psr_link(linked_resources):
+    """Return dict with PSR info + SF FK refs from linkedResources, or empty dict."""
+    for lr in linked_resources or []:
+        if (lr.get("externalResourceType") == "Professional_Service_Request__c"
+                and not lr.get("deleted")
+                and not lr.get("externalResourceDeleted")
+                and lr.get("enabled", True)):
+            ext_id = lr.get("externalResourceId")
+            if ext_id:
+                ctx = lr.get("context") or {}
+                acct_id = ctx.get("Account_Name__c")
+                opp_id = ctx.get("Opportunity_Name__c")
+                return {
+                    "psr_external_id": ext_id,
+                    "psr_url": f"{SFDC_LIGHTNING_BASE}/Professional_Service_Request__c/{ext_id}/view",
+                    "sf_account_id": acct_id,
+                    "sf_account_url": f"{SFDC_LIGHTNING_BASE}/Account/{acct_id}/view" if acct_id else None,
+                    "context_opp_id": opp_id,
+                }
+    return {}
+
+
+# Custom field ID on COMPANY that stores the Salesforce Account ID
+COMPANY_SF_ACCOUNT_FIELD_ID = 2014018
+# Optional override: set to a label substring (case-insensitive) if the field ID
+# above ever changes. Matched against fieldLabel/label/name/fieldName.
+COMPANY_SF_ACCOUNT_FIELD_LABEL_HINT = "salesforce account id"
+
+
+SF_ACCT_ID_RE = re.compile(r"\b(001[A-Za-z0-9]{12,15})\b")
+
+
+def _coerce_value(f):
+    """Pull the raw string value out of whatever shape Rocketlane returns."""
+    val = f.get("fieldValue")
+    if val is None:
+        val = f.get("value")
+    if val is None:
+        val = f.get("valueText")
+    if isinstance(val, dict):
+        val = val.get("value") or val.get("text") or ""
+    return str(val).strip() if val is not None else ""
+
+
+def _extract_acct_id_from_fields(fields):
+    """Pull the SF Account ID out of a company's fields list. Tolerates:
+      - field shape: {"fieldId":X,"fieldValue":Y} OR {"id":X,"value":Y}
+      - value shape: raw 15/18-char SF ID, or a SF URL containing the ID
+    Pass 1: fieldId == COMPANY_SF_ACCOUNT_FIELD_ID.
+    Pass 2: any field whose value matches the 001-prefixed SF ID regex."""
+    if not fields:
+        return None
+
+    # Pass 1 — known fieldId
+    for f in fields:
+        fid = f.get("fieldId") or f.get("id")
+        if fid == COMPANY_SF_ACCOUNT_FIELD_ID:
+            val = _coerce_value(f)
+            # Value might be a URL containing the ID — extract if possible
+            m = SF_ACCT_ID_RE.search(val)
+            if m:
+                return m.group(1)
+            if val:
+                return val  # raw ID with no `001` prefix? Pass through anyway
+
+    # Pass 2 — scan all values for a 001-prefixed Salesforce Account ID
+    for f in fields:
+        val = _coerce_value(f)
+        m = SF_ACCT_ID_RE.search(val)
+        if m:
+            return m.group(1)
+
+    # Pass 3 — label hint (in case fields ever start carrying labels)
+    hint = COMPANY_SF_ACCOUNT_FIELD_LABEL_HINT.lower()
+    for f in fields:
+        label = " ".join(
+            str(f.get(k) or "")
+            for k in ("fieldLabel", "label", "name", "fieldName")
+        ).lower()
+        if hint in label:
+            val = _coerce_value(f)
+            m = SF_ACCT_ID_RE.search(val)
+            if m:
+                return m.group(1)
+            if val:
+                return val
+    return None
+
+
+def _acct_url(acct_id):
+    return f"{SFDC_LIGHTNING_BASE}/Account/{acct_id}/view" if acct_id else None
+
+
+def fetch_all_companies():
+    """ONE paginated bulk call to v1 /companies — returns every company with its
+    custom fields. Replaces N parallel per-company calls.
+
+    Probe confirmed v1 /companies returns a TOP-LEVEL LIST (no pagination wrapper).
+    Falls back to per-company fetch if bulk doesn't include `fields`."""
+    all_co, page_token, calls = [], None, 0
+    base_qs = "pageSize=500&includeAllFields=true"
+    while True:
+        url = f"companies?{base_qs}"
+        if page_token:
+            url += f"&pageToken={urllib.parse.quote(page_token)}"
+        resp = api_get(url, base=V1_BASE_URL, timeout=90)
+        calls += 1
+        # v1 /companies returns a top-level list. Older shapes wrapped in
+        # {data:[]} / {companies:[]} — handle both for safety.
+        if isinstance(resp, list):
+            items = resp
+            pag = {}
+        elif isinstance(resp, dict):
+            items = resp.get("data") or resp.get("companies") or []
+            pag = resp.get("pagination") or {}
+        else:
+            items = []
+            pag = {}
+        all_co.extend(items)
+        if pag.get("hasMore") and pag.get("nextPageToken"):
+            page_token = pag["nextPageToken"]
+        else:
+            break
+    return all_co, calls
+
+
+def fetch_companies_with_fields_fallback(company_ids, max_workers=10):
+    """If bulk /companies doesn't include `fields`, fan out per company in parallel.
+    Returns a dict {companyId: company_dict}."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    results, calls = {}, 0
+
+    def work(cid):
+        try:
+            return cid, api_get(f"companies/{cid}", timeout=60, base=V1_BASE_URL), 1
+        except Exception:
+            return cid, None, 1
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = [pool.submit(work, cid) for cid in company_ids]
+        for f in as_completed(futures):
+            cid, co, c = f.result()
+            calls += c
+            if co:
+                results[cid] = co
+    return results, calls
+
+
+def enrich_company_account_links_bulk(projects, debug=False):
+    """ONE bulk call → per-company-fallback if bulk omits fields → map → lookup.
+    Independent of PSR linkage — works for projects with no PSR."""
+    needed_company_ids = {
+        (p.get("customer") or {}).get("companyId")
+        for p in projects
+        if (p.get("customer") or {}).get("companyId")
+    }
+    if not needed_company_ids:
+        return 0
+
+    print("  bulk-fetching companies (v1)...")
+    companies, api_calls = fetch_all_companies()
+    print(f"  pulled {len(companies)} companies in {api_calls} call{'s' if api_calls != 1 else ''}")
+
+    # If bulk didn't return `fields` per company, fan out per-company
+    bulk_has_fields = any(("fields" in c) for c in companies[:5])
+    co_by_id = {}
+    if bulk_has_fields:
+        for co in companies:
+            cid = co.get("companyId") or co.get("id")
+            if cid is not None:
+                co_by_id[cid] = co
+    else:
+        print("  bulk response did NOT include fields — falling back to per-company fetch")
+        co_by_id, fb_calls = fetch_companies_with_fields_fallback(needed_company_ids)
+        api_calls += fb_calls
+        print(f"  per-company fallback: {fb_calls} calls for {len(co_by_id)} companies")
+
+    # Build map of every company that has an SF Account ID
+    co_map = {}
+    no_field = 0
+    sample_dumped = False
+    for cid, co in co_by_id.items():
+        fields = co.get("fields") or co.get("customFields") or []
+        acct_id = _extract_acct_id_from_fields(fields)
+        if acct_id:
+            co_map[cid] = (acct_id, _acct_url(acct_id))
+        else:
+            no_field += 1
+            if debug and not sample_dumped and fields:
+                sample_dumped = True
+                print(f"  DEBUG sample company without SF Acct ID — companyId={cid}")
+                for f in fields[:8]:
+                    fid = f.get("fieldId") or f.get("id")
+                    val = str(f.get("fieldValue") or f.get("value") or "")[:60]
+                    print(f"  DEBUG  fieldId={fid}  value={val!r}")
+    print(f"  {len(co_map)} companies have SF Account ID; {no_field} do not")
+
+    # Stash on each project
+    matched = 0
+    for p in projects:
+        cid = (p.get("customer") or {}).get("companyId")
+        if cid and cid in co_map:
+            acct_id, acct_url = co_map[cid]
+            p["_sf_account_id_company"] = acct_id
+            p["_sf_account_url_company"] = acct_url
+            matched += 1
+    print(f"  {matched}/{len(projects)} projects matched to a company with SF Acct ID")
+    return api_calls
+
+
+# Backward-compat alias — keeps old callers working if any exist
+def enrich_company_account_links_parallel(projects, max_workers=10):
+    return enrich_company_account_links_bulk(projects)
+
+
+def enrich_psr_links_parallel(projects, max_workers=10):
+    """For each project, fetch linkedResources via v1 and stash psr_external_id +
+    psr_url on the project dict. Done in parallel for speed."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    api_calls = 0
+
+    def work(p):
+        pid = p.get("projectId")
+        lr = fetch_linked_resources(pid)
+        info = find_psr_link(lr)
+        p["_psr_external_id"] = info.get("psr_external_id")
+        p["_psr_url"] = info.get("psr_url")
+        p["_psr_context_opp"] = info.get("context_opp_id")
+        p["_sf_account_id"] = info.get("sf_account_id")
+        p["_sf_account_url"] = info.get("sf_account_url")
+        p["_linked_resources_count"] = len(lr)
+        return 1
+
+    done = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(work, p): p for p in projects}
+        for f in as_completed(futures):
+            try:
+                api_calls += f.result()
+            except Exception as e:
+                p = futures[f]
+                print(f"  WARN linkedResources for {p.get('projectId')}: {str(e)[:80]}")
+            done += 1
+            if done % 25 == 0 or done == len(projects):
+                print(f"  {done}/{len(projects)} projects checked for PSR links")
+    return api_calls
+
+
+# ─── Enrichment from project-level rollup (no time-entry calls) ────────────────
+def enrich_row_from_rollup(p, detail, base_row, entries_by_project=None):
+    """Use project-level rollup fields (trackedHours, percentageBudgetedHoursConsumed)
+    that the list endpoint already returns. No per-project time-entry calls needed.
+    If entries_by_project is provided (--with-entries mode), also computes last_entry_date.
+    """
+    pid = p.get("projectId")
+
+    # Modules + product family
+    base_row["modules"] = get_field(p, "Opp: Product Names") or ""
+    base_row["product_family"] = get_field(p, "Opp: Product Families") or ""
+
+    # ARR
+    arr_top = (detail or p).get("annualizedRecurringRevenue") or 0
+    arr_opp = get_field(p, "Opp: Opportunity ARR") or 0
+    try:
+        arr_opp = float(arr_opp) if arr_opp else 0
+    except (TypeError, ValueError):
+        arr_opp = 0
+    base_row["arr"] = arr_top or arr_opp or 0
+    base_row["total_contract_value"] = get_field(p, "Opp: Total Contract Value") or ""
+
+    # Customer + ownership
+    base_row["account_owner"] = get_field(p, "Opp: Account Owner") or ""
+    base_row["primary_contact"] = get_field(p, "Opp: Primary Customer Contact Name") or ""
+    base_row["primary_contact_email"] = get_field(p, "Opp: Primary Customer Contact Email") or ""
+    base_row["responsible_director"] = get_field(p, "Responsible Director") or ""
+    base_row["subscription_end"] = get_field(p, "Opp: Opportunity End Date") or ""
+
+    # PSR link from v1 linkedResources (set earlier by enrich_psr_links_parallel)
+    base_row["psr_external_id"] = p.get("_psr_external_id") or ""
+    base_row["psr_url"] = p.get("_psr_url") or ""
+
+    # SF Account URL — prefer company-level (always available) over PSR-context (only when PSR exists)
+    base_row["sf_account_id"] = (
+        p.get("_sf_account_id_company")
+        or p.get("_sf_account_id")
+        or ""
+    )
+    base_row["sf_account_url"] = (
+        p.get("_sf_account_url_company")
+        or p.get("_sf_account_url")
+        or ""
+    )
+
+    health_notes = get_field(p, "Internal Project Health Notes") or ""
+    base_row["health_notes"] = re.sub(r"<[^>]+>", "", str(health_notes))[:500].strip()
+
+    # Consumption — straight from project-level rollup
+    tracked_hrs = p.get("trackedHours")
+    if tracked_hrs is None:
+        tracked_min = p.get("trackedMinutes", 0) or 0
+        tracked_hrs = tracked_min / 60 if tracked_min else 0
+    base_row["hours_used"] = round(float(tracked_hrs or 0), 1)
+
+    # % consumed: prefer Rocketlane's pre-computed value if present, else compute
+    rl_pct = p.get("percentageBudgetedHoursConsumed")
+    budgeted = base_row.get("total_budget_hrs", 0) or 0
+    if rl_pct is not None and rl_pct > 0:
+        base_row["pct_consumed"] = round(float(rl_pct), 1)
+    elif budgeted > 0:
+        base_row["pct_consumed"] = round((base_row["hours_used"] / budgeted * 100), 1)
+    else:
+        base_row["pct_consumed"] = 0
+
+    # Last entry date — only available if --with-entries was used
+    base_row["last_entry_date"] = ""
+    if entries_by_project:
+        entries = entries_by_project.get(int(pid), [])
+        if entries:
+            dates = []
+            for e in entries:
+                ds = e.get("date", "")
+                if ds:
+                    try:
+                        dates.append(datetime.strptime(ds, "%Y-%m-%d"))
+                    except ValueError:
+                        pass
+            if dates:
+                base_row["last_entry_date"] = max(dates).strftime("%Y-%m-%d")
+    else:
+        # Use project's updatedAt as a proxy for "last activity"
+        ua = p.get("updatedAt")
+        if ua:
+            try:
+                base_row["last_entry_date"] = datetime.fromtimestamp(ua / 1000).strftime("%Y-%m-%d")
+            except (TypeError, ValueError, OSError):
+                pass
+
+    # Expansion flags
+    flags = []
+    pct = base_row["pct_consumed"]
+    if pct >= 100:
+        flags.append("OVER budget")
+    elif pct >= 75:
+        flags.append("Renewal window")
+    elif pct < 25 and base_row.get("total_budget_hrs", 0) > 0:
+        flags.append("Underutilized")
+
+    if not base_row["modules"]:
+        flags.append("Module data missing")
+
+    health = (base_row.get("health") or "").lower()
+    if "red" in health:
+        flags.append("Red health")
+    elif "yellow" in health:
+        flags.append("Yellow health")
+
+    if base_row.get("needs_fix"):
+        flags.append("Contract type wrong")
+
+    seg = (base_row.get("client_segment") or "").lower()
+    if "pinnacle" in seg or "strategic" in seg:
+        flags.append(f"Tier: {base_row['client_segment']}")
+
+    base_row["expansion_flags"] = " | ".join(flags) if flags else ""
+    return base_row
+
+
+# ─── Main ──────────────────────────────────────────────────────────────────────
+def run_audit(since_date=None, with_entries=False, time_entries_lookback_days=365):
+    if not API_KEY:
+        print("ERROR: ROCKETLANE_API_KEY not set.", file=sys.stderr)
+        sys.exit(1)
+
+    print("=" * 70)
+    print("Subscription Expansion Audit")
+    print(f"Date: {NOW.strftime('%Y-%m-%d %H:%M')}")
+    if since_date:
+        print(f"Incremental mode: only projects updated since {since_date}")
+    print("=" * 70)
+
+    total_calls = 0
+    t_start = time.time()
+
+    # 1. Server-side filtered project list
+    print("Fetching active subscription projects (server-side filter + sort)...")
+    t = time.time()
+    subs, calls = fetch_subscription_projects(since_date)
+    total_calls += calls
+    print(f"  {len(subs)} projects in {time.time()-t:.1f}s ({calls} API call{'s' if calls != 1 else ''})")
+
+    if not subs:
+        print("No projects matched. Exiting.")
+        return
+
+    # 2. Consumption — use project-level rollup by default. Only pull time entries if requested.
+    entries_by_project = None
+    if with_entries:
+        cutoff = (NOW - timedelta(days=time_entries_lookback_days)).strftime("%Y-%m-%d")
+        print(f"Fetching time entries since {cutoff} (--with-entries)...")
+        t = time.time()
+        try:
+            entries, calls = fetch_bulk_time_entries(cutoff, timeout=90)
+            total_calls += calls
+            entries_by_project = group_entries_by_project(entries)
+            covered = sum(1 for s in subs if int(s.get("projectId", 0)) in entries_by_project)
+            print(
+                f"  Bulk: {len(entries)} entries in {time.time()-t:.1f}s ({calls} API calls); "
+                f"{covered}/{len(subs)} projects have entries"
+            )
+        except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
+            print(f"  Bulk fetch failed ({str(e)[:80]}); falling back to parallel per-project...")
+            t2 = time.time()
+            project_ids = [p["projectId"] for p in subs if p.get("projectId")]
+            entries_by_project, calls = fetch_time_entries_per_project(
+                project_ids, cutoff, max_workers=8
+            )
+            total_calls += calls
+            total_entries = sum(len(v) for v in entries_by_project.values())
+            covered = len(entries_by_project)
+            print(
+                f"  Per-project: {total_entries} entries in {time.time()-t2:.1f}s "
+                f"({calls} API calls); {covered}/{len(subs)} projects have entries"
+            )
+    else:
+        print("Using project-level rollup (trackedHours, %consumed) — no time-entry calls needed")
+
+    # 2b. Fetch PSR linked resources in parallel (one v1 call per project)
+    print(f"Fetching PSR linkedResources for {len(subs)} projects (parallel)...")
+    t = time.time()
+    lr_calls = enrich_psr_links_parallel(subs, max_workers=10)
+    total_calls += lr_calls
+    psr_count = sum(1 for s in subs if s.get("_psr_external_id"))
+    print(f"  {psr_count}/{len(subs)} projects have PSR link in {time.time()-t:.1f}s ({lr_calls} API calls)")
+
+    # 2c. Fetch SF Account URLs from company custom fields (independent of PSR linkage)
+    # Single bulk /companies call replaces N parallel per-company calls.
+    print("Resolving SF Account links from bulk /companies call...")
+    t = time.time()
+    co_calls = enrich_company_account_links_bulk(subs, debug=True)
+    total_calls += co_calls
+    acct_count = sum(1 for s in subs if s.get("_sf_account_url_company"))
+    print(f"  {acct_count}/{len(subs)} projects have SF Account link in {time.time()-t:.1f}s ({co_calls} API call{'s' if co_calls != 1 else ''})")
+
+    # 3. Build rows. Fallback to per-project detail only if financials missing.
+    print("Building rows...")
+    t = time.time()
+    rows = []
+    detail_calls = 0
+    for p in subs:
+        pid = p.get("projectId")
+        # If the list response already has financials, skip detail call
+        has_fin = bool(p.get("financials"))
+        if has_fin:
+            detail = p
+        else:
+            try:
+                detail = fetch_project_detail(pid)
+                detail_calls += 1
+            except Exception:
+                detail = p
+
+        base = extract_project_row(p, detail)
+        enrich_row_from_rollup(p, detail, base, entries_by_project)
+        rows.append(base)
+
+    total_calls += detail_calls
+    print(f"  {len(rows)} rows built in {time.time()-t:.1f}s; fallback detail calls: {detail_calls}")
+
+    # 4. Stats
+    elapsed = time.time() - t_start
+    print()
+    print("=" * 70)
+    print("RESULTS")
+    print("=" * 70)
+    arr_total = sum((r.get("arr") or 0) for r in rows)
+    print(f"Total active subscription projects: {len(rows)}")
+    print(f"Total ARR: ${arr_total:,.0f}")
+    if True:  # always show — pct_consumed always available now
+        over = sum(1 for r in rows if (r.get("pct_consumed") or 0) >= 100)
+        renew = sum(1 for r in rows if 75 <= (r.get("pct_consumed") or 0) < 100)
+        under = sum(1 for r in rows if 0 < (r.get("pct_consumed") or 0) < 25 and r.get("total_budget_hrs", 0) > 0)
+        print(f"  OVER budget: {over}  |  Renewal window: {renew}  |  Underutilized: {under}")
+    needs_fix = sum(1 for r in rows if r.get("needs_fix"))
+    no_modules = sum(1 for r in rows if not r.get("modules"))
+    print(f"  Contract type wrong: {needs_fix}  |  Missing modules: {no_modules}")
+    print(f"  Total API calls: {total_calls}  |  Total time: {elapsed:.1f}s")
+
+    # 5. Excel — deliver to Exterro/outputs/
+    print("\nBuilding spreadsheet...")
+    wb = build_expansion_workbook(rows)
+    outputs_dir = "/Users/matthew.abadie/Library/Mobile Documents/com~apple~CloudDocs/iCloud Storage/Exterro/outputs"
+    os.makedirs(outputs_dir, exist_ok=True)
+    fname = f"Subscription_Expansion_Audit_{NOW.strftime('%Y%m%d')}.xlsx"
+    out_path = os.path.join(outputs_dir, fname)
+    wb.save(out_path)
+    print(f"  Saved: {out_path}")
+
+    return {
+        "projects": len(rows),
+        "api_calls": total_calls,
+        "elapsed_seconds": round(elapsed, 1),
+        "arr_total": arr_total,
+    }
+
+
+def run_bench():
+    """Compare legacy fetch-all-then-filter vs current native-filter approach."""
+    print("\n" + "=" * 70)
+    print("BENCHMARK — Legacy vs Current")
+    print("=" * 70)
+
+    print("\n[Legacy] fetch_all_projects + client-side filter...")
+    legacy_start = time.time()
+    from subscription_audit import fetch_all_projects, is_active_subscription
+    t = time.time()
+    all_projects = fetch_all_projects()
+    print(f"  fetch_all: {len(all_projects)} projects in {time.time()-t:.1f}s")
+    subs_legacy = [p for p in all_projects if is_active_subscription(p)]
+    print(f"  client-side filter: {len(subs_legacy)} active subscriptions")
+    print(f"  Legacy simulated total (filter only): {time.time()-legacy_start:.1f}s")
+    print("  (legacy also makes ~110 detail + ~110 time-entry calls; not run here)")
+
+    print("\n[Current] run_audit()...")
+    current = run_audit()
+
+    print("\n" + "=" * 70)
+    print(f"Current: {current['projects']} projects | {current['api_calls']} API calls | {current['elapsed_seconds']}s")
+    print("=" * 70)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--with-entries", action="store_true",
+                        help="Also pull time entries for last_entry_date and detailed burn (slower)")
+    parser.add_argument("--since", help="Only fetch projects updated since YYYY-MM-DD (incremental sync)")
+    parser.add_argument("--bench", action="store_true", help="Compare legacy vs current approach for timing")
+    parser.add_argument("--time-lookback-days", type=int, default=365,
+                        help="How far back to fetch time entries when --with-entries used (default: 365)")
+    args = parser.parse_args()
+
+    if args.bench:
+        run_bench()
+    else:
+        run_audit(since_date=args.since, with_entries=args.with_entries,
+               time_entries_lookback_days=args.time_lookback_days)
+
+
+if __name__ == "__main__":
+    main()

@@ -39,10 +39,8 @@ from subscription_audit import (
     is_active_subscription,
     extract_project_row,
 )
-from subscription_tracker import (
-    fetch_time_entries_for_project,
-    compute_consumption,
-)
+from rocketlane_client import fetch_time_entries_for_project
+from subscription_tracker import compute_consumption
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side

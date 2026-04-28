@@ -25,6 +25,7 @@ import smtplib
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -32,81 +33,43 @@ from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+# Shared infrastructure — HTTP, fetchers, helpers
+from rocketlane_client import (
+    api_get,
+    get_field,
+    is_owned_or_member,
+    fetch_subscription_projects,
+    fetch_bulk_time_entries,
+    fetch_time_entries_per_project,
+    group_entries_by_project,
+    fetch_project_detail,
+    ACTIVE_STATUS_VALUES,
+    ORONDE_ID,
+    BASE_URL,
+    RL_APP_BASE,
+)
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIG
 # ═══════════════════════════════════════════════════════════════════════════════
-API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")
 GMAIL_ADDRESS = os.environ.get("GMAIL_ADDRESS", "")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 GCHAT_WEBHOOK_URL = os.environ.get("GCHAT_SUB_WEBHOOK_URL", "")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+API_KEY = os.environ.get("ROCKETLANE_API_KEY", "")  # surfaced for main()'s pre-flight check
 try:
     from claude_utils import call_claude
 except ImportError:
     call_claude = None
-BASE_URL = "https://services.api.exterro.com/api/1.0"
-RL_APP_BASE = "https://services.exterro.com/projects"
 
-ORONDE_ID = 393607  # Post Implementation director
-ACTIVE_STATUS_VALUES = {2, 4, 5, 6, 9, 12, 14, 15}
 NOW = datetime.now()
-DASH = "\u2014"
+DASH = "—"
 DEFAULT_THRESHOLD = 75  # percent
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# HTTP + DATA FETCHING
+# TASKS (no shared equivalent — only the tracker uses these)
 # ═══════════════════════════════════════════════════════════════════════════════
-def api_get(path, retries=3):
-    url = f"{BASE_URL}/{path}"
-    req = urllib.request.Request(url, headers={"api-key": API_KEY, "accept": "application/json"})
-    for attempt in range(retries):
-        try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                return json.loads(resp.read().decode())
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < retries - 1:
-                wait = 2 ** (attempt + 1)  # 2s, 4s backoff
-                time.sleep(wait)
-            else:
-                raise
-
-
-def fetch_all_projects():
-    all_projects, page_token = [], None
-    while True:
-        url = "projects" + (f"?pageToken={page_token}" if page_token else "")
-        resp = api_get(url)
-        all_projects.extend(resp.get("data", []))
-        pag = resp.get("pagination", {})
-        if pag.get("hasMore") and pag.get("nextPageToken"):
-            page_token = pag["nextPageToken"]
-        else:
-            break
-    return all_projects
-
-
-def fetch_project_detail(pid):
-    """Fetch individual project detail (includes financials not in list endpoint)."""
-    return api_get(f"projects/{pid}")
-
-
-def fetch_time_entries_for_project(pid):
-    entries, token = [], None
-    while True:
-        url = f"time-entries?projectId.eq={pid}"
-        if token:
-            url += f"&pageToken={token}"
-        resp = api_get(url)
-        entries.extend(resp.get("data", []))
-        pag = resp.get("pagination", {})
-        if pag.get("hasMore") and pag.get("nextPageToken"):
-            token = pag["nextPageToken"]
-        else:
-            break
-    return entries
-
-
 def fetch_tasks_for_project(pid):
     tasks, token = [], None
     while True:
@@ -123,52 +86,46 @@ def fetch_tasks_for_project(pid):
     return tasks
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# FIELD HELPERS
-# ═══════════════════════════════════════════════════════════════════════════════
-def get_field(project, label):
-    for f in project.get("fields", []):
-        if f.get("fieldLabel") == label:
-            return f.get("fieldValueLabel", f.get("fieldValue", ""))
-    return None
-
-
 def strip_html(text):
     return re.sub(r'<[^>]+>', '', str(text)).strip() if text else ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SUBSCRIPTION DATA EXTRACTION
+# FILTERS
 # ═══════════════════════════════════════════════════════════════════════════════
 def is_post_impl_project(p):
-    """Check if project belongs to Oronde's Post Implementation team."""
-    member_ids = {m.get("userId") for m in p.get("teamMembers", {}).get("members", [])}
-    owner_id = p.get("owner", {}).get("userId")
-    return ORONDE_ID in member_ids or ORONDE_ID == owner_id
+    """Project belongs to Oronde's Post Implementation team (owner or member)."""
+    return is_owned_or_member(p, ORONDE_ID)
 
 
 def is_active_subscription(p):
-    """Check if project is active and type = Subscription."""
+    """Active project with Project Type = Subscription. Used as client-side fallback;
+    prefer rocketlane_client.fetch_subscription_projects() for new code."""
     sv = p.get("status", {}).get("value")
     if sv not in ACTIVE_STATUS_VALUES:
         return False
-    project_type = get_field(p, "Project Type") or ""
-    return project_type.lower() == "subscription"
+    return (get_field(p, "Project Type") or "").lower() == "subscription"
 
 
 def extract_subscription_data(p):
     """Pull subscription contract financials and opp fields from a project.
-    Fetches individual project detail to get financials (not in list endpoint)."""
+
+    Uses project payload directly — when fetched via fetch_subscription_projects()
+    (with includeAllFields=true), financials come back inline. Falls back to a
+    per-project detail call only if financials are missing on the list response.
+    """
     pid = p.get("projectId", "")
 
-    # Fetch detail for financials (list endpoint doesn't include them)
-    try:
-        detail = fetch_project_detail(pid)
-    except Exception as e:
-        print(f"    WARNING: Could not fetch detail for {pid}: {e}")
+    # Try list-response first; only fall back to detail call if financials missing
+    if p.get("financials"):
         detail = p
+    else:
+        try:
+            detail = fetch_project_detail(pid)
+        except Exception as e:
+            print(f"    WARNING: Could not fetch detail for {pid}: {e}")
+            detail = p
 
-    # Merge: use detail for financials, but keep list-level fields as fallback
     financials = detail.get("financials", {}) or {}
     contract_type = financials.get("contractType", "UNKNOWN") or "UNKNOWN"
     sub_contract = financials.get("subscriptionContract", {}) or {}
@@ -791,51 +748,125 @@ def main():
     print(f"Threshold: {args.threshold}% | Dry run: {args.dry_run}")
     print("=" * 60)
 
-    # 1. Fetch all projects
-    print("Fetching all projects...")
-    all_projects = fetch_all_projects()
-    print(f"  {len(all_projects)} total projects")
-
-    # 2. Filter to active subscriptions under Post Implementation
-    subs = [p for p in all_projects if is_post_impl_project(p) and is_active_subscription(p)]
-    print(f"  {len(subs)} active subscription projects under Post Implementation")
-
-    # 3. Extract subscription data + compute consumption in one parallel pass
-    #    Each worker: fetch detail → extract sub data → fetch time entries → compute consumption
-    print(f"Processing {len(subs)} subscription projects (detail + time entries)...")
     t_start = time.time()
+    total_calls = 0
 
-    def _full_process(p):
-        """Single-pass: detail fetch, extraction, time entries, consumption."""
-        sub_d = extract_subscription_data(p)
-        # Skip time entry fetch for non-SUBSCRIPTION contracts (they need correction first)
-        if sub_d["needs_correction"] or sub_d["total_budgeted_hours"] <= 0:
-            return sub_d, None, None
-        entries = fetch_time_entries_for_project(sub_d["project_id"])
-        consumption = compute_consumption(sub_d, entries)
-        sub_d["pct_consumed"] = consumption["pct_consumed"]
-        siblings = find_sibling_projects(sub_d, all_projects)
-        return sub_d, consumption, siblings
+    # 1. Server-side filtered fetch — only active Subscription projects come back,
+    #    sorted by ARR. Replaces fetch_all_projects() + client-side filter.
+    print("Fetching active subscription projects (server-side filter + sort)...")
+    all_subs, calls = fetch_subscription_projects()
+    total_calls += calls
+    print(f"  {len(all_subs)} active subscription projects ({calls} API call{'s' if calls != 1 else ''})")
 
+    # 2. Narrow to Post Implementation team (client-side — no server-side filter
+    #    available for team membership / Responsible Director through MCP today)
+    subs = [p for p in all_subs if is_post_impl_project(p)]
+    print(f"  {len(subs)} under Post Implementation team")
+
+    if not subs:
+        print("No Post-Impl subscription projects found. Exiting.")
+        return
+
+    # 3. Extract subscription data from list response (financials inline via
+    #    includeAllFields=true — no per-project detail call). For each, also
+    #    grab the project rollup pct_consumed for pre-filtering.
+    print(f"Extracting subscription data for {len(subs)} projects (no detail calls)...")
     sub_data_list = []
-    results = []
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        futures = {pool.submit(_full_process, p): p for p in subs}
-        done = 0
-        for f in as_completed(futures):
-            done += 1
-            if done % 10 == 0:
-                print(f"  {done}/{len(subs)}...")
-            try:
-                sub_d, consumption, siblings = f.result()
-                sub_data_list.append(sub_d)
-                if consumption is not None:
-                    results.append((sub_d, consumption, siblings))
-            except Exception as e:
-                print(f"  Error: {e}")
+    pct_estimates = {}  # pid -> rollup-derived pct_consumed
+    for p in subs:
+        sub_d = extract_subscription_data(p)
+        sub_data_list.append(sub_d)
+        # Estimate pct from rollup before deciding whether to fetch time entries
+        rl_pct = p.get("percentageBudgetedHoursConsumed")
+        if rl_pct is not None and rl_pct > 0:
+            pct_estimates[sub_d["project_id"]] = float(rl_pct)
+        elif sub_d["total_budgeted_hours"] > 0:
+            tracked_hrs = p.get("trackedHours")
+            if tracked_hrs is None:
+                tracked_hrs = (p.get("trackedMinutes", 0) or 0) / 60
+            pct_estimates[sub_d["project_id"]] = (
+                tracked_hrs / sub_d["total_budgeted_hours"] * 100
+            ) if tracked_hrs else 0
+        else:
+            pct_estimates[sub_d["project_id"]] = 0
+
+    # 4. Pre-filter: only fetch time entries for projects that will actually
+    #    trigger an alert. Time entries are the expensive part.
+    eligible = [s for s in sub_data_list
+                if not s["needs_correction"] and s["total_budgeted_hours"] > 0]
+    if args.force_all:
+        triggered_pids = [s["project_id"] for s in eligible]
+    else:
+        triggered_pids = [
+            s["project_id"] for s in eligible
+            if pct_estimates.get(s["project_id"], 0) >= args.threshold
+        ]
+    print(f"  {len(eligible)} eligible projects; {len(triggered_pids)} above threshold "
+          f"by rollup ({args.threshold}%)")
+
+    # 5. Fetch time entries — only for triggered subset. Try bulk first, fall
+    #    back to parallel per-project if bulk times out.
+    entries_by_project = {}
+    if triggered_pids:
+        # Look back 365 days — enough history for monthly burn rate
+        cutoff = (NOW - timedelta(days=365)).strftime("%Y-%m-%d")
+        print(f"Fetching time entries for {len(triggered_pids)} triggered projects since {cutoff}...")
+        t = time.time()
+        try:
+            entries, calls = fetch_bulk_time_entries(
+                cutoff, project_ids=triggered_pids, timeout=90
+            )
+            total_calls += calls
+            entries_by_project = group_entries_by_project(entries)
+            covered = sum(1 for pid in triggered_pids if int(pid) in entries_by_project)
+            print(f"  Bulk: {len(entries)} entries in {time.time()-t:.1f}s "
+                  f"({calls} calls); {covered}/{len(triggered_pids)} have entries")
+        except (urllib.error.URLError, TimeoutError, RuntimeError) as e:
+            print(f"  Bulk fetch failed ({str(e)[:80]}); falling back to per-project...")
+            t2 = time.time()
+            entries_by_project, calls = fetch_time_entries_per_project(
+                triggered_pids, cutoff, max_workers=8
+            )
+            total_calls += calls
+            total_entries = sum(len(v) for v in entries_by_project.values())
+            print(f"  Per-project: {total_entries} entries in {time.time()-t2:.1f}s "
+                  f"({calls} calls)")
+
+    # 6. Build full results. Triggered projects get full consumption (monthly
+    #    burn, recent entries). Non-triggered get a lightweight version using
+    #    rollup pct only — enough for the summary print.
+    results = []  # (sub_d, consumption, siblings) — only for projects with budget
+    for sub_d in sub_data_list:
+        if sub_d["needs_correction"] or sub_d["total_budgeted_hours"] <= 0:
+            continue
+        pid = sub_d["project_id"]
+        if pid in entries_by_project or (args.force_all and pid in triggered_pids):
+            # Full computation from entries
+            entries = entries_by_project.get(int(pid), entries_by_project.get(pid, []))
+            consumption = compute_consumption(sub_d, entries)
+        else:
+            # Lightweight: use rollup pct, no monthly burn
+            pct = pct_estimates.get(pid, 0)
+            budget = sub_d["total_budgeted_hours"]
+            used = (pct / 100) * budget
+            consumption = {
+                "total_hours_used": round(used, 1),
+                "total_budgeted_hours": round(budget, 1),
+                "pct_consumed": round(pct, 1),
+                "remaining_hours": round(max(0, budget - used), 1),
+                "monthly_hours": {},
+                "avg_monthly_burn": 0,
+                "months_remaining": None,
+                "recent_entries": [],
+                "last_entry_date": None,
+            }
+        sub_d["pct_consumed"] = consumption["pct_consumed"]
+        # Siblings limited to other active subscription projects (the all_subs list)
+        siblings = find_sibling_projects(sub_d, all_subs)
+        results.append((sub_d, consumption, siblings))
 
     elapsed = time.time() - t_start
-    print(f"  Completed in {elapsed:.0f}s")
+    print(f"  Completed in {elapsed:.0f}s ({total_calls} total API calls)")
 
     # Flag projects with wrong contract type
     needs_fix = [s for s in sub_data_list if s["needs_correction"]]
