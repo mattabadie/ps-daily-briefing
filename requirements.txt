@@ -1,0 +1,3 @@
+# daily_digest.py --output is pure stdlib (urllib, json, etc.) — no installs needed.
+# Optional dev-only deps the legacy email path uses:
+#   weasyprint  # PDF attachment for the SMTP-send path; only needed if running without --output
