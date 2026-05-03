@@ -452,6 +452,7 @@ def enrich_project(p):
     # Fields for deep analysis
     sub_type = fi.get("eDisc: Project Sub-Type", "")
     client_segment = fi.get("Client Segmentation", "")
+    responsible_director = (fi.get("Responsible Director", "") or "").strip()
     contract_value = 0.0
     try:
         contract_value = float(fi.get("Opp: Total Contract Value", 0) or 0)
@@ -489,6 +490,7 @@ def enrich_project(p):
         "updated_at": updated_at,
         "sub_type": sub_type,
         "client_segment": client_segment,
+        "responsible_director": responsible_director,
         "contract_value": contract_value,
         "ps_net_price": ps_net_price,
         "latest_note_date": latest_note_date,
@@ -625,6 +627,9 @@ def find_stale_projects(active_projects):
     - Excludes New, On Hold, Blocked statuses (zero time is expected)
     Uses a single date-range query (date.ge + date.le) to fetch all recent
     time entries, then compares against the active project set.
+
+    Returns: (stale_projects, time_entries_7d) — entries are exposed so callers
+    that emit JSON for downstream consumers don't refetch the data.
     """
     today = datetime.now().date()
     seven_days_ago = today - timedelta(days=7)
@@ -637,7 +642,7 @@ def find_stale_projects(active_projects):
         and p.get("project_type", "").lower() == "implementation"
     }
     if not projects_by_id:
-        return []
+        return [], []
 
     # Fetch all time entries for the last 7 days
     print(f"  Fetching 7-day time entries to detect stale projects ({len(projects_by_id)} active)...")
@@ -650,7 +655,7 @@ def find_stale_projects(active_projects):
             resp = api_get(url, retries=4)
         except Exception as e:
             print(f"    WARN: time-entries fetch error: {e}")
-            return []
+            return [], []
         entries.extend(resp.get("data", []))
         pag = resp.get("pagination", {})
         if pag.get("hasMore") and pag.get("nextPageToken"):
@@ -672,7 +677,48 @@ def find_stale_projects(active_projects):
         if pid not in active_pids:
             stale.append(p)
 
-    return sorted(stale, key=lambda x: x["customer"])
+    return sorted(stale, key=lambda x: x["customer"]), entries
+
+
+def aggregate_time_entries(entries):
+    """Roll up raw 7-day time entries into per-project totals + a summary.
+
+    Returns (by_pid, summary):
+      by_pid:  {projectId: {hours, billable_hours, entry_count}}
+      summary: {total_hours, billable_hours, project_hours, non_project_hours, entry_count}
+
+    Some entries (admin work, internal categories) have no project nesting; their
+    minutes flow into summary.non_project_hours but not into by_pid.
+    """
+    by_pid = defaultdict(lambda: {"hours": 0.0, "billable_hours": 0.0, "entry_count": 0})
+    summary = {
+        "total_hours": 0.0, "billable_hours": 0.0,
+        "project_hours": 0.0, "non_project_hours": 0.0,
+        "entry_count": len(entries),
+    }
+    for e in entries:
+        minutes = e.get("minutes", 0) or 0
+        hours = minutes / 60.0
+        billable = bool(e.get("billable", False))
+        summary["total_hours"] += hours
+        if billable:
+            summary["billable_hours"] += hours
+        proj = e.get("project") or {}
+        pid = proj.get("projectId") if isinstance(proj, dict) else None
+        if pid:
+            summary["project_hours"] += hours
+            by_pid[pid]["hours"] += hours
+            if billable:
+                by_pid[pid]["billable_hours"] += hours
+            by_pid[pid]["entry_count"] += 1
+        else:
+            summary["non_project_hours"] += hours
+    for v in by_pid.values():
+        v["hours"] = round(v["hours"], 2)
+        v["billable_hours"] = round(v["billable_hours"], 2)
+    for k in ("total_hours", "billable_hours", "project_hours", "non_project_hours"):
+        summary[k] = round(summary[k], 2)
+    return dict(by_pid), summary
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -2018,6 +2064,9 @@ def main():
                         help="Output mode: email, chat (Google Chat card), or both")
     parser.add_argument("--scope", choices=list(SCOPE_CONFIG.keys()), default="ps",
                         help="Scope: ps (eDiscovery/Data PSG/Post Impl) or forensics")
+    parser.add_argument("--output", metavar="PATH",
+                        help="Emit digest_data JSON to PATH and exit; skip HTML/email/chat. "
+                             "When set, only ROCKETLANE_API_KEY is required.")
     args = parser.parse_args()
 
     # Apply scope configuration to module-level globals
@@ -2033,7 +2082,7 @@ def main():
     if not API_KEY:
         print("ERROR: ROCKETLANE_API_KEY not set")
         sys.exit(1)
-    if not args.dry_run:
+    if not args.output and not args.dry_run:
         if args.mode in ("email", "both") and (not GMAIL_ADDRESS or not GMAIL_APP_PASSWORD):
             print("ERROR: GMAIL_ADDRESS and GMAIL_APP_PASSWORD required for email mode")
             sys.exit(1)
@@ -2103,7 +2152,7 @@ def main():
 
     # Find stale projects (active but no time logged in 7 days)
     print("Detecting stale projects...")
-    stale_projects = find_stale_projects(all_enriched)
+    stale_projects, time_entries_7d = find_stale_projects(all_enriched)
     print(f"Found {len(stale_projects)} stale projects (no time entries in 7 days).")
 
     # Build digest data
@@ -2117,6 +2166,65 @@ def main():
         "projects_by_id": projects_by_id,
         "has_prior_snapshot": has_prior_snapshot,
     }
+
+    # JSON-only path — emit digest_data.json for downstream consumers (Routine
+    # session, etc.) and skip HTML/email/chat rendering entirely. Aggressively
+    # slim the payload: roll up time entries to per-project totals, truncate
+    # PM notes on non-attention projects (only red/yellow/escalation-flagged
+    # need full text — those are what action/hotspot rules fire on).
+    if args.output:
+        team_by_pid = {p["id"]: team for team, projs in projects_by_team.items() for p in projs}
+        hours_by_pid, time_summary = aggregate_time_entries(time_entries_7d)
+        zero_rollup = {"hours": 0.0, "billable_hours": 0.0, "entry_count": 0}
+
+        for p in all_enriched:
+            p["team"] = team_by_pid.get(p["id"], "")
+            r = hours_by_pid.get(p["id"], zero_rollup)
+            p["hours_logged_7d"] = r["hours"]
+            p["billable_hours_7d"] = r["billable_hours"]
+            p["entry_count_7d"] = r["entry_count"]
+            needs_full_notes = (p["health"] in ("red", "yellow")) or bool(p["escalation_flags"])
+            if not needs_full_notes:
+                for k in ("health_notes", "weekly_status"):
+                    v = p.get(k, "") or ""
+                    if len(v) > 200:
+                        p[k] = v[:200].rstrip() + "…"
+
+        active = [p for p in all_enriched if p["status_val"] in ACTIVE_STATUS_VALUES]
+        kpis = {
+            "total_active": len(active),
+            "red_health": sum(1 for p in active if p["health"] == "red"),
+            "yellow_health": sum(1 for p in active if p["health"] == "yellow"),
+            "green_health": sum(1 for p in active if p["health"] == "green"),
+            "no_health": sum(1 for p in active if not p["health"]),
+            "new_24h": len(new_projects),
+            "stale_count": len(stale_projects),
+            "snapshot_diff_count": len(changes),
+        }
+
+        output_data = {
+            "scope": SCOPE,
+            "generated_at": NOW.isoformat(),
+            "today_str": digest_data["today_str"],
+            "has_prior_snapshot": has_prior_snapshot,
+            "kpis": kpis,
+            "projects": all_enriched,
+            "new_projects": new_projects,
+            "stale_projects": stale_projects,
+            "time_summary_7d": time_summary,
+            "snapshot_diff": changes,
+        }
+
+        out_path = Path(args.output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w") as f:
+            json.dump(output_data, f, default=str, indent=2)
+        print(f"\nWrote digest data to {out_path} ({out_path.stat().st_size:,} bytes).")
+
+        print("Saving project state snapshot...")
+        save_snapshot(projects_by_id)
+        print("Done.")
+        return
 
     # Build and send outputs
     mode = args.mode
