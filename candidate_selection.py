@@ -249,3 +249,58 @@ def build_candidate_lists(all_enriched: Iterable[dict], now: datetime) -> dict:
     action_ids = {a["id"] for a in actions}
     hotspots = select_candidate_hotspots(all_enriched, action_ids, now_ms)
     return {"candidate_actions": actions, "candidate_hotspots": hotspots}
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SWIMLANE STATS
+#
+# Pre-computed per-director health rollups so the Routine session can render
+# the 4-line health summary at the top of each swimlane without iterating the
+# full project roster (which is intentionally NOT in digest_data.json — see
+# daily_digest.py's --output flow comment for context).
+# ═══════════════════════════════════════════════════════════════════════════════
+def build_swimlane_stats(
+    active_projects: Iterable[dict],
+    stale_project_ids: set = None,
+) -> dict:
+    """Roll up active projects by director swimlane.
+
+    Returns:
+        {
+            "Vanessa": {"active": 156, "red": 18, "yellow": 35, "green": 36,
+                        "no_health": 67, "hours_logged_7d": 234.5, "stale_count": 14},
+            "Maggie": {...},
+            "Oronde": {...},
+            "Cody": {...},
+            "Unattributed": {...},   # only present if non-empty
+        }
+    """
+    stale_set = set(stale_project_ids or [])
+    stats = {}
+    for p in active_projects:
+        d = _assign_director(p)
+        s = stats.setdefault(
+            d,
+            {
+                "active": 0,
+                "red": 0,
+                "yellow": 0,
+                "green": 0,
+                "no_health": 0,
+                "hours_logged_7d": 0.0,
+                "stale_count": 0,
+            },
+        )
+        s["active"] += 1
+        h = (p.get("health") or "").lower()
+        if h in ("red", "yellow", "green"):
+            s[h] += 1
+        else:
+            s["no_health"] += 1
+        s["hours_logged_7d"] += p.get("hours_logged_7d") or 0.0
+        if p.get("id") in stale_set:
+            s["stale_count"] += 1
+    # Round hours for cleaner JSON
+    for d in stats:
+        stats[d]["hours_logged_7d"] = round(stats[d]["hours_logged_7d"], 1)
+    return stats

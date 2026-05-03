@@ -41,7 +41,7 @@ try:
 except ImportError:
     HAS_WEASYPRINT = False
 
-from candidate_selection import build_candidate_lists
+from candidate_selection import build_candidate_lists, build_swimlane_stats
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIG
@@ -2213,18 +2213,33 @@ def main():
             f"Hotspots: {len(candidates['candidate_hotspots'])}."
         )
 
+        # Pre-compute per-swimlane health rollups so the Routine doesn't need
+        # the full project list to render the 4-line summary at the top of
+        # each swimlane.
+        stale_ids = {p["id"] for p in stale_projects}
+        swimlane_stats = build_swimlane_stats(active, stale_ids)
+        print(
+            "Swimlane stats: "
+            + ", ".join(
+                f"{d}={s['active']}A/{s['red']}R/{s['yellow']}Y"
+                for d, s in swimlane_stats.items()
+            )
+        )
+
         # NOTE: `projects` (full enriched list) is intentionally omitted from
-        # the JSON output. Once candidate_actions and candidate_hotspots are
-        # pre-curated, the Routine session doesn't need the raw 372-project
-        # roster — every row it renders is already in the candidate arrays.
-        # Keeping `projects` in the JSON was costing ~70% of file size and
-        # most of Claude's read time.
+        # the JSON output. Once candidate_actions, candidate_hotspots, and
+        # swimlane_stats are pre-curated, the Routine session doesn't need
+        # the raw 372-project roster — every row it renders is already in
+        # the candidate arrays, and per-swimlane counts come from
+        # swimlane_stats. Keeping `projects` in the JSON was costing ~70%
+        # of file size and most of Claude's read time.
         output_data = {
             "scope": SCOPE,
             "generated_at": NOW.isoformat(),
             "today_str": digest_data["today_str"],
             "has_prior_snapshot": has_prior_snapshot,
             "kpis": kpis,
+            "swimlane_stats": swimlane_stats,
             "new_projects": new_projects,
             "stale_projects": stale_projects,
             "time_summary_7d": time_summary,

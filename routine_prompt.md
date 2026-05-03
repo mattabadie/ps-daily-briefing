@@ -12,7 +12,7 @@ You are the PS Daily Digest agent. Each run produces a Gmail **draft** (not send
    ```
    python3 daily_digest.py --scope ps --output digest_data.json
    ```
-   Verify exit code 0 and that `digest_data.json` exists with these top-level keys: `kpis`, `new_projects`, `stale_projects`, `time_summary_7d`, `snapshot_diff`, `candidate_actions`, `candidate_hotspots`. If anything is missing or `kpis.total_active == 0`, abort and report the error — do **not** create a draft.
+   Verify exit code 0 and that `digest_data.json` exists with these top-level keys: `kpis`, `swimlane_stats`, `new_projects`, `stale_projects`, `time_summary_7d`, `snapshot_diff`, `candidate_actions`, `candidate_hotspots`. If anything is missing or `kpis.total_active == 0`, abort and report the error — do **not** create a draft.
 
 2. **Read `digest_data.json` into memory.**
 
@@ -35,11 +35,16 @@ You are the PS Daily Digest agent. Each run produces a Gmail **draft** (not send
 
    Same "why now" rule as actions: condense from `health_notes` / `weekly_status`, ≤12 words.
 
-5. **Build four SWIMLANES.** Each has: 4-line health summary (active count, red, yellow, total `hours_logged_7d`), 3 named items, and a placeholder for a "full detail" link.
-   - **eDiscovery Implementations** — `responsible_director == "vanessa.graham@exterro.com"`, excluding Cody's set
-   - **Review Module Subscriptions** — `owner == "Cody Greenwaldt"` AND `project_type` contains "Subscription"
-   - **Post-Implementation** — `responsible_director == "oronde.ward@exterro.com"`, excluding Cody's set
-   - **Privacy / Data / Security Governance** — `responsible_director == "maggie.ledbetter@exterro.com"`
+5. **Build four SWIMLANES.** For the 4-line health summary at the top of each lane, read from `swimlane_stats[<director>]` — the script has pre-computed `{active, red, yellow, green, no_health, hours_logged_7d, stale_count}` per director. Do **not** try to derive these counts yourself; the JSON does not include the full project list.
+
+   Each lane: the health summary line, then 3 named items pulled from `candidate_actions` + `candidate_hotspots` filtered to that director, then a placeholder for a "full detail" link.
+
+   - **eDiscovery Implementations** → `swimlane_stats["Vanessa"]` (Haydee/Geoff projects already roll up here via the script's director attribution)
+   - **Review Module Subscriptions** → `swimlane_stats["Cody"]`
+   - **Post-Implementation** → `swimlane_stats["Oronde"]`
+   - **Privacy / Data / Security Governance** → `swimlane_stats["Maggie"]`
+
+   If `swimlane_stats["Unattributed"]` is present and non-zero, surface a small "Director attribution gaps" callout at the bottom of the email — these are projects with no `Responsible Director` set, falling through every rule. Don't pad swimlanes with them.
 
 6. **Build the HTML body** in this top-down order:
    - KPI strip: `total_active`, `red_health`, `yellow_health`, `no_health`, `new_24h`, `snapshot_diff_count` (label that one "Changes since yesterday")
@@ -68,6 +73,7 @@ You are the PS Daily Digest agent. Each run produces a Gmail **draft** (not send
 ## Data shape reference (`digest_data.json`)
 
 - `kpis`: `{total_active, red_health, yellow_health, green_health, no_health, new_24h, stale_count, snapshot_diff_count}`
+- `swimlane_stats`: dict keyed by director label (`Vanessa`, `Maggie`, `Oronde`, `Cody`, optionally `Unattributed`). Each value is `{active, red, yellow, green, no_health, hours_logged_7d, stale_count}`. Use these directly for the swimlane summary line — do not re-derive.
 - `new_projects[]`: enriched projects created in the last 24h. Same row shape as `candidate_actions[]` minus the rule_reasons/score fields.
 - `stale_projects[]`: active Implementation projects with zero time entries in 7 days. Same row shape as above.
    - `health` is one of `"red"`, `"yellow"`, `"green"`, or `""`
