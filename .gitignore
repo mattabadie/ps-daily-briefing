@@ -9,3 +9,4 @@ pull-from-repo.sh
 .claude/
 *.bak
 *.bak2
+digest_data.json

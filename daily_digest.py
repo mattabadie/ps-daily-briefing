@@ -477,6 +477,11 @@ def enrich_project(p):
     if ESCALATION_KEYWORDS.search(weekly_status):
         escalation_flags.append("weekly_status")
 
+    # Project completion % straight off the bulk projects payload — same
+    # number Rocketlane shows on the project screen. Replaces the previous
+    # per-project task-count fetch (~108 sequential API calls).
+    task_progress = p.get("progressPercentage")
+
     return {
         "id": project_id,
         "name": p.get("projectName", "?"),
@@ -497,6 +502,7 @@ def enrich_project(p):
         "ps_net_price": ps_net_price,
         "latest_note_date": latest_note_date,
         "escalation_flags": escalation_flags,
+        "task_progress": task_progress,
     }
 
 
@@ -2130,27 +2136,18 @@ def main():
     has_prior_snapshot = bool(old_snapshot)
     print(f"Found {len(changes)} health/status changes (prior snapshot: {has_prior_snapshot}).")
 
-    # Fetch Z2E task progress (PS scope only — Z2E is eDiscovery-specific)
-    z2e_progress = {}
-    if SCOPE == "ps":
-        print("Fetching Z2E project task progress...")
-        z2e_ids = []
-        for p in all_enriched:
-            st = p.get("sub_type", "").lower()
-            if "z2e" in st and "z2e - not started" not in st and p["status"] not in ("Completed", "Closeout"):
-                z2e_ids.append(p["id"])
-        z2e_progress = fetch_z2e_progress(z2e_ids) if z2e_ids else {}
-    # Inject progress into enriched projects
+    # Project progress is already on the bulk project payload as
+    # `progressPercentage` (set on each enriched dict as `task_progress` in
+    # enrich_project). No per-project task fetch needed — saves ~108
+    # sequential API calls and 15-20 minutes of runtime.
+    #
+    # Safety override: force Completed/Closeout to 100, in case the API
+    # value lags (closeout doesn't always immediately roll all tasks to done).
     for p in all_enriched:
-        pid = p["id"]
-        if pid in z2e_progress:
-            comp, total = z2e_progress[pid]
-            p["task_progress"] = int(comp / total * 100) if total > 0 else 0
-            p["task_completed"] = comp
-            p["task_total"] = total
-        elif p["status"] in ("Completed", "Closeout"):
+        if p["status"] in ("Completed", "Closeout") and (p.get("task_progress") or 0) < 100:
             p["task_progress"] = 100
-    print(f"Z2E progress: {len(z2e_progress)} projects with task data.")
+    n_with_progress = sum(1 for p in all_enriched if p.get("task_progress") is not None)
+    print(f"Project progress: {n_with_progress}/{len(all_enriched)} projects have progressPercentage.")
 
     # Find stale projects (active but no time logged in 7 days)
     print("Detecting stale projects...")
