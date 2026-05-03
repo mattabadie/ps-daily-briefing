@@ -12,7 +12,7 @@ You are the PS Daily Digest agent. Each run produces a Gmail **draft** (not send
    ```
    python3 daily_digest.py --scope ps --output digest_data.json
    ```
-   Verify exit code 0 and that `digest_data.json` exists with these top-level keys: `kpis`, `projects`, `new_projects`, `stale_projects`, `time_summary_7d`, `snapshot_diff`, `candidate_actions`, `candidate_hotspots`. If anything is missing or `kpis.total_active == 0`, abort and report the error — do **not** create a draft.
+   Verify exit code 0 and that `digest_data.json` exists with these top-level keys: `kpis`, `new_projects`, `stale_projects`, `time_summary_7d`, `snapshot_diff`, `candidate_actions`, `candidate_hotspots`. If anything is missing or `kpis.total_active == 0`, abort and report the error — do **not** create a draft.
 
 2. **Read `digest_data.json` into memory.**
 
@@ -68,13 +68,12 @@ You are the PS Daily Digest agent. Each run produces a Gmail **draft** (not send
 ## Data shape reference (`digest_data.json`)
 
 - `kpis`: `{total_active, red_health, yellow_health, green_health, no_health, new_24h, stale_count, snapshot_diff_count}`
-- `projects[]`: `{id, name, customer, owner, status, status_val, health, health_notes, weekly_status, project_type, sub_type, client_segment, responsible_director, team, contract_value, ps_net_price, latest_note_date, escalation_flags, hours_logged_7d, billable_hours_7d, entry_count_7d, task_progress, created_at, updated_at}`
+- `new_projects[]`: enriched projects created in the last 24h. Same row shape as `candidate_actions[]` minus the rule_reasons/score fields.
+- `stale_projects[]`: active Implementation projects with zero time entries in 7 days. Same row shape as above.
    - `health` is one of `"red"`, `"yellow"`, `"green"`, or `""`
    - `escalation_flags` is a list of `"health_notes"` and/or `"weekly_status"`, indicating which field tripped escalation keywords
    - `health_notes` and `weekly_status` are full text only on red/yellow/escalation-flagged projects; truncated to ~200 chars otherwise
    - `created_at` and `updated_at` are ms epoch ints
-- `new_projects[]`: subset of `projects` created in last 24h
-- `stale_projects[]`: subset of `projects` (active Implementation only) with zero time entries in 7d
 - `time_summary_7d`: `{total_hours, billable_hours, project_hours, non_project_hours, entry_count}`
 - `snapshot_diff[]`: changes since yesterday's snapshot. Each entry has `type` (one of `status_change`, `health_change`, `health_notes_new`, `health_notes_update`, `weekly_status_new`, `weekly_status_update`), `project`, `pid`, `customer`, `pm`, plus `from`/`to` (for `*_change`/`*_update`) or `value` (for `*_new`).
 - `candidate_actions[]`: pre-curated by the script. Each row carries the project context the writer needs to compose the action line — `id, name, customer, owner, director, health, status, project_type, sub_type, client_segment, contract_value, ps_net_price, age_days, task_progress, responsible_director, escalation_flags, health_notes, weekly_status, hours_logged_7d, billable_hours_7d, entry_count_7d, rule_reasons, score`. `rule_reasons` is a list of which filters fired (`red_escalation`, `z2e_phase2_laggard`, `review_module_blocker`). `director` is one of `Vanessa`, `Maggie`, `Oronde`, `Cody`, `Unattributed`.

@@ -2213,13 +2213,18 @@ def main():
             f"Hotspots: {len(candidates['candidate_hotspots'])}."
         )
 
+        # NOTE: `projects` (full enriched list) is intentionally omitted from
+        # the JSON output. Once candidate_actions and candidate_hotspots are
+        # pre-curated, the Routine session doesn't need the raw 372-project
+        # roster — every row it renders is already in the candidate arrays.
+        # Keeping `projects` in the JSON was costing ~70% of file size and
+        # most of Claude's read time.
         output_data = {
             "scope": SCOPE,
             "generated_at": NOW.isoformat(),
             "today_str": digest_data["today_str"],
             "has_prior_snapshot": has_prior_snapshot,
             "kpis": kpis,
-            "projects": all_enriched,
             "new_projects": new_projects,
             "stale_projects": stale_projects,
             "time_summary_7d": time_summary,
