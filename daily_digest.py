@@ -41,6 +41,8 @@ try:
 except ImportError:
     HAS_WEASYPRINT = False
 
+from candidate_selection import build_candidate_lists
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIG
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -2202,6 +2204,18 @@ def main():
             "snapshot_diff_count": len(changes),
         }
 
+        # Pre-curate action and hotspot candidates deterministically. Routine
+        # session reads these and only does the writing/judgment work.
+        # Rule definitions mirror routine_prompt.md — change both in lockstep.
+        candidates = build_candidate_lists(all_enriched, NOW)
+        print(
+            f"Candidate actions: {len(candidates['candidate_actions'])} "
+            f"({sum(1 for a in candidates['candidate_actions'] if 'red_escalation' in a['rule_reasons'])} red, "
+            f"{sum(1 for a in candidates['candidate_actions'] if 'z2e_phase2_laggard' in a['rule_reasons'])} z2e, "
+            f"{sum(1 for a in candidates['candidate_actions'] if 'review_module_blocker' in a['rule_reasons'])} review). "
+            f"Hotspots: {len(candidates['candidate_hotspots'])}."
+        )
+
         output_data = {
             "scope": SCOPE,
             "generated_at": NOW.isoformat(),
@@ -2213,6 +2227,8 @@ def main():
             "stale_projects": stale_projects,
             "time_summary_7d": time_summary,
             "snapshot_diff": changes,
+            "candidate_actions": candidates["candidate_actions"],
+            "candidate_hotspots": candidates["candidate_hotspots"],
         }
 
         out_path = Path(args.output)
