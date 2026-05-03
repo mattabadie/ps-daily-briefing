@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.exterro.z2e-audit</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>-c</string>
+        <string>/Users/matthew.abadie/repos/ps-daily-briefing/run_z2e_audit.sh</string>
+    </array>
+
+    <!-- Run weekly: Monday at 07:00 local time. Edit Hour/Minute as desired. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Weekday</key><integer>1</integer>
+        <key>Hour</key><integer>7</integer>
+        <key>Minute</key><integer>0</integer>
+    </dict>
+
+    <!-- If the Mac is asleep at 07:00 Monday, run as soon as it wakes. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/matthew.abadie/repos/ps-daily-briefing</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/matthew.abadie/Library/Logs/z2e_audit.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/matthew.abadie/Library/Logs/z2e_audit.err</string>
+</dict>
+</plist>

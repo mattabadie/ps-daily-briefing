@@ -1,0 +1,7 @@
+{
+  "_comment": "Per-email weekly capacity overrides in hours. Add an entry only when a resource's effective capacity differs from the 40-hr default (part-time, leadership at 32-hr billable target, etc.). Keys must be lowercase email. Values are hours per 5-day work week.",
+  "_examples": {
+    "matthew.abadie@exterro.com": 0,
+    "vanessa.graham@exterro.com": 0
+  }
+}

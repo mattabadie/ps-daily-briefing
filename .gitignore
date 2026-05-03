@@ -7,3 +7,5 @@ com.ps-briefing.sync.plist
 sync-to-repo.sh
 pull-from-repo.sh
 .claude/
+*.bak
+*.bak2

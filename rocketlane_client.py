@@ -222,10 +222,50 @@ def fetch_project_detail(pid):
 # ═══════════════════════════════════════════════════════════════════════════════
 # TIME ENTRIES
 # ═══════════════════════════════════════════════════════════════════════════════
-def fetch_bulk_time_entries(since_date, *, project_ids=None, timeout=90):
-    """One paginated call for all time entries since date. Optionally filter to
-    a subset via projectId.in. Returns (entries: list, api_calls: int)."""
+def fetch_bulk_time_entries(since_date, *, until_date=None, user_ids=None,
+                            project_ids=None, timeout=90):
+    """One paginated call for time entries in [since_date, until_date]. Optionally
+    filter to a subset of users and/or projects. Uses real pageToken pagination
+    via the underlying API (not the broken MCP `page` parameter).
+
+    The /time-entries endpoint quirk: `projectId.in` works for multi-project,
+    but there is no `user.in` — only `user.eq` (single). For multi-user
+    filtering we iterate one call per userId. Verified 2026-04-28
+    (HTTP 400 INVALID_INPUTS: "Invalid filter condition operator: in" for user).
+
+    Args:
+        since_date: YYYY-MM-DD inclusive lower bound on entry date
+        until_date: YYYY-MM-DD inclusive upper bound (None = no upper bound)
+        user_ids: iterable of Rocketlane userIds to filter on
+        project_ids: iterable of projectIds to filter on
+        timeout: per-request timeout in seconds
+
+    Returns: (entries: list[dict], api_calls: int)
+    """
+    user_list = [str(u) for u in user_ids] if user_ids else []
+
+    # Multi-user: iterate one fetch per user. The API has no user.in, so we
+    # serialize. For typical team sizes (≤10) this stays fast enough.
+    if len(user_list) > 1:
+        merged: list = []
+        total_calls = 0
+        for uid in user_list:
+            chunk, c = fetch_bulk_time_entries(
+                since_date,
+                until_date=until_date,
+                user_ids=[uid],
+                project_ids=project_ids,
+                timeout=timeout,
+            )
+            merged.extend(chunk)
+            total_calls += c
+        return merged, total_calls
+
     params = {"date.ge": since_date, "pageSize": "100"}
+    if until_date:
+        params["date.le"] = until_date
+    if user_list:  # exactly one
+        params["user.eq"] = user_list[0]
     if project_ids:
         params["projectId.in"] = ",".join(str(p) for p in project_ids)
     qs = urllib.parse.urlencode(params)
@@ -307,6 +347,133 @@ def group_entries_by_project(entries):
         if pid:
             by_project[int(pid)].append(e)
     return by_project
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# USERS — paginated fetch + name/email resolution
+# ═══════════════════════════════════════════════════════════════════════════════
+def fetch_users(*, page_size=100, timeout=60):
+    """Paginated /users fetch. Returns (users: list[dict], api_calls: int).
+
+    User dicts include userId, email, firstName, lastName, type
+    (TEAM_MEMBER / CUSTOMER), status (ACTIVE / INACTIVE / INVITED), and a
+    fields[] array for custom fields. There is NO native weeklyCapacity field
+    — capacity has to come from a side-channel config."""
+    all_users, token, calls = [], None, 0
+    base_qs = f"pageSize={page_size}"
+    while True:
+        url = f"users?{base_qs}"
+        if token:
+            url += f"&pageToken={urllib.parse.quote(token)}"
+        resp = api_get(url, timeout=timeout)
+        calls += 1
+        all_users.extend(resp.get("data", []))
+        pag = resp.get("pagination", {})
+        if pag.get("hasMore") and pag.get("nextPageToken"):
+            token = pag["nextPageToken"]
+        else:
+            break
+    return all_users, calls
+
+
+def resolve_user(query, users, *, allow_inactive=False, allow_customers=False):
+    """Match a name/email query to a Rocketlane user dict.
+
+    Match priority:
+      1. Exact email (case-insensitive)
+      2. firstname.lastname@... synthesis when query is "Firstname Lastname"
+      3. Substring match against firstName / lastName / email
+
+    Args:
+        query: name fragment, full name, or email
+        users: list of user dicts (typically from fetch_users())
+        allow_inactive: include status=INACTIVE / INVITED users
+        allow_customers: include type=CUSTOMER users
+
+    Returns: (resolved_user: dict | None, candidates: list[dict])
+        - On unique match: (user, [user])
+        - On ambiguous match: (None, [user1, user2, ...]) — caller asks user to disambiguate
+        - On no match: (None, [])
+    """
+    q = (query or "").strip().lower()
+    if not q:
+        return None, []
+
+    def is_eligible(u):
+        if not allow_inactive and (u.get("status") or "").upper() != "ACTIVE":
+            return False
+        if not allow_customers and (u.get("type") or "").upper() == "CUSTOMER":
+            return False
+        return True
+
+    pool = [u for u in users if is_eligible(u)]
+
+    # 1. Exact email
+    for u in pool:
+        if (u.get("email") or "").lower() == q:
+            return u, [u]
+
+    # 2. firstname.lastname email synthesis
+    if " " in q:
+        first, last = q.split(" ", 1)
+        synth = f"{first}.{last}@exterro.com".strip()
+        for u in pool:
+            if (u.get("email") or "").lower() == synth:
+                return u, [u]
+
+    # 3. Substring match across firstName / lastName / email
+    matches = []
+    for u in pool:
+        first = (u.get("firstName") or "").lower()
+        last = (u.get("lastName") or "").lower()
+        email = (u.get("email") or "").lower()
+        if q in first or q in last or q in email or q in f"{first} {last}".strip():
+            matches.append(u)
+
+    if len(matches) == 1:
+        return matches[0], matches
+    return None, matches
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROJECT NAME → CUSTOMER PARSING
+# ═══════════════════════════════════════════════════════════════════════════════
+NON_PROJECT_LABEL = "(non-project)"
+INTERNAL_LABEL = "(internal)"
+
+# Underscore-separated Data PSG / older convention: "Wyndham (T + L)_Imp_..."
+_UNDERSCORE_TYPE_RE = re.compile(
+    r"_(?:Imp|IMP|Impl|Implementation)(?=_|\s|$)", re.IGNORECASE
+)
+
+
+def parse_customer(project_name):
+    """Pull the customer label out of an Exterro project name.
+
+    Three conventions live in the wild:
+      - eDiscovery (newer): "Customer Name | <descriptor>"
+      - Forensics: "Customer Code - GLAM - YYYY/MM/DD - <products> - <hrs>"
+      - Data PSG (older): "Customer Name_Imp_<descriptor>" / "Customer_IMP_DI"
+
+    Names starting with INTERNAL/Internal bucket as "(internal)" so they don't
+    pollute customer rankings — these are R&D, presales, or admin projects.
+    """
+    if not project_name:
+        return NON_PROJECT_LABEL
+    name = project_name.strip()
+    head = name
+    if " | " in name:
+        head = name.split(" | ", 1)[0]
+    elif " - " in name:
+        head = name.split(" - ", 1)[0]
+    else:
+        m = _UNDERSCORE_TYPE_RE.search(name)
+        if m:
+            head = name[: m.start()]
+    head = head.strip()
+    if head.upper() == "INTERNAL":
+        return INTERNAL_LABEL
+    return head or NON_PROJECT_LABEL
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
